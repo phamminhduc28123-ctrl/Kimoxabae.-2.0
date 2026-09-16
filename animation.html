@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Animation</title>
+
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style id="shared-styles"></style>
+</head>
+
+<body class="min-h-screen">
+	<div id="shared-header"></div>
+
+	<main class="pt-16">
+		<!-- Animation page content -->
+	</main>
+
+	<script>
+		fetch('./index.html')
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Could not load index.html');
+				}
+
+				return response.text();
+			})
+			.then(html => {
+				const sourceDocument =
+					new DOMParser().parseFromString(html, 'text/html');
+
+				const sourceStyle =
+					sourceDocument.querySelector('style');
+
+				if (sourceStyle) {
+					document.getElementById('shared-styles').textContent =
+						sourceStyle.textContent;
+				}
+
+				const sourceHeader =
+					sourceDocument.querySelector('#smartHeader');
+
+				if (sourceHeader) {
+					document
+						.getElementById('shared-header')
+						.appendChild(document.importNode(sourceHeader, true));
+				}
+
+				const sourceScripts =
+					sourceDocument.querySelectorAll('script:not([src])');
+
+				sourceScripts.forEach(sourceScript => {
+					const script = document.createElement('script');
+					script.textContent = sourceScript.textContent;
+					document.body.appendChild(script);
+				});
+
+				document.dispatchEvent(new Event('DOMContentLoaded'));
+			})
+			.catch(error => {
+				console.error('Animation page error:', error);
+			});
+	</script>
+</body>
+</html>

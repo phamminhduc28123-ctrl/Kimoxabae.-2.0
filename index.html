@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Fixed Header</title>
+    <title>KIMOXABAE</title>
+    <link rel="icon" type="image/png" href="images/icon.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -54,6 +55,24 @@
             font-family: 'Geom Variable', sans-serif;
             background-color: #ffffff;
             color: #000000;
+        }
+
+        html {
+            scroll-behavior: auto;
+            scroll-snap-type: none;
+        }
+
+        #hero-section,
+        #main-content {
+            transition: none;
+        }
+
+        body:not(.grid-section-active) #main-content {
+            opacity: 0.78;
+        }
+
+        body.grid-section-active #main-content {
+            opacity: 1;
         }
 
         /* 1. Header Hide/Show Animation */
@@ -205,6 +224,18 @@
             transform: translateX(0);
         }
 
+        .logo-animation {
+            display: block;
+            width: 10rem;
+            height: 2.5rem;
+        }
+
+        .menu-animation {
+            display: block;
+            width: 3.146rem;
+            height: 3.146rem;
+        }
+
     </style>
 </head>
 <body class="min-h-screen">
@@ -216,15 +247,15 @@
         
         <!-- Logo -->
         <!-- UPDATED: Changed div to anchor tag to link back to main domain -->
-        <a href="https://kimoxabae.de" class="logo text-2xl font-extrabold tracking-wider cursor-pointer text-white no-underline">
-            KIMOXABAE
+        <a href="index.html" class="logo cursor-pointer text-white no-underline" aria-label="KIMOXABAE">
+            <span id="logo-animation" class="logo-animation" aria-hidden="true"></span>
         </a>
 
         <!-- Navigation -->
         <nav class="relative z-50">
             <!-- Menu Button -->
-            <button id="dropdownToggle" class="flex items-center justify-center w-[2.2rem] h-[2.2rem] mr-[0.65rem] rounded-full hover:bg-white hover:text-black transition duration-500 group cursor-pointer" aria-label="Menu">
-                <div id="menuIcon" class="w-6 h-6 border-2 border-white rounded-full transition-colors duration-500"></div>
+            <button id="dropdownToggle" class="flex items-center justify-center w-[3.146rem] h-[3.146rem] mr-[0.65rem] rounded-full transition duration-500 group cursor-pointer" aria-label="Menu">
+                <span id="menuIcon" class="menu-animation" aria-hidden="true"></span>
             </button>
             
             <!-- Dropdown Menu Container -->
@@ -232,15 +263,15 @@
                 
                 <!-- 1. Illustration -->
             
-                <a href="https://kimoxabae.de/illustration_storyboard" class="menu-item">
-                    <span class="menu-text">Illustration - Storyboard</span>
+                <a href="illustration.html" class="menu-item">
+                    <span class="menu-text">Illustration</span>
                     <div class="menu-icon-bg"></div>
                     <img src="icons/Illustration, Storyboardxhdpi.png" alt="Illustration" class="menu-icon-img">
                 </a>
 
                 <!-- 2. Animation -->
         
-                <a href="https://kimoxabae.de/animation" class="menu-item">
+                <a href="animation.html" class="menu-item">
                     <span class="menu-text">Animation</span>
                     <div class="menu-icon-bg"></div>
                     <img src="icons/Animationxhdpi.png" alt="Animation" class="menu-icon-img">
@@ -248,7 +279,7 @@
 
                 <!-- 3. 3D/CGI -->
              
-                <a href="https://kimoxabae.de/3d_cgi" class="menu-item">
+                <a href="3d.html" class="menu-item">
                     <span class="menu-text">3D/CGI</span>
                     <div class="menu-icon-bg"></div>
                     <img src="icons/3D, CGIxhdpi.png" alt="3D/CGI" class="menu-icon-img">
@@ -272,7 +303,7 @@
 
                 <!-- 6. Photography -->
                 <!-- UPDATED: Linked to photography -->
-                <a href="https://kimoxabae.de/photography" class="menu-item">
+                <a href="photography.html" class="menu-item">
                     <span class="menu-text">Photography</span>
                     <div class="menu-icon-bg"></div>
                     <img src="icons/Photographyxhdpi.png" alt="Photography" class="menu-icon-img">
@@ -280,7 +311,7 @@
 
                 <!-- 7. Music -->
                 <!-- UPDATED: Linked to music -->
-                <a href="https://kimoxabae.de/music" class="menu-item">
+                <a href="music.html" class="menu-item">
                     <span class="menu-text">Music</span>
                     <div class="menu-icon-bg"></div>
                     <img src="icons/Musikxhdpi.png" alt="Music" class="menu-icon-img">
@@ -323,13 +354,13 @@
         </main>
 
         <!-- Impressum Footer -->
-        <footer id="footer" class="w-full py-12 px-4 bg-white">
-            <div class="max-w-4xl mx-auto text-center space-y-2">
-                <h3 class="text-xl font-bold uppercase mb-6 tracking-widest">Impressum</h3>
+        <footer id="footer" class="w-full mt-6 py-5 px-4 bg-white">
+            <div class="max-w-2xl mx-auto text-center space-y-0.5 text-xs">
+                <h3 class="text-base font-bold uppercase mb-3 tracking-widest">Impressum</h3>
                 <p class="text-black font-medium">Name: Minh Đức Phạm</p>
                 <p class="text-black">Address: Nuremberg, Germany</p>
                 <p class="text-black">Email: <a href="mailto:kimoxabae@web.de" class="hover:underline">kimoxabae@web.de</a></p>
-                <p class="text-sm text-gray-500 mt-8 pt-4 border-t border-gray-200 max-w-lg mx-auto">
+                <p class="text-[0.65rem] text-gray-500 mt-4 pt-2 border-t border-gray-200 max-w-md mx-auto">
                     This is a personal portfolio website. All artwork and content are created by the artist and may not be used without permission.
                 </p>
             </div>
@@ -350,6 +381,149 @@
             const heroSection = document.getElementById('hero-section'); 
             const welcomeText = document.getElementById('welcome-text'); 
             const gridContainer = document.getElementById('grid-container'); 
+            let menuAnimation;
+            let menuIdleLoopTimer;
+            let isMenuHovered = false;
+
+            const stopMenuIdleLoop = () => {
+                clearInterval(menuIdleLoopTimer);
+                menuIdleLoopTimer = null;
+            };
+
+            const startMenuIdleLoop = () => {
+                stopMenuIdleLoop();
+                if (isMenuHovered || !menuAnimation) return;
+
+                menuIdleLoopTimer = setInterval(() => {
+                    if (!isMenuHovered) {
+                        menuAnimation.playSegments([61, 240], true);
+                    }
+                }, 2000);
+            };
+
+            const initializeMenuAnimation = () => {
+                const menu = document.getElementById('menuIcon');
+                if (!menu || menu.dataset.loaded === 'true' || !window.lottie) return;
+
+                menuAnimation = window.lottie.loadAnimation({
+                    container: menu,
+                    renderer: 'svg',
+                    loop: false,
+                    autoplay: false,
+                    path: 'Icons Jsons/menu icon.json'
+                });
+
+                menuAnimation.goToAndStop(0, true);
+                nav.addEventListener('mouseenter', () => {
+                    isMenuHovered = true;
+                    stopMenuIdleLoop();
+                    menuAnimation.playSegments([0, 31], true);
+                });
+                nav.addEventListener('mouseleave', () => {
+                    isMenuHovered = false;
+                    menuAnimation.playSegments([31, 61], true);
+                    startMenuIdleLoop();
+                });
+                menu.dataset.loaded = 'true';
+                startMenuIdleLoop();
+            };
+
+            const initializeLogoAnimation = () => {
+                const logo = document.getElementById('logo-animation');
+                if (!logo || logo.dataset.loaded === 'true') return;
+
+                const renderLogo = () => {
+                    if (!window.lottie || logo.dataset.loaded === 'true') return;
+
+                    const logoAnimation = window.lottie.loadAnimation({
+                        container: logo,
+                        renderer: 'svg',
+                        loop: false,
+                        autoplay: false,
+                        path: 'Icons Jsons/Kimoxabae header icon.json'
+                    });
+
+                    let idleLoopTimer;
+                    let isLogoHovered = false;
+                    let shouldStartIdleLoop = true;
+
+                    const stopIdleLoop = () => {
+                        clearInterval(idleLoopTimer);
+                        idleLoopTimer = null;
+                    };
+
+                    const startIdleLoop = () => {
+                        stopIdleLoop();
+                        if (isLogoHovered) return;
+
+                        idleLoopTimer = setInterval(() => {
+                            if (!isLogoHovered) {
+                                logoAnimation.playSegments([60, 180], true);
+                            }
+                        }, 2000);
+                    };
+
+                    logoAnimation.addEventListener('complete', () => {
+                        if (shouldStartIdleLoop && !isLogoHovered) {
+                            startIdleLoop();
+                        }
+                    });
+
+                    logoAnimation.goToAndStop(0, true);
+                    startIdleLoop();
+                    logo.addEventListener('mouseenter', () => {
+                        isLogoHovered = true;
+                        shouldStartIdleLoop = false;
+                        stopIdleLoop();
+                        logoAnimation.playSegments([0, 31], true);
+                    });
+                    logo.addEventListener('mouseleave', () => {
+                        isLogoHovered = false;
+                        shouldStartIdleLoop = true;
+                        logoAnimation.playSegments([30, 60], true);
+                    });
+                    logo.dataset.loaded = 'true';
+                    initializeMenuAnimation();
+                };
+
+                if (window.lottie) {
+                    renderLogo();
+                    initializeMenuAnimation();
+                    return;
+                }
+
+                const lottieScript = document.createElement('script');
+                lottieScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
+                lottieScript.onload = renderLogo;
+                document.head.appendChild(lottieScript);
+            };
+
+            initializeLogoAnimation();
+
+            // Replace the current site's menu item with a friendly message.
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            const currentSiteLabels = {
+                'illustration.html': 'Illustration',
+                'animation.html': 'Animation',
+                '3d.html': '3D/CGI',
+                'photography.html': 'Photography',
+                'music.html': 'Music',
+                'ai.html': 'AI'
+            };
+            const currentSiteLabel = currentSiteLabels[currentPage];
+
+            if (currentSiteLabel && dropdownMenu) {
+                const currentMenuItem = [...dropdownMenu.querySelectorAll('.menu-item')]
+                    .find(item => item.querySelector('.menu-text')?.textContent.trim() === currentSiteLabel);
+
+                if (currentMenuItem) {
+                    const messageItem = document.createElement('div');
+                    messageItem.className = 'menu-item';
+                    messageItem.setAttribute('aria-label', "You're already here silly.");
+                    messageItem.innerHTML = '<span class="menu-text">You\'re already here silly.</span>';
+                    currentMenuItem.replaceWith(messageItem);
+                }
+            }
             
             // Variables
             const headerHeight = 64; 
@@ -372,17 +546,17 @@
                     { 
                         src: "icons/Illustration, Storyboardxhdpi.png", 
                         name: "Illustration", 
-                        link: "https://kimoxabae.de/illustration_storyboard" 
+                        link: "illustration.html"
                     },
                     { 
                         src: "icons/Animationxhdpi.png", 
                         name: "Animation", 
-                        link: "https://kimoxabae.de/animation" 
+                        link: "animation.html"
                     },
                     { 
                         src: "icons/3D, CGIxhdpi.png", 
                         name: "3D/CGI", 
-                        link: "https://kimoxabae.de/3d_cgi" 
+                        link: "3d.html"
                     },
                     { 
                         src: "icons/Web Designxhdpi.png", 
@@ -397,12 +571,12 @@
                     { 
                         src: "icons/Photographyxhdpi.png", 
                         name: "Photography", 
-                        link: "https://kimoxabae.de/photography" 
+                        link: "photography.html"
                     },
                     { 
                         src: "icons/Musikxhdpi.png", 
                         name: "Music", 
-                        link: "https://kimoxabae.de/music" 
+                        link: "music.html"
                     }
                 ];
 
@@ -500,6 +674,7 @@
                     x:0, y:0, w: 2, h: 2, 
                     isAboutMe: true, 
                     content: "About Me",
+                    link: "about_me.html",
                     id: "about"
                 });
                 
@@ -548,6 +723,9 @@
                         span.textContent = item.content;
                         span.className = "font-lexend font-bold text-xl uppercase tracking-widest text-black";
                         el.appendChild(span);
+                        el.addEventListener('click', () => {
+                            window.location.href = item.link;
+                        });
                     } else if (!item.isBlack) {
                         // Container for content to manage layout
                         const contentWrapper = document.createElement('div');
@@ -756,12 +934,12 @@
                     if (e.key === 'ArrowDown') {
                         const nextTarget = targets.find(t => t > currentScroll + threshold);
                         if (nextTarget !== undefined) {
-                            window.scrollTo({ top: nextTarget, behavior: 'smooth' });
+                            moveToSection(nextTarget);
                         }
                     } else if (e.key === 'ArrowUp') {
                         const prevTarget = [...targets].reverse().find(t => t < currentScroll - threshold);
                         if (prevTarget !== undefined) {
-                            window.scrollTo({ top: prevTarget, behavior: 'smooth' });
+                            moveToSection(prevTarget);
                         }
                     }
                 }
@@ -796,7 +974,6 @@
                     isDropdownOpen = true;
                     dropdownMenu.classList.remove('hidden-menu');
                     dropdownMenu.classList.add('visible-menu');
-                    if(menuIcon) menuIcon.classList.add('bg-white');
                 }
             };
 
@@ -806,7 +983,6 @@
                         isDropdownOpen = false;
                         dropdownMenu.classList.remove('visible-menu');
                         dropdownMenu.classList.add('hidden-menu');
-                        if(menuIcon) menuIcon.classList.remove('bg-white');
                     }
                 }, 300);
             };
@@ -817,7 +993,6 @@
                     isDropdownOpen = false;
                     dropdownMenu.classList.remove('visible-menu');
                     dropdownMenu.classList.add('hidden-menu');
-                    if(menuIcon) menuIcon.classList.remove('bg-white');
                 } else {
                     openDropdown();
                 }
@@ -841,18 +1016,83 @@
                     isDropdownOpen = false;
                     dropdownMenu.classList.remove('visible-menu');
                     dropdownMenu.classList.add('hidden-menu');
-                    if(menuIcon) menuIcon.classList.remove('bg-white');
                 }
             });
 
             // --- SCROLL LOGIC ---
             const hideHeader = () => { header.classList.add('header-hidden'); };
             const showHeader = () => { header.classList.remove('header-hidden'); };
+            const mainContent = document.getElementById('main-content');
+            let wheelDistance = 0;
+            let sectionAnimationFrame;
+            let isSectionAnimating = false;
+            const getGridOffset = () => {
+                if (!mainContent) return 0;
+                return mainContent.getBoundingClientRect().top + window.scrollY;
+            };
+
+            const moveToSection = (target) => {
+                cancelAnimationFrame(sectionAnimationFrame);
+                isSectionAnimating = true;
+
+                const start = window.scrollY;
+                const distance = target - start;
+                const startTime = performance.now();
+                const duration = 600;
+
+                const animateScroll = (currentTime) => {
+                    const progress = Math.min((currentTime - startTime) / duration, 1);
+                    const easedProgress = progress < 0.5
+                        ? 2 * progress * progress
+                        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+                    window.scrollTo(0, start + distance * easedProgress);
+
+                    if (progress < 1) {
+                        sectionAnimationFrame = requestAnimationFrame(animateScroll);
+                    } else {
+                        isSectionAnimating = false;
+                    }
+                };
+
+                sectionAnimationFrame = requestAnimationFrame(animateScroll);
+            };
+
+            // Keep each section still until the scroll intent crosses the jump threshold.
+            window.addEventListener('wheel', (event) => {
+                if (!mainContent || Math.abs(event.deltaY) < 1) return;
+
+                if (isSectionAnimating) {
+                    event.preventDefault();
+                    return;
+                }
+
+                const gridOffset = getGridOffset();
+                const atHero = window.scrollY < gridOffset - 10;
+                    const atGrid = window.scrollY >= gridOffset - 10 && window.scrollY <= gridOffset + 120;
+                const movingTowardGrid = event.deltaY > 0 && atHero;
+                const movingTowardHero = event.deltaY < 0 && atGrid;
+
+                if (!movingTowardGrid && !movingTowardHero) {
+                    wheelDistance = 0;
+                    return;
+                }
+
+                event.preventDefault();
+                wheelDistance += event.deltaY;
+
+                if (Math.abs(wheelDistance) >= 300) {
+                    moveToSection(movingTowardGrid ? gridOffset : 0);
+                    wheelDistance = 0;
+                }
+            }, { passive: false });
 
             window.addEventListener('scroll', () => {
                 const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
-                
-                if (heroSection) heroSection.style.transform = `translateY(${currentScrollTop * 0.5}px)`;
+
+                const gridSectionIsActive = mainContent && currentScrollTop >= getGridOffset() - 10;
+
+                document.body.classList.toggle('grid-section-active', gridSectionIsActive);
 
                 if (welcomeText) {
                     const textPosition = welcomeText.getBoundingClientRect().top;
@@ -875,7 +1115,6 @@
                              isDropdownOpen = false;
                              dropdownMenu.classList.remove('visible-menu');
                              dropdownMenu.classList.add('hidden-menu');
-                             if(menuIcon) menuIcon.classList.remove('bg-white');
                         }
                     } else { showHeader(); }
                 } else { showHeader(); }

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Illustration</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style id="shared-styles"></style>
+</head>
+
+<body class="min-h-screen">
+    <div id="shared-header"></div>
+
+    <main class="pt-16 px-4 py-12 md:px-8 lg:px-12">
+        <div class="mx-auto max-w-7xl">
+            <header class="mb-10">
+                <p class="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-gray-500">Selected work</p>
+                <h1 class="text-4xl font-bold tracking-tight md:text-6xl">Illustration</h1>
+            </header>
+
+            <div id="illustration-gallery" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
+        </div>
+    </main>
+
+    <script>
+        const gallery = document.getElementById('illustration-gallery');
+        const illustrationFiles = [
+            ...Array.from({ length: 53 }, (_, index) =>
+                `illu/illu_${String(index + 1).padStart(2, '0')}.jpg`
+            ),
+            'illu/b.jpg',
+            'illu/PXL_20240501_215658551~2.jpg'
+        ];
+
+        illustrationFiles.forEach((file, index) => {
+            const figure = document.createElement('figure');
+            figure.className = 'group overflow-hidden rounded-2xl border border-black/10 bg-gray-100';
+
+            const image = document.createElement('img');
+            image.src = file;
+            image.alt = `Illustration ${index + 1}`;
+            image.loading = 'lazy';
+            image.className = 'aspect-square w-full object-contain transition duration-500 group-hover:scale-105';
+
+            const caption = document.createElement('figcaption');
+            caption.className = 'px-3 py-2 text-xs font-bold uppercase tracking-widest text-gray-500';
+            caption.textContent = String(index + 1).padStart(2, '0');
+
+            figure.append(image, caption);
+            gallery.appendChild(figure);
+        });
+
+        fetch('./index.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Could not load index.html');
+                }
+
+                return response.text();
+            })
+            .then(html => {
+                const sourceDocument =
+                    new DOMParser().parseFromString(html, 'text/html');
+
+                // Copy the original CSS.
+                const sourceStyle =
+                    sourceDocument.querySelector('style');
+
+                if (sourceStyle) {
+                    document.getElementById('shared-styles').textContent =
+                        sourceStyle.textContent;
+                }
+
+                // Copy the original header.
+                const sourceHeader =
+                    sourceDocument.querySelector('#smartHeader');
+
+                if (sourceHeader) {
+                    document
+                        .getElementById('shared-header')
+                        .appendChild(document.importNode(sourceHeader, true));
+                }
+
+                // Run the original JavaScript from index.html.
+                const sourceScripts =
+                    sourceDocument.querySelectorAll('script:not([src])');
+
+                sourceScripts.forEach(sourceScript => {
+                    const script = document.createElement('script');
+                    script.textContent = sourceScript.textContent;
+                    document.body.appendChild(script);
+                });
+
+                // The original script waits for this event.
+                document.dispatchEvent(new Event('DOMContentLoaded'));
+            })
+            .catch(error => {
+                console.error('Illustration page error:', error);
+            });
+    </script>
+</body>
+</html>
