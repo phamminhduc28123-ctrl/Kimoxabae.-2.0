@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Illu_Storyboard" data-name="Illu, Storyboard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #000;
+        stroke-linejoin: round;
+        stroke-width: 30px;
+      }
+    </style>
+  </defs>
+  <path d="M487.57,196.67l386.67,386.67-290.91,290.91L196.67,487.57V196.67h290.91M500,166.67H166.67v333.33l416.67,416.67,333.33-333.33L500,166.67h0Z"/>
+  <line class="cls-1" x1="184.8" y1="481.87" x2="484" y2="182.66"/>
+  <line class="cls-1" x1="250" y1="416.67" x2="541.67" y2="708.33"/>
+  <line class="cls-1" x1="416.67" y1="250" x2="708.33" y2="541.67"/>
+  <path d="M166.67,291.67l125-125h-125s-3.21,128.21,0,125Z"/>
+  <line class="cls-1" x1="458.33" y1="791.67" x2="791.67" y2="458.33"/>
+  <rect x="472.63" y="649.41" width="471.4" height="117.85" transform="translate(-293.4 708.33) rotate(-45)"/>
+</svg>
