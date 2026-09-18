@@ -12,11 +12,146 @@
 <body class="min-h-screen">
 	<div id="shared-header"></div>
 
-	<main class="pt-16">
-		<!-- Photography page content -->
+	<main class="pt-24 px-4 md:px-8 pb-16">
+		<div class="max-w-7xl mx-auto">
+			<h1 class="font-lexend text-4xl md:text-5xl font-medium tracking-wider text-black mb-12 uppercase">Photography</h1>
+			
+			<div id="photography-grid" class="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+				<!-- Images will be injected here -->
+			</div>
+		</div>
 	</main>
 
+	<!-- Lightbox Overlay -->
+	<div id="lightbox" class="fixed inset-0 bg-black/95 z-[100] hidden flex flex-col md:flex-row items-center justify-center cursor-default">
+		<!-- Close Button -->
+		<button id="close-lightbox" class="absolute top-6 right-8 text-white text-4xl font-light hover:scale-110 transition-transform z-[110] cursor-pointer">&times;</button>
+		
+		<!-- Image Area -->
+		<div class="flex-1 flex items-center justify-center p-4 h-[60vh] md:h-full overflow-hidden">
+			<img id="lightbox-img" src="" alt="Full size photography" class="max-w-full max-h-full object-contain">
+		</div>
+
+		<!-- Description Side Panel -->
+		<div class="w-full md:w-96 h-[40vh] md:h-full bg-black text-white p-8 md:p-12 flex flex-col justify-center border-t md:border-t-0 md:border-l border-white/10 overflow-y-auto">
+			<h2 id="lightbox-destination" class="font-lexend text-2xl font-medium mb-4 uppercase tracking-wider text-white"></h2>
+			<div class="w-12 h-0.5 bg-white mb-6"></div>
+			<div id="lightbox-details" class="space-y-4">
+				<!-- Parsed details will go here -->
+			</div>
+		</div>
+	</div>
+
+	<!-- Impressum Footer -->
+	<footer id="footer" class="w-full mt-12 py-8 px-4 bg-white border-t border-gray-100">
+		<div class="max-w-2xl mx-auto text-center space-y-1 text-xs">
+			<h3 class="text-base font-bold uppercase mb-4 tracking-widest">Impressum</h3>
+			<p class="text-black font-medium">Name: Minh Đức Phạm</p>
+			<p class="text-black">Address: Nuremberg, Germany</p>
+			<p class="text-black">Email: <a href="mailto:kimoxabae@web.de" class="hover:underline">kimoxabae@web.de</a></p>
+			<p class="text-[0.65rem] text-gray-500 mt-6 pt-4 max-w-md mx-auto">
+				This is a personal portfolio website. All artwork and content are created by the artist and may not be used without permission.
+			</p>
+		</div>
+	</footer>
+
 	<script>
+		const grid = document.getElementById('photography-grid');
+		const lightbox = document.getElementById('lightbox');
+		const lightboxImg = document.getElementById('lightbox-img');
+		const lightboxDestination = document.getElementById('lightbox-destination');
+		const lightboxDetails = document.getElementById('lightbox-details');
+		const closeLightbox = document.getElementById('close-lightbox');
+
+		async function initGallery() {
+			try {
+				// 1. Fetch the text file
+				const response = await fetch('photography/photography.txt');
+				const text = await response.text();
+				
+				// 2. Parse the text file into an object
+				const photoInfoMap = {};
+				const lines = text.split('\n');
+				
+				lines.forEach(line => {
+					// Matches: "1. Destination: [dest] | Description: [details]"
+					const match = line.match(/^\d+\.\s*Destination:\s*(.*?)\s*\|\s*Description:\s*(.*)$/);
+					if (match) {
+						const index = line.split('.')[0].trim();
+						photoInfoMap[`img (${index}).jpg`] = {
+							destination: match[1],
+							description: match[2]
+						};
+					}
+				});
+
+				// 3. Generate images 1 to 83
+				for (let i = 1; i <= 83; i++) {
+					const fileName = `img (${i}).jpg`;
+					const info = photoInfoMap[fileName] || { destination: "Untitled", description: "No details available." };
+
+					const container = document.createElement('div');
+					container.className = "break-inside-avoid mb-4 overflow-hidden rounded-lg group relative cursor-pointer bg-gray-50 transition-all duration-300 hover:shadow-2xl";
+					
+					const img = document.createElement('img');
+					img.src = `photography/${fileName}`;
+					img.alt = info.destination;
+					img.className = "w-full h-auto object-cover transition-all duration-700 group-hover:scale-105";
+					img.loading = "lazy";
+
+					// Hover Overlay: Destination (Bottom Right, Move Up + Fade In)
+					const overlay = document.createElement('div');
+					overlay.className = "absolute inset-0 flex items-end justify-end p-6 pointer-events-none";
+					overlay.innerHTML = `
+						<div class="text-right opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
+							<span class="text-white font-lexend uppercase tracking-[0.2em] text-xs font-bold drop-shadow-md">${info.destination}</span>
+						</div>
+					`;
+
+					container.addEventListener('click', () => {
+						lightboxImg.src = img.src;
+						lightboxDestination.textContent = info.destination;
+						
+						// Split details by semicolon for better formatting
+						const details = info.description.split(';').map(d => d.trim()).filter(d => d);
+						lightboxDetails.innerHTML = details.map(d => `
+							<p class="text-sm text-gray-400 leading-relaxed font-light border-l border-white/20 pl-4 py-1">${d}</p>
+						`).join('');
+
+						lightbox.classList.remove('hidden');
+						document.body.style.overflow = 'hidden';
+					});
+
+					container.appendChild(img);
+					container.appendChild(overlay);
+					grid.appendChild(container);
+				}
+			} catch (e) {
+				console.error("Gallery initialization failed:", e);
+			}
+		}
+
+		closeLightbox.addEventListener('click', () => {
+			lightbox.classList.add('hidden');
+			document.body.style.overflow = '';
+		});
+
+		// Close when clicking the image itself
+		lightboxImg.addEventListener('click', () => {
+			lightbox.classList.add('hidden');
+			document.body.style.overflow = '';
+		});
+
+		// Close on clicking outside the image or panel
+		lightbox.addEventListener('click', (e) => {
+			if (e.target === lightbox) {
+				lightbox.classList.add('hidden');
+				document.body.style.overflow = '';
+			}
+		});
+
+		initGallery();
+
 		fetch('./index.html')
 			.then(response => {
 				if (!response.ok) {

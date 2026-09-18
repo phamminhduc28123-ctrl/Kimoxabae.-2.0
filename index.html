@@ -274,10 +274,10 @@
                 
                 <!-- 1. Illustration -->
             
-                <a href="illustration.html" class="menu-item">
+                <a href="illustration.html" class="menu-item" id="illustration-item">
                     <span class="menu-text">Illustration</span>
                     <div class="menu-icon-bg"></div>
-                    <img src="icons/Illustration, Storyboardxhdpi.png" alt="Illustration" class="menu-icon-img">
+                    <div id="illustration-icon" class="menu-icon-img"></div>
                 </a>
 
                 <!-- 2. Animation -->
@@ -393,6 +393,7 @@
             const welcomeText = document.getElementById('welcome-text'); 
             const gridContainer = document.getElementById('grid-container'); 
             let menuAnimation;
+            let illustrationAnimation;
             let menuIdleLoopTimer;
             let menuCloseTimer;
             let isMenuHovered = false;
@@ -444,6 +445,53 @@
                 });
                 menu.dataset.loaded = 'true';
                 startMenuIdleLoop();
+            };
+
+            const initializeIllustrationAnimation = () => {
+                const illuIcon = document.getElementById('illustration-icon');
+                const illuItem = document.getElementById('illustration-item');
+                if (!illuIcon || illuIcon.dataset.loaded === 'true' || !window.lottie) return;
+
+                illustrationAnimation = window.lottie.loadAnimation({
+                    container: illuIcon,
+                    renderer: 'svg',
+                    loop: false,
+                    autoplay: false,
+                    path: 'Icons Jsons/illustration.json'
+                });
+
+                if (illuItem) {
+                    const startLoop = () => {
+                        if (isDropdownOpen) {
+                            illustrationAnimation.loop = true;
+                            illustrationAnimation.playSegments([31, 211], true);
+                        }
+                    };
+
+                    illuItem.addEventListener('mouseenter', () => {
+                        if (isDropdownOpen && illustrationAnimation) {
+                            illustrationAnimation.removeEventListener('complete', startLoop);
+                            // If it's already at or past the "slid left" position (31), just start the loop.
+                            // Otherwise, slide it left (0-31) then start the loop.
+                            if (illustrationAnimation.currentFrame >= 30) {
+                                startLoop();
+                            } else {
+                                illustrationAnimation.loop = false;
+                                illustrationAnimation.playSegments([0, 31], true);
+                                illustrationAnimation.addEventListener('complete', startLoop, { once: true });
+                            }
+                        }
+                    });
+                    illuItem.addEventListener('mouseleave', () => {
+                        if (isDropdownOpen && illustrationAnimation) {
+                            illustrationAnimation.removeEventListener('complete', startLoop);
+                            illustrationAnimation.loop = false;
+                            illustrationAnimation.playSegments([31, 0], true);
+                        }
+                    });
+                }
+
+                illuIcon.dataset.loaded = 'true';
             };
 
             const initializeLogoAnimation = () => {
@@ -502,11 +550,13 @@
                     });
                     logo.dataset.loaded = 'true';
                     initializeMenuAnimation();
+                    initializeIllustrationAnimation();
                 };
 
                 if (window.lottie) {
                     renderLogo();
                     initializeMenuAnimation();
+                    initializeIllustrationAnimation();
                     return;
                 }
 
@@ -562,7 +612,7 @@
                 // UPDATED: Converted simple icon array to object array with Names and Links
                 const gridData = [
                     { 
-                        src: "icons/Illustration, Storyboardxhdpi.png", 
+                        src: "Icons Jsons/illustration.json", 
                         name: "Illustration", 
                         link: "illustration.html"
                     },
@@ -750,11 +800,28 @@
                         contentWrapper.className = "relative w-full h-full flex items-center justify-center";
 
                         // Icon
-                        const img = document.createElement('img');
-                        img.src = item.icon;
-                        // Added group-hover transition to maybe move up slightly or just stay centered
-                        img.className = "w-1/2 h-1/2 object-contain transition-all duration-300 group-hover:-translate-y-4";
-                        contentWrapper.appendChild(img);
+                        if (item.icon && item.icon.endsWith('.json')) {
+                            const lottieContainer = document.createElement('div');
+                            lottieContainer.className = "w-1/2 h-1/2 transition-all duration-300 group-hover:-translate-y-4";
+                            contentWrapper.appendChild(lottieContainer);
+                            
+                            // Initialize Lottie for grid item
+                            if (window.lottie) {
+                                window.lottie.loadAnimation({
+                                    container: lottieContainer,
+                                    renderer: 'svg',
+                                    loop: true,
+                                    autoplay: true,
+                                    path: item.icon
+                                });
+                            }
+                        } else {
+                            const img = document.createElement('img');
+                            img.src = item.icon;
+                            // Added group-hover transition to maybe move up slightly or just stay centered
+                            img.className = "w-1/2 h-1/2 object-contain transition-all duration-300 group-hover:-translate-y-4";
+                            contentWrapper.appendChild(img);
+                        }
 
                         // NEW: Category Name Text
                         const text = document.createElement('div');
@@ -992,6 +1059,11 @@
                     isDropdownOpen = true;
                     dropdownMenu.classList.remove('hidden-menu');
                     dropdownMenu.classList.add('visible-menu');
+
+                    if (illustrationAnimation) {
+                        illustrationAnimation.loop = false;
+                        illustrationAnimation.playSegments([0, 31], true);
+                    }
                 }
             };
 
@@ -1001,6 +1073,11 @@
                         isDropdownOpen = false;
                         dropdownMenu.classList.remove('visible-menu');
                         dropdownMenu.classList.add('hidden-menu');
+
+                        if (illustrationAnimation) {
+                            illustrationAnimation.loop = false;
+                            illustrationAnimation.playSegments([31, 0], true);
+                        }
                     }
                 }, 100);
             };
@@ -1011,6 +1088,11 @@
                     isDropdownOpen = false;
                     dropdownMenu.classList.remove('visible-menu');
                     dropdownMenu.classList.add('hidden-menu');
+
+                    if (illustrationAnimation) {
+                        illustrationAnimation.loop = false;
+                        illustrationAnimation.playSegments([31, 0], true);
+                    }
                 } else {
                     openDropdown();
                 }
