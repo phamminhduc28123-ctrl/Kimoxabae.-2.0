@@ -461,32 +461,17 @@
                 });
 
                 if (illuItem) {
-                    const startLoop = () => {
-                        if (isDropdownOpen) {
-                            illustrationAnimation.loop = true;
-                            illustrationAnimation.playSegments([31, 211], true);
-                        }
-                    };
-
                     illuItem.addEventListener('mouseenter', () => {
                         if (isDropdownOpen && illustrationAnimation) {
-                            illustrationAnimation.removeEventListener('complete', startLoop);
-                            // If it's already at or past the "slid left" position (31), just start the loop.
-                            // Otherwise, slide it left (0-31) then start the loop.
-                            if (illustrationAnimation.currentFrame >= 30) {
-                                startLoop();
-                            } else {
-                                illustrationAnimation.loop = false;
-                                illustrationAnimation.playSegments([0, 31], true);
-                                illustrationAnimation.addEventListener('complete', startLoop, { once: true });
-                            }
+                            illustrationAnimation.loop = true;
+                            illustrationAnimation.playSegments([31, 211], true);
                         }
                     });
                     illuItem.addEventListener('mouseleave', () => {
                         if (isDropdownOpen && illustrationAnimation) {
-                            illustrationAnimation.removeEventListener('complete', startLoop);
                             illustrationAnimation.loop = false;
-                            illustrationAnimation.playSegments([31, 0], true);
+                            // Play to 211 and stay there as requested
+                            illustrationAnimation.playSegments([illustrationAnimation.currentFrame, 211], true);
                         }
                     });
                 }
@@ -1076,7 +1061,8 @@
 
                         if (illustrationAnimation) {
                             illustrationAnimation.loop = false;
-                            illustrationAnimation.playSegments([31, 0], true);
+                            // Specifically play the exit sequence 211-240
+                            illustrationAnimation.playSegments([211, 240], true);
                         }
                     }
                 }, 100);
@@ -1091,7 +1077,7 @@
 
                     if (illustrationAnimation) {
                         illustrationAnimation.loop = false;
-                        illustrationAnimation.playSegments([31, 0], true);
+                        illustrationAnimation.playSegments([211, 240], true);
                     }
                 } else {
                     openDropdown();
@@ -1116,6 +1102,11 @@
                     isDropdownOpen = false;
                     dropdownMenu.classList.remove('visible-menu');
                     dropdownMenu.classList.add('hidden-menu');
+
+                    if (illustrationAnimation) {
+                        illustrationAnimation.loop = false;
+                        illustrationAnimation.playSegments([211, 240], true);
+                    }
                 }
             });
 
@@ -1215,6 +1206,11 @@
                              isDropdownOpen = false;
                              dropdownMenu.classList.remove('visible-menu');
                              dropdownMenu.classList.add('hidden-menu');
+
+                             if (illustrationAnimation) {
+                                 illustrationAnimation.loop = false;
+                                 illustrationAnimation.playSegments([211, 240], true);
+                             }
                         }
                     } else { showHeader(); }
                 } else { showHeader(); }
