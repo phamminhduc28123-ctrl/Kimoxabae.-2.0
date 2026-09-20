@@ -277,7 +277,7 @@
                 <a href="illustration.html" class="menu-item" id="illustration-item">
                     <span class="menu-text">Illustration</span>
                     <div class="menu-icon-bg"></div>
-                    <div id="illustration-icon" class="menu-icon-img"></div>
+                    <div class="menu-icon-img" data-animation-path="Icons Jsons/illustration.json"></div>
                 </a>
 
                 <!-- 2. Animation -->
@@ -298,7 +298,7 @@
 
                 <!-- 4. Web Design -->
                 <!-- UPDATED: Linked to web_design -->
-                <a href="https://kimoxabae.de/web_design" class="menu-item">
+                <a href="ai.html" class="menu-item">
                     <span class="menu-text">Web Design</span>
                     <div class="menu-icon-bg"></div>
                     <img src="icons/Web Designxhdpi.png" alt="Web Design" class="menu-icon-img">
@@ -306,10 +306,10 @@
 
                 <!-- 5. App Development -->
                 <!-- UPDATED: Linked to app_development -->
-                <a href="https://kimoxabae.de/app_development" class="menu-item">
-                    <span class="menu-text">App Development</span>
+                <a href="blog.html" class="menu-item">
+                    <span class="menu-text">Blog</span>
                     <div class="menu-icon-bg"></div>
-                    <img src="icons/App Developxhdpi.png" alt="App Development" class="menu-icon-img">
+                    <img src="icons/Blog.json" alt="Blog" class="menu-icon-img">
                 </a>
 
                 <!-- 6. Photography -->
@@ -317,7 +317,7 @@
                 <a href="photography.html" class="menu-item">
                     <span class="menu-text">Photography</span>
                     <div class="menu-icon-bg"></div>
-                    <img src="icons/Photographyxhdpi.png" alt="Photography" class="menu-icon-img">
+                    <div class="menu-icon-img" data-animation-path="Icons Jsons/photography.json" aria-label="Photography"></div>
                 </a>
 
                 <!-- 7. Music -->
@@ -393,10 +393,33 @@
             const welcomeText = document.getElementById('welcome-text'); 
             const gridContainer = document.getElementById('grid-container'); 
             let menuAnimation;
-            let illustrationAnimation;
             let menuIdleLoopTimer;
             let menuCloseTimer;
             let isMenuHovered = false;
+            const menuIconAnimations = [];
+
+            const getLastTransitionTime = (value) => {
+                const time = value.split(',').pop().trim();
+                return time.endsWith('ms') ? parseFloat(time) : parseFloat(time) * 1000;
+            };
+
+            const playMenuIconAnimations = (segment, waitForDrop = false) => {
+                menuIconAnimations.forEach((iconAnimation) => {
+                    const { animation, menuItem } = iconAnimation;
+                    clearTimeout(iconAnimation.startTimer);
+                    animation.loop = false;
+
+                    const playAnimation = () => animation.playSegments(segment, true);
+                    if (waitForDrop && menuItem) {
+                        const styles = getComputedStyle(menuItem);
+                        const delay = getLastTransitionTime(styles.transitionDelay);
+                        const duration = getLastTransitionTime(styles.transitionDuration);
+                        iconAnimation.startTimer = setTimeout(playAnimation, delay + duration);
+                    } else {
+                        playAnimation();
+                    }
+                });
+            };
 
             const stopMenuIdleLoop = () => {
                 clearInterval(menuIdleLoopTimer);
@@ -447,36 +470,39 @@
                 startMenuIdleLoop();
             };
 
-            const initializeIllustrationAnimation = () => {
-                const illuIcon = document.getElementById('illustration-icon');
-                const illuItem = document.getElementById('illustration-item');
-                if (!illuIcon || illuIcon.dataset.loaded === 'true' || !window.lottie) return;
+            const initializeMenuIconAnimations = () => {
+                if (!window.lottie) return;
 
-                illustrationAnimation = window.lottie.loadAnimation({
-                    container: illuIcon,
-                    renderer: 'svg',
-                    loop: false,
-                    autoplay: false,
-                    path: 'Icons Jsons/illustration.json'
+                document.querySelectorAll('[data-animation-path]').forEach((icon) => {
+                    if (icon.dataset.loaded === 'true') return;
+
+                    const menuItem = icon.closest('.menu-item');
+                    const animation = window.lottie.loadAnimation({
+                        container: icon,
+                        renderer: 'svg',
+                        loop: false,
+                        autoplay: false,
+                        path: icon.dataset.animationPath
+                    });
+                    const iconAnimation = { animation, menuItem, startTimer: null };
+                    menuIconAnimations.push(iconAnimation);
+
+                    menuItem?.addEventListener('mouseenter', () => {
+                        if (isDropdownOpen) {
+                            clearTimeout(iconAnimation.startTimer);
+                            animation.loop = true;
+                            animation.playSegments([31, 211], true);
+                        }
+                    });
+                    menuItem?.addEventListener('mouseleave', () => {
+                        if (isDropdownOpen) {
+                            animation.loop = false;
+                            animation.playSegments([animation.currentFrame, 211], true);
+                        }
+                    });
+
+                    icon.dataset.loaded = 'true';
                 });
-
-                if (illuItem) {
-                    illuItem.addEventListener('mouseenter', () => {
-                        if (isDropdownOpen && illustrationAnimation) {
-                            illustrationAnimation.loop = true;
-                            illustrationAnimation.playSegments([31, 211], true);
-                        }
-                    });
-                    illuItem.addEventListener('mouseleave', () => {
-                        if (isDropdownOpen && illustrationAnimation) {
-                            illustrationAnimation.loop = false;
-                            // Play to 211 and stay there as requested
-                            illustrationAnimation.playSegments([illustrationAnimation.currentFrame, 211], true);
-                        }
-                    });
-                }
-
-                illuIcon.dataset.loaded = 'true';
             };
 
             const initializeLogoAnimation = () => {
@@ -535,13 +561,13 @@
                     });
                     logo.dataset.loaded = 'true';
                     initializeMenuAnimation();
-                    initializeIllustrationAnimation();
+                    initializeMenuIconAnimations();
                 };
 
                 if (window.lottie) {
                     renderLogo();
                     initializeMenuAnimation();
-                    initializeIllustrationAnimation();
+                    initializeMenuIconAnimations();
                     return;
                 }
 
@@ -1045,10 +1071,7 @@
                     dropdownMenu.classList.remove('hidden-menu');
                     dropdownMenu.classList.add('visible-menu');
 
-                    if (illustrationAnimation) {
-                        illustrationAnimation.loop = false;
-                        illustrationAnimation.playSegments([0, 31], true);
-                    }
+                    playMenuIconAnimations([0, 31], true);
                 }
             };
 
@@ -1059,11 +1082,7 @@
                         dropdownMenu.classList.remove('visible-menu');
                         dropdownMenu.classList.add('hidden-menu');
 
-                        if (illustrationAnimation) {
-                            illustrationAnimation.loop = false;
-                            // Specifically play the exit sequence 211-240
-                            illustrationAnimation.playSegments([211, 240], true);
-                        }
+                        playMenuIconAnimations([211, 240]);
                     }
                 }, 100);
             };
@@ -1075,10 +1094,7 @@
                     dropdownMenu.classList.remove('visible-menu');
                     dropdownMenu.classList.add('hidden-menu');
 
-                    if (illustrationAnimation) {
-                        illustrationAnimation.loop = false;
-                        illustrationAnimation.playSegments([211, 240], true);
-                    }
+                    playMenuIconAnimations([211, 240]);
                 } else {
                     openDropdown();
                 }
@@ -1103,10 +1119,7 @@
                     dropdownMenu.classList.remove('visible-menu');
                     dropdownMenu.classList.add('hidden-menu');
 
-                    if (illustrationAnimation) {
-                        illustrationAnimation.loop = false;
-                        illustrationAnimation.playSegments([211, 240], true);
-                    }
+                    playMenuIconAnimations([211, 240]);
                 }
             });
 
@@ -1207,10 +1220,7 @@
                              dropdownMenu.classList.remove('visible-menu');
                              dropdownMenu.classList.add('hidden-menu');
 
-                             if (illustrationAnimation) {
-                                 illustrationAnimation.loop = false;
-                                 illustrationAnimation.playSegments([211, 240], true);
-                             }
+                             playMenuIconAnimations([211, 240]);
                         }
                     } else { showHeader(); }
                 } else { showHeader(); }

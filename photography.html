@@ -96,8 +96,20 @@
 					const img = document.createElement('img');
 					img.src = `photography/${fileName}`;
 					img.alt = info.destination;
-					img.className = "w-full h-auto object-cover transition-all duration-700 group-hover:scale-105";
+					img.className = "w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105";
 					img.loading = "lazy";
+					let colorTimeout;
+
+					container.addEventListener('mouseenter', () => {
+						clearTimeout(colorTimeout);
+						img.classList.add('grayscale-0');
+					});
+
+					container.addEventListener('mouseleave', () => {
+						colorTimeout = setTimeout(() => {
+							img.classList.remove('grayscale-0');
+						}, 2000);
+					});
 
 					// Hover Overlay: Destination (Bottom Right, Move Up + Fade In)
 					const overlay = document.createElement('div');

@@ -1,10 +1,10 @@
-1. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
-2. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
-3. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
-4. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
-5. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
-6. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
-7. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
+1. Destination: Tandem | Description: There is always that one dude in the group.; August 2021; Ostende, Germany
+2. Destination: Monument | Description: In my visit to a friend of mine in Gießen, I had to wait for hours in the city. So I took my time and wandered around.; November 2024; Gießen, Germany
+3. Destination: Eupen Hbf | Description: On our trip to Ostende, Belgium. The wait in Eupen was extremely long, but the sign there has a certain charm.; August 2021; Eupen, Belgium
+4. Destination: Beach | Description: I have been to beaches in many countries thousand times before, never have I seen something more "beachy" than this view.  ; August 2021; Ostende, Belgium
+5. Destination: Retired Astronaut | Description: The second-hand market in Hungary is criminally underrated.; December 2021; Budapest, Hungary
+6. Destination: Free bird | Description: The seagulls here are surprisingly chill, you would almost not acknowledge their existences here even they keep themselves quite busy chasing after food rests on the street.; August 2021; Ostende, Belgium
+7. Destination: Cash Machine | Description: On the counter of a cafe near Anne Frank's Museum. Something from the old time that I have somehow never seen before.; December 2022; Berlin, Germany
 8. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
 9. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
 10. Destination: [destination] | Description: [photo name]; [date]; [time]; [setup]
