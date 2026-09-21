@@ -235,14 +235,19 @@
 				section.className = 'project-section';
 				section.style.backgroundColor = '#000';
 
+				// Each section gets two z-index slots (cover, then gallery) so later sections
+				// always stack above earlier ones, and a section's gallery stacks above its own cover.
+				const coverZIndex = 2 + projectIndex * 2;
+				const galleryZIndex = coverZIndex + 1;
+
 				const coverStage = document.createElement('div');
 				coverStage.className = 'cover-stage';
-				coverStage.style.zIndex = String(2 + projectIndex);
+				coverStage.style.zIndex = String(coverZIndex);
 
 				const cover = document.createElement('div');
 				cover.className = 'project-cover parallax-cover';
 				// Later covers stack a higher z-index so they slide over earlier, already-stuck covers.
-				cover.style.zIndex = String(2 + projectIndex);
+				cover.style.zIndex = String(coverZIndex);
 				// Starts black and races to white as it slides into place (handled in revealProjectMeta).
 				cover.style.backgroundColor = '#000';
 
@@ -258,7 +263,8 @@
 				description.textContent = project.description;
 
 				const galleryWrapper = document.createElement('div');
-				galleryWrapper.className = 'project-gallery relative z-[2] max-w-7xl mx-auto px-4 md:px-8 mb-32';
+				galleryWrapper.className = 'project-gallery relative max-w-7xl mx-auto px-4 md:px-8 mb-32';
+				galleryWrapper.style.zIndex = String(galleryZIndex);
 
 				const grid = document.createElement('div');
 				grid.className = "flex flex-wrap justify-center gap-4";
