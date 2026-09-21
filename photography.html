@@ -23,13 +23,13 @@
 	</main>
 
 	<!-- Lightbox Overlay -->
-	<div id="lightbox" class="fixed inset-0 bg-black/95 z-[100] hidden flex flex-col md:flex-row items-center justify-center cursor-default">
+	<div id="lightbox" class="fixed inset-0 bg-black/95 z-[100] hidden flex flex-col md:flex-row items-center justify-center cursor-default opacity-0 transition-opacity duration-300">
 		<!-- Close Button -->
 		<button id="close-lightbox" class="absolute top-6 right-8 text-white text-4xl font-light hover:scale-110 transition-transform z-[110] cursor-pointer">&times;</button>
 		
 		<!-- Image Area -->
 		<div id="lightbox-image-area" class="flex-1 relative flex items-center justify-center p-4 h-[60vh] md:h-full overflow-hidden cursor-pointer">
-			<img id="lightbox-img" src="" alt="Full size photography" class="max-w-full max-h-full object-contain">
+			<img id="lightbox-img" src="" alt="Full size photography" class="max-w-full max-h-full object-contain opacity-0 translate-y-8 transition-all duration-1000 ease-out">
 		</div>
 
 		<!-- Description Side Panel -->
@@ -87,6 +87,27 @@
 
 		function showPrevPhoto() {
 			showPhoto(currentIndex - 1);
+		}
+
+		function openLightbox(index) {
+			showPhoto(index);
+			lightbox.classList.remove('hidden');
+			document.body.style.overflow = 'hidden';
+
+			// Force a reflow so the transition plays instead of jumping straight to the end state
+			void lightbox.offsetWidth;
+			lightbox.classList.remove('opacity-0');
+			lightboxImg.classList.remove('opacity-0', 'translate-y-8');
+		}
+
+		function closeLightboxOverlay() {
+			lightbox.classList.add('opacity-0');
+			lightboxImg.classList.add('opacity-0', 'translate-y-8');
+
+			setTimeout(() => {
+				lightbox.classList.add('hidden');
+				document.body.style.overflow = '';
+			}, 1000);
 		}
 
 		async function initGallery() {
@@ -147,9 +168,7 @@
 					`;
 
 					container.addEventListener('click', () => {
-						showPhoto(photos.findIndex(p => p.src === img.src));
-						lightbox.classList.remove('hidden');
-						document.body.style.overflow = 'hidden';
+						openLightbox(photos.findIndex(p => p.src === img.src));
 					});
 
 					container.appendChild(img);
@@ -164,8 +183,7 @@
 		}
 
 		closeLightbox.addEventListener('click', () => {
-			lightbox.classList.add('hidden');
-			document.body.style.overflow = '';
+			closeLightboxOverlay();
 		});
 
 		// Click the side margins around the image (not the photo itself) to go to the previous/next photo
@@ -190,22 +208,19 @@
 			} else if (e.key === 'ArrowLeft') {
 				showPrevPhoto();
 			} else if (e.key === 'Escape') {
-				lightbox.classList.add('hidden');
-				document.body.style.overflow = '';
+				closeLightboxOverlay();
 			}
 		});
 
 		// Close when clicking the image itself
 		lightboxImg.addEventListener('click', () => {
-			lightbox.classList.add('hidden');
-			document.body.style.overflow = '';
+			closeLightboxOverlay();
 		});
 
 		// Close on clicking outside the image or panel
 		lightbox.addEventListener('click', (e) => {
 			if (e.target === lightbox) {
-				lightbox.classList.add('hidden');
-				document.body.style.overflow = '';
+				closeLightboxOverlay();
 			}
 		});
 
