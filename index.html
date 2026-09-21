@@ -401,9 +401,9 @@
             const welcomeText = document.getElementById('welcome-text'); 
             const gridContainer = document.getElementById('grid-container'); 
             let menuAnimation;
-            let menuIdleLoopTimer;
             let menuCloseTimer;
             let isMenuHovered = false;
+            let isMenuClosing = false;
             const menuIconAnimations = [];
 
             const getLastTransitionTime = (value) => {
@@ -430,24 +430,26 @@
             };
 
             const stopMenuIdleLoop = () => {
-                clearInterval(menuIdleLoopTimer);
-                menuIdleLoopTimer = null;
+                if (menuAnimation) menuAnimation.loop = false;
             };
 
-            const startMenuIdleLoop = () => {
-                stopMenuIdleLoop();
-                if (isMenuHovered || !menuAnimation) return;
-
-                menuIdleLoopTimer = setInterval(() => {
-                    if (!isMenuHovered) {
-                        menuAnimation.playSegments([61, 240], true);
+            const attachMenuAnimationCompleteHandler = () => {
+                menuAnimation.addEventListener('complete', () => {
+                    if (isMenuClosing) {
+                        isMenuClosing = false;
+                        if (!isMenuHovered) startMenuIdleLoop();
                     }
-                }, 2000);
+                });
             };
 
-            const initializeMenuAnimation = () => {
+            // Recreates the Lottie instance from scratch and plays it exactly like the very first page load,
+            // instead of resuming the same instance - reusing it after the open/close segments is what stutters
+            const startMenuIdleLoop = () => {
+                if (isMenuHovered) return;
                 const menu = document.getElementById('menuIcon');
-                if (!menu || menu.dataset.loaded === 'true' || !window.lottie) return;
+                if (!menu || !window.lottie) return;
+
+                if (menuAnimation) menuAnimation.destroy();
 
                 menuAnimation = window.lottie.loadAnimation({
                     container: menu,
@@ -457,11 +459,21 @@
                     path: 'Icons Jsons/menu icon.json'
                 });
 
-                menuAnimation.goToAndStop(61, true);
-                menuAnimation.playSegments([61, 240], true);
+                attachMenuAnimationCompleteHandler();
+
+                menuAnimation.goToAndStop(180, true);
+                menuAnimation.loop = true;
+                menuAnimation.playSegments([180, 270], true);
+            };
+
+            const initializeMenuAnimation = () => {
+                const menu = document.getElementById('menuIcon');
+                if (!menu || menu.dataset.loaded === 'true' || !window.lottie) return;
+
                 nav.addEventListener('mouseenter', () => {
                     isMenuHovered = true;
                     clearTimeout(menuCloseTimer);
+                    isMenuClosing = false;
                     stopMenuIdleLoop();
                     menuAnimation.playSegments([0, 31], true);
                 });
@@ -469,8 +481,9 @@
                     isMenuHovered = false;
                     menuCloseTimer = setTimeout(() => {
                         if (!isMenuHovered) {
-                            menuAnimation.playSegments([31, 61], true);
-                            startMenuIdleLoop();
+                            isMenuClosing = true;
+                            menuAnimation.loop = false;
+                            menuAnimation.playSegments([30, 150], true);
                         }
                     }, 500);
                 });
