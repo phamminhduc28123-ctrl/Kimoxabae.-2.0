@@ -28,7 +28,7 @@
 		<button id="close-lightbox" class="absolute top-6 right-8 text-white text-4xl font-light hover:scale-110 transition-transform z-[110] cursor-pointer">&times;</button>
 		
 		<!-- Image Area -->
-		<div id="lightbox-image-area" class="flex-1 relative flex items-center justify-center p-4 h-[60vh] md:h-full overflow-hidden">
+		<div id="lightbox-image-area" class="flex-1 relative flex items-center justify-center p-4 h-[60vh] md:h-full overflow-hidden cursor-pointer">
 			<img id="lightbox-img" src="" alt="Full size photography" class="max-w-full max-h-full object-contain">
 		</div>
 
@@ -40,10 +40,6 @@
 				<!-- Parsed details will go here -->
 			</div>
 		</div>
-
-		<!-- Navigation arrows: fixed to viewport so they stay on top and snap to the image's own edges -->
-		<button id="prev-lightbox" style="font-size: clamp(2.25rem, 5vw, 6rem);" class="fixed text-white font-light opacity-0 hover:opacity-100 hover:scale-110 transition-all duration-200 z-[200] cursor-pointer select-none">&#8249;</button>
-		<button id="next-lightbox" style="font-size: clamp(2.25rem, 5vw, 6rem);" class="fixed text-white font-light opacity-0 hover:opacity-100 hover:scale-110 transition-all duration-200 z-[200] cursor-pointer select-none">&#8250;</button>
 	</div>
 
 	<!-- Impressum Footer -->
@@ -62,35 +58,14 @@
 	<script>
 		const grid = document.getElementById('photography-grid');
 		const lightbox = document.getElementById('lightbox');
+		const lightboxImageArea = document.getElementById('lightbox-image-area');
 		const lightboxImg = document.getElementById('lightbox-img');
 		const lightboxDestination = document.getElementById('lightbox-destination');
 		const lightboxDetails = document.getElementById('lightbox-details');
 		const closeLightbox = document.getElementById('close-lightbox');
-		const prevLightbox = document.getElementById('prev-lightbox');
-		const nextLightbox = document.getElementById('next-lightbox');
 
 		let photos = [];
 		let currentIndex = 0;
-
-		// Aligns the arrows to the actual rendered edges of the (object-contain) image using
-		// viewport coordinates, since the buttons are position:fixed and independent of any clipping container
-		function positionArrows() {
-			if (!lightboxImg.naturalWidth) return;
-			const imgRect = lightboxImg.getBoundingClientRect();
-			const gap = 16;
-
-			const top = imgRect.top + imgRect.height / 2;
-			const prevLeft = Math.max(imgRect.left - gap, 8);
-			const nextLeft = Math.min(imgRect.right + gap, window.innerWidth - 8);
-
-			prevLightbox.style.top = `${top}px`;
-			prevLightbox.style.left = `${prevLeft}px`;
-			prevLightbox.style.transform = 'translate(-100%, -50%)';
-
-			nextLightbox.style.top = `${top}px`;
-			nextLightbox.style.left = `${nextLeft}px`;
-			nextLightbox.style.transform = 'translateY(-50%)';
-		}
 
 		function showPhoto(index) {
 			if (!photos.length) return;
@@ -193,14 +168,18 @@
 			document.body.style.overflow = '';
 		});
 
-		prevLightbox.addEventListener('click', (e) => {
-			e.stopPropagation();
-			showPrevPhoto();
-		});
+		// Click the side margins around the image (not the photo itself) to go to the previous/next photo
+		lightboxImageArea.addEventListener('click', (e) => {
+			if (e.target !== lightboxImageArea) return;
 
-		nextLightbox.addEventListener('click', (e) => {
-			e.stopPropagation();
-			showNextPhoto();
+			const areaRect = lightboxImageArea.getBoundingClientRect();
+			const clickX = e.clientX - areaRect.left;
+
+			if (clickX < areaRect.width / 2) {
+				showPrevPhoto();
+			} else {
+				showNextPhoto();
+			}
 		});
 
 		document.addEventListener('keydown', (e) => {
@@ -229,9 +208,6 @@
 				document.body.style.overflow = '';
 			}
 		});
-
-		lightboxImg.addEventListener('load', positionArrows);
-		window.addEventListener('resize', positionArrows);
 
 		initGallery();
 
