@@ -13,6 +13,16 @@
 			height: 112vh;
 		}
 
+		.intro-stage {
+			height: 100vh;
+		}
+
+		#intro-section {
+			position: fixed;
+			inset: 0;
+			will-change: transform, opacity;
+		}
+
 		.parallax-cover {
 			position: sticky;
 			top: 0;
@@ -40,16 +50,13 @@
 			pointer-events: none;
 		}
 
-		.storyboard-hero-video iframe {
+		.storyboard-hero-sequence {
 			position: absolute;
-			top: 50%;
-			left: 50%;
-			width: 100vw;
-			height: 56.25vw;
-			min-width: 177.78vh;
-			min-height: 100vh;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
 			border: 0;
-			transform: translate(-50%, -50%) scale(1.08);
 			pointer-events: none;
 		}
 
@@ -57,23 +64,41 @@
 			position: relative;
 			z-index: 1;
 		}
+
+		.project-meta-wrapper {
+			will-change: transform;
+		}
+
+		.project-cover {
+			justify-content: flex-start;
+			height: 42vh;
+			padding-top: 15vh;
+		}
+
+		.project-section .cover-stage {
+			height: 54vh;
+			background-color: #000;
+		}
+
+		.project-section .cover-stage {
+			position: relative;
+		}
+
+		.project-gallery {
+			background-color: #000;
+			will-change: transform;
+		}
 	</style>
 </head>
 
 <body class="min-h-screen">
 	<div id="shared-header"></div>
 
-	<main class="pt-24 pb-16">
-		<div class="cover-stage">
+	<main class="pb-16">
+		<div class="cover-stage intro-stage">
 			<section id="intro-section" class="parallax-cover" style="z-index: 1;">
 				<div class="storyboard-hero-video" aria-hidden="true">
-					<iframe
-						src="https://player.vimeo.com/video/1099034448?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;autoplay=1&amp;loop=1&amp;muted=1&amp;controls=0&amp;title=0&amp;byline=0&amp;portrait=0"
-						allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-						referrerpolicy="strict-origin-when-cross-origin"
-						frameborder="0"
-						title="Geist - Overwerk (Animatic)">
-					</iframe>
+					<img id="storyboard-hero-sequence" class="storyboard-hero-sequence" src="Storyboard Hero Images/Storyboard hero images_00000.jpg" alt="">
 				</div>
 
 				<div class="hero-content max-w-7xl mx-auto px-4 md:px-8 w-full">
@@ -105,6 +130,31 @@
 	<script>
 		const introEl = document.getElementById('storyboard-intro');
 		const introText = "I have worked on the storyboard of all the film projects I have taken part in.\n\nWhat I enjoy the most about it is how much I have to work with cameraman or the camera directly.\n\nAnd I doesn't hurt that I can abuse my sketching skill.";
+		const heroSequenceEl = document.getElementById('storyboard-hero-sequence');
+		const heroFrameCount = 559;
+		const heroFrameRate = 8;
+		const heroSequencePath = 'Storyboard Hero Images/Storyboard hero images_';
+		let heroSequenceStart;
+		let heroSequenceFrame = -1;
+
+		function updateHeroSequence(timestamp) {
+			if (heroSequenceStart === undefined) {
+				heroSequenceStart = timestamp;
+			}
+
+			const elapsedFrames = Math.floor((timestamp - heroSequenceStart) * heroFrameRate / 1000);
+			const nextFrame = elapsedFrames % heroFrameCount;
+
+			if (nextFrame !== heroSequenceFrame) {
+				heroSequenceFrame = nextFrame;
+				const frameNumber = String(nextFrame).padStart(5, '0');
+				heroSequenceEl.src = `${heroSequencePath}${frameNumber}.jpg`;
+			}
+
+			requestAnimationFrame(updateHeroSequence);
+		}
+
+		requestAnimationFrame(updateHeroSequence);
 
 		function typewriterEffect(element, text, duration = 2000) {
 			// Render every character up front so line wrapping/alignment never shifts, then reveal them in place.
@@ -181,9 +231,11 @@
 			projects.forEach((project, projectIndex) => {
 				const section = document.createElement('div');
 				section.className = 'project-section';
+				section.style.backgroundColor = '#000';
 
 				const coverStage = document.createElement('div');
 				coverStage.className = 'cover-stage';
+				coverStage.style.zIndex = String(2 + projectIndex);
 
 				const cover = document.createElement('div');
 				cover.className = 'project-cover parallax-cover';
@@ -193,7 +245,7 @@
 				cover.style.backgroundColor = '#000';
 
 				const coverInner = document.createElement('div');
-				coverInner.className = 'max-w-7xl mx-auto px-4 md:px-8 w-full';
+				coverInner.className = 'project-meta-wrapper max-w-7xl mx-auto px-4 md:px-8 w-full';
 
 				const title = document.createElement('h2');
 				title.className = "project-meta project-title font-lexend text-2xl md:text-3xl font-medium tracking-wider text-white mb-1 uppercase opacity-0 translate-y-4 transition-all duration-700 ease-out";
@@ -204,7 +256,7 @@
 				description.textContent = project.description;
 
 				const galleryWrapper = document.createElement('div');
-				galleryWrapper.className = 'max-w-7xl mx-auto px-4 md:px-8 mb-32';
+				galleryWrapper.className = 'project-gallery relative z-[2] max-w-7xl mx-auto px-4 md:px-8 mb-32';
 
 				const grid = document.createElement('div');
 				grid.className = "flex flex-wrap justify-center gap-4";
@@ -213,7 +265,7 @@
 					const fileName = `${project.prefix}${i}.jpg`;
 
 					const container = document.createElement('div');
-					container.className = "overflow-hidden rounded-lg bg-gray-50";
+					container.className = "overflow-hidden rounded-lg";
 
 					const img = document.createElement('img');
 					img.src = `storyboard/${fileName}`;
@@ -241,16 +293,40 @@
 
 		function revealProjectMeta() {
 			const covers = document.querySelectorAll('.project-cover');
+			const galleries = document.querySelectorAll('.project-gallery');
 			const triggerLine = window.innerHeight * 0.5;
 			const colorTransitionDistance = 120;
+			const firstCover = covers[0];
 
-			covers.forEach(cover => {
+			if (firstCover) {
+				const entryProgress = Math.min(Math.max(1 - firstCover.getBoundingClientRect().top / window.innerHeight, 0), 1);
+				const heroExitOffset = entryProgress * 36;
+
+				document.getElementById('intro-section').style.transform = `translateY(-${heroExitOffset}vh)`;
+				document.getElementById('intro-section').style.opacity = String(1 - entryProgress);
+				document.getElementById('intro-section').style.visibility = entryProgress === 1 ? 'hidden' : 'visible';
+			}
+
+			covers.forEach((cover, index) => {
 				const rect = cover.getBoundingClientRect();
 				const metaNodes = cover.querySelectorAll('.project-meta');
+				const metaWrapper = cover.querySelector('.project-meta-wrapper');
+				const nextCover = covers[index + 1];
+				const gallery = galleries[index];
 
-				const colorProgress = 1 - Math.min(Math.max(rect.top / colorTransitionDistance, 0), 1);
+				if (nextCover) {
+					const handoffProgress = Math.min(Math.max(1 - nextCover.getBoundingClientRect().top / window.innerHeight, 0), 1);
+					gallery.style.transform = `translateY(${handoffProgress * window.innerHeight * 0.88}px)`;
+				}
+
+				const galleryTransitionDistance = window.innerHeight * 0.54;
+				const colorProgress = 1 - Math.min(Math.max(gallery.getBoundingClientRect().top / galleryTransitionDistance, 0), 1);
 				const channel = Math.round(255 * colorProgress);
-				cover.style.backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
+				const backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
+				cover.style.backgroundColor = backgroundColor;
+				cover.parentElement.style.backgroundColor = backgroundColor;
+				gallery.style.backgroundColor = backgroundColor;
+				cover.closest('.project-section').style.backgroundColor = backgroundColor;
 
 				// Text starts white (on the black cover) and turns black as the cover turns white.
 				const textChannel = 255 - channel;
@@ -265,10 +341,13 @@
 				});
 
 				if (rect.top <= triggerLine) {
+					const slowOffset = Math.min(Math.max(-rect.top * 0.65, 0), window.innerHeight * 0.36);
+
 					metaNodes.forEach(node => {
 						node.classList.remove('opacity-0', 'translate-y-4');
 						node.classList.add('opacity-100', 'translate-y-0');
 					});
+					metaWrapper.style.transform = `translateY(${slowOffset}px)`;
 				}
 			});
 		}
