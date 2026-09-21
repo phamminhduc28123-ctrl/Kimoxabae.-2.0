@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Storyboard</title>
+
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style id="shared-styles"></style>
+	<style>
+		.cover-stage {
+			position: relative;
+			height: 112vh;
+		}
+
+		.parallax-cover {
+			position: sticky;
+			top: 0;
+			width: 100%;
+			height: 100vh;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			overflow: hidden;
+		}
+
+		.storyboard-hero-video {
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+			overflow: hidden;
+			background: #000;
+		}
+
+		.storyboard-hero-video::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			background: rgba(255, 255, 255, 0.28);
+			pointer-events: none;
+		}
+
+		.storyboard-hero-video iframe {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 100vw;
+			height: 56.25vw;
+			min-width: 177.78vh;
+			min-height: 100vh;
+			border: 0;
+			transform: translate(-50%, -50%) scale(1.08);
+			pointer-events: none;
+		}
+
+		#intro-section .hero-content {
+			position: relative;
+			z-index: 1;
+		}
+	</style>
+</head>
+
+<body class="min-h-screen">
+	<div id="shared-header"></div>
+
+	<main class="pt-24 pb-16">
+		<div class="cover-stage">
+			<section id="intro-section" class="parallax-cover" style="z-index: 1;">
+				<div class="storyboard-hero-video" aria-hidden="true">
+					<iframe
+						src="https://player.vimeo.com/video/1099034448?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;autoplay=1&amp;loop=1&amp;muted=1&amp;controls=0&amp;title=0&amp;byline=0&amp;portrait=0"
+						allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+						referrerpolicy="strict-origin-when-cross-origin"
+						frameborder="0"
+						title="Geist - Overwerk (Animatic)">
+					</iframe>
+				</div>
+
+				<div class="hero-content max-w-7xl mx-auto px-4 md:px-8 w-full">
+					<h1 class="font-lexend text-4xl md:text-5xl font-medium tracking-wider text-black mb-8 uppercase">Storyboard</h1>
+
+					<p id="storyboard-intro" class="mb-12 ml-auto w-[50%] min-w-[220px] max-w-xl whitespace-pre-line text-right text-base md:text-lg leading-relaxed text-black/80 pr-2" aria-live="polite"></p>
+				</div>
+			</section>
+		</div>
+
+		<div id="storyboard-projects">
+			<!-- Project sections will be injected here -->
+		</div>
+	</main>
+
+	<!-- Impressum Footer -->
+	<footer id="footer" class="w-full mt-12 py-8 px-4 bg-white border-t border-gray-100">
+		<div class="max-w-2xl mx-auto text-center space-y-1 text-xs">
+			<h3 class="text-base font-bold uppercase mb-4 tracking-widest">Impressum</h3>
+			<p class="text-black font-medium">Name: Minh Đức Phạm</p>
+			<p class="text-black">Address: Nuremberg, Germany</p>
+			<p class="text-black">Email: <a href="mailto:kimoxabae@web.de" class="hover:underline">kimoxabae@web.de</a></p>
+			<p class="text-[0.65rem] text-gray-500 mt-6 pt-4 max-w-md mx-auto">
+				This is a personal portfolio website. All artwork and content are created by the artist and may not be used without permission.
+			</p>
+		</div>
+	</footer>
+
+	<script>
+		const introEl = document.getElementById('storyboard-intro');
+		const introText = "I have worked on the storyboard of all the film projects I have taken part in.\n\nWhat I enjoy the most about it is how much I have to work with cameraman or the camera directly.\n\nAnd I doesn't hurt that I can abuse my sketching skill.";
+
+		function typewriterEffect(element, text, duration = 2000) {
+			// Render every character up front so line wrapping/alignment never shifts, then reveal them in place.
+			const chars = [...text];
+			element.textContent = '';
+			const spans = chars.map(char => {
+				const span = document.createElement('span');
+				span.textContent = char;
+				span.style.opacity = '0';
+				element.appendChild(span);
+				return span;
+			});
+
+			const start = performance.now();
+
+			function tick(now) {
+				const progress = Math.min((now - start) / duration, 1);
+				const visibleLength = Math.floor(progress * chars.length);
+
+				spans.forEach((span, index) => {
+					span.style.opacity = index < visibleLength ? '1' : '0';
+				});
+
+				if (progress < 1) {
+					requestAnimationFrame(tick);
+				}
+			}
+
+			requestAnimationFrame(tick);
+		}
+
+		typewriterEffect(introEl, introText, 2000);
+
+		const projectsContainer = document.getElementById('storyboard-projects');
+
+		const projects = [
+			{
+				prefix: 'a',
+				count: 4,
+				title: 'Ghostknight',
+				description: 'A assignment in college, based on a script of possibly the worst film professor ever.',
+				imageHeight: 'h-[32rem]',
+				imageWidth: 'w-[22rem]'
+			},
+			{
+				prefix: 'b',
+				count: 3,
+				title: 'Ladybug and Her Polka Dots',
+				description: 'Placeholder description — edit this text to describe the Ladybug and Her Polka Dots storyboard project.',
+				imageHeight: 'h-[32rem]',
+				imageWidth: 'w-[22rem]'
+			},
+			{
+				prefix: 'c',
+				count: 45,
+				title: 'Mockumentary',
+				description: 'Placeholder description — edit this text to describe the Mockumentary storyboard project.',
+				imageHeight: 'h-56',
+				imageWidth: 'w-80',
+				imageFit: 'object-cover'
+			},
+			{
+				prefix: 'd',
+				count: 68,
+				title: 'Geist - Overwerk',
+				description: 'Placeholder description — edit this text to describe the Geist - Overwerk storyboard project.',
+				imageHeight: 'h-56',
+				imageWidth: 'w-96',
+				imageFit: 'object-cover'
+			}
+		];
+
+		function initGallery() {
+			projects.forEach((project, projectIndex) => {
+				const section = document.createElement('div');
+				section.className = 'project-section';
+
+				const coverStage = document.createElement('div');
+				coverStage.className = 'cover-stage';
+
+				const cover = document.createElement('div');
+				cover.className = 'project-cover parallax-cover';
+				// Later covers stack a higher z-index so they slide over earlier, already-stuck covers.
+				cover.style.zIndex = String(2 + projectIndex);
+				// Starts black and races to white as it slides into place (handled in revealProjectMeta).
+				cover.style.backgroundColor = '#000';
+
+				const coverInner = document.createElement('div');
+				coverInner.className = 'max-w-7xl mx-auto px-4 md:px-8 w-full';
+
+				const title = document.createElement('h2');
+				title.className = "project-meta project-title font-lexend text-2xl md:text-3xl font-medium tracking-wider text-white mb-1 uppercase opacity-0 translate-y-4 transition-all duration-700 ease-out";
+				title.textContent = project.title;
+
+				const description = document.createElement('p');
+				description.className = "project-meta project-description max-w-3xl ml-auto text-sm md:text-base text-white mb-3 leading-relaxed text-right opacity-0 translate-y-4 transition-all duration-700 ease-out";
+				description.textContent = project.description;
+
+				const galleryWrapper = document.createElement('div');
+				galleryWrapper.className = 'max-w-7xl mx-auto px-4 md:px-8 mb-32';
+
+				const grid = document.createElement('div');
+				grid.className = "flex flex-wrap justify-center gap-4";
+
+				for (let i = 1; i <= project.count; i++) {
+					const fileName = `${project.prefix}${i}.jpg`;
+
+					const container = document.createElement('div');
+					container.className = "overflow-hidden rounded-lg bg-gray-50";
+
+					const img = document.createElement('img');
+					img.src = `storyboard/${fileName}`;
+					img.alt = `${project.title} storyboard ${i}`;
+					img.className = `${project.imageHeight} ${project.imageWidth} ${project.imageFit || 'object-contain'}`;
+					img.loading = "lazy";
+
+					container.appendChild(img);
+					grid.appendChild(container);
+				}
+
+				coverInner.appendChild(title);
+				coverInner.appendChild(description);
+				cover.appendChild(coverInner);
+				coverStage.appendChild(cover);
+				galleryWrapper.appendChild(grid);
+
+				section.appendChild(coverStage);
+				section.appendChild(galleryWrapper);
+				projectsContainer.appendChild(section);
+			});
+		}
+
+		initGallery();
+
+		function revealProjectMeta() {
+			const covers = document.querySelectorAll('.project-cover');
+			const triggerLine = window.innerHeight * 0.5;
+			const colorTransitionDistance = 120;
+
+			covers.forEach(cover => {
+				const rect = cover.getBoundingClientRect();
+				const metaNodes = cover.querySelectorAll('.project-meta');
+
+				const colorProgress = 1 - Math.min(Math.max(rect.top / colorTransitionDistance, 0), 1);
+				const channel = Math.round(255 * colorProgress);
+				cover.style.backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
+
+				// Text starts white (on the black cover) and turns black as the cover turns white.
+				const textChannel = 255 - channel;
+				cover.querySelectorAll('.project-title').forEach(node => {
+					node.style.color = `rgb(${textChannel}, ${textChannel}, ${textChannel})`;
+				});
+				cover.querySelectorAll('.project-description').forEach(node => {
+					const r = 255 - Math.round(180 * colorProgress);
+					const g = 255 - Math.round(170 * colorProgress);
+					const b = 255 - Math.round(156 * colorProgress);
+					node.style.color = `rgb(${r}, ${g}, ${b})`;
+				});
+
+				if (rect.top <= triggerLine) {
+					metaNodes.forEach(node => {
+						node.classList.remove('opacity-0', 'translate-y-4');
+						node.classList.add('opacity-100', 'translate-y-0');
+					});
+				}
+			});
+		}
+
+		window.addEventListener('scroll', revealProjectMeta, { passive: true });
+		window.addEventListener('load', revealProjectMeta);
+		revealProjectMeta();
+
+		fetch('./index.html')
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Could not load index.html');
+				}
+
+				return response.text();
+			})
+			.then(html => {
+				const sourceDocument =
+					new DOMParser().parseFromString(html, 'text/html');
+
+				const sourceStyle =
+					sourceDocument.querySelector('style');
+
+				if (sourceStyle) {
+					document.getElementById('shared-styles').textContent =
+						sourceStyle.textContent;
+				}
+
+				const sourceHeader =
+					sourceDocument.querySelector('#smartHeader');
+
+				if (sourceHeader) {
+					document
+						.getElementById('shared-header')
+						.appendChild(document.importNode(sourceHeader, true));
+				}
+
+				const sourceScripts =
+					sourceDocument.querySelectorAll('script:not([src])');
+
+				sourceScripts.forEach(sourceScript => {
+					const script = document.createElement('script');
+					script.textContent = sourceScript.textContent;
+					document.body.appendChild(script);
+				});
+
+				document.dispatchEvent(new Event('DOMContentLoaded'));
+			})
+			.catch(error => {
+				console.error('Storyboard page error:', error);
+			});
+	</script>
+</body>
+</html>

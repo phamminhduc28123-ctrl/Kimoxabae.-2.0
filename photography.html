@@ -28,8 +28,10 @@
 		<button id="close-lightbox" class="absolute top-6 right-8 text-white text-4xl font-light hover:scale-110 transition-transform z-[110] cursor-pointer">&times;</button>
 		
 		<!-- Image Area -->
-		<div class="flex-1 flex items-center justify-center p-4 h-[60vh] md:h-full overflow-hidden">
+		<div class="flex-1 relative flex items-center justify-center p-4 h-[60vh] md:h-full overflow-hidden">
+			<button id="prev-lightbox" class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white text-4xl font-light opacity-0 hover:opacity-100 hover:scale-110 transition-all duration-200 z-[110] cursor-pointer select-none">&#8249;</button>
 			<img id="lightbox-img" src="" alt="Full size photography" class="max-w-full max-h-full object-contain">
+			<button id="next-lightbox" class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white text-4xl font-light opacity-0 hover:opacity-100 hover:scale-110 transition-all duration-200 z-[110] cursor-pointer select-none">&#8250;</button>
 		</div>
 
 		<!-- Description Side Panel -->
@@ -62,6 +64,33 @@
 		const lightboxDestination = document.getElementById('lightbox-destination');
 		const lightboxDetails = document.getElementById('lightbox-details');
 		const closeLightbox = document.getElementById('close-lightbox');
+		const prevLightbox = document.getElementById('prev-lightbox');
+		const nextLightbox = document.getElementById('next-lightbox');
+
+		let photos = [];
+		let currentIndex = 0;
+
+		function showPhoto(index) {
+			if (!photos.length) return;
+			currentIndex = (index + photos.length) % photos.length;
+			const photo = photos[currentIndex];
+
+			lightboxImg.src = photo.src;
+			lightboxDestination.textContent = photo.destination;
+
+			const details = photo.description.split(';').map(d => d.trim()).filter(d => d);
+			lightboxDetails.innerHTML = details.map(d => `
+				<p class="text-sm text-gray-400 leading-relaxed font-light border-l border-white/20 pl-4 py-1">${d}</p>
+			`).join('');
+		}
+
+		function showNextPhoto() {
+			showPhoto(currentIndex + 1);
+		}
+
+		function showPrevPhoto() {
+			showPhoto(currentIndex - 1);
+		}
 
 		async function initGallery() {
 			try {
@@ -121,15 +150,7 @@
 					`;
 
 					container.addEventListener('click', () => {
-						lightboxImg.src = img.src;
-						lightboxDestination.textContent = info.destination;
-						
-						// Split details by semicolon for better formatting
-						const details = info.description.split(';').map(d => d.trim()).filter(d => d);
-						lightboxDetails.innerHTML = details.map(d => `
-							<p class="text-sm text-gray-400 leading-relaxed font-light border-l border-white/20 pl-4 py-1">${d}</p>
-						`).join('');
-
+						showPhoto(photos.findIndex(p => p.src === img.src));
 						lightbox.classList.remove('hidden');
 						document.body.style.overflow = 'hidden';
 					});
@@ -137,6 +158,8 @@
 					container.appendChild(img);
 					container.appendChild(overlay);
 					grid.appendChild(container);
+
+					photos.push({ src: img.src, destination: info.destination, description: info.description });
 				}
 			} catch (e) {
 				console.error("Gallery initialization failed:", e);
@@ -146,6 +169,29 @@
 		closeLightbox.addEventListener('click', () => {
 			lightbox.classList.add('hidden');
 			document.body.style.overflow = '';
+		});
+
+		prevLightbox.addEventListener('click', (e) => {
+			e.stopPropagation();
+			showPrevPhoto();
+		});
+
+		nextLightbox.addEventListener('click', (e) => {
+			e.stopPropagation();
+			showNextPhoto();
+		});
+
+		document.addEventListener('keydown', (e) => {
+			if (lightbox.classList.contains('hidden')) return;
+
+			if (e.key === 'ArrowRight') {
+				showNextPhoto();
+			} else if (e.key === 'ArrowLeft') {
+				showPrevPhoto();
+			} else if (e.key === 'Escape') {
+				lightbox.classList.add('hidden');
+				document.body.style.overflow = '';
+			}
 		});
 
 		// Close when clicking the image itself
