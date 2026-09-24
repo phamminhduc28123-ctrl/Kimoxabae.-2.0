@@ -7,15 +7,32 @@
 
 	<script src="https://cdn.tailwindcss.com"></script>
 	<style id="shared-styles"></style>
+	<style id="blog-styles">
+		@keyframes title-blink {
+			0% { opacity: 1; }
+			50% { opacity: 0; }
+			100% { opacity: 1; }
+		}
+		.title-blink {
+			animation: title-blink 0.6s ease-in-out;
+		}
+	</style>
 </head>
 
 <body class="min-h-screen">
 	<div id="shared-header"></div>
 
-	<main class="pt-24 px-4 md:px-8 pb-16">
-		<div class="max-w-5xl mx-auto">
-			<h1 class="font-lexend text-4xl md:text-5xl font-medium tracking-wider text-black mb-8 uppercase">Blog</h1>
+	<main class="pt-16 pb-16">
+		<div class="group relative w-full h-56 md:h-72 overflow-hidden mb-10">
+				<img src="blog/Thumbnail/Blog Header.png" alt=""
+					class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+				<div class="absolute inset-0 bg-black/40"></div>
+				<div class="absolute inset-0 flex items-center px-6 md:px-12">
+					<h1 class="font-lexend text-4xl md:text-6xl font-medium tracking-wider text-white uppercase transition-all duration-500 ease-out group-hover:opacity-0 group-hover:-translate-x-10">Blog</h1>
+				</div>
+			</div>
 
+		<div class="max-w-5xl mx-auto px-4 md:px-8">
 			<div class="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-10">
 				<input id="blog-search" type="text" placeholder="Search articles and their text..."
 					class="w-full sm:max-w-xs px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-black">
@@ -118,19 +135,54 @@
 			visibleArticles.forEach(article => {
 				const card = document.createElement('a');
 				card.href = `article.html?post=${encodeURIComponent(article.slug)}`;
-				card.className = 'group relative flex h-40 md:h-56 overflow-hidden rounded-lg bg-gray-50 cursor-pointer';
+				card.className = 'relative flex h-40 md:h-56 overflow-hidden rounded-lg bg-gray-50 cursor-pointer';
 
 				card.innerHTML = `
-					<div class="w-1/2 h-full overflow-hidden">
+					<div class="blog-card-image w-1/2 h-full flex-shrink-0 overflow-hidden transition-[width] duration-500 ease-out">
 						<img src="${article.thumbnail}" alt="${article.title}" loading="lazy"
-							class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105">
+							class="blog-card-img w-full h-full object-cover grayscale transition-all duration-700">
 					</div>
-					<div class="w-1/2 h-full relative flex flex-col justify-center p-6 md:p-8">
-						<h2 class="font-lexend text-black text-base md:text-xl font-medium uppercase tracking-wider">${article.title}</h2>
-						<p class="text-gray-600 text-sm mt-1 font-light">${article.subtitle}</p>
-						<span class="absolute bottom-3 right-4 text-[0.7rem] text-gray-400">${formatDate(article.date)}</span>
+					<div class="blog-card-text w-1/2 h-full relative flex flex-col justify-center p-6 md:p-8 transition-[width] duration-500 ease-out">
+						<h2 class="blog-card-title font-lexend text-black text-base md:text-xl font-medium uppercase tracking-wider">${article.title}</h2>
+						<p class="blog-card-subtitle text-gray-600 text-sm mt-1 font-light transition-opacity duration-300">${article.subtitle}</p>
+						<span class="blog-card-date absolute bottom-3 right-4 text-[0.7rem] text-gray-400 transition-opacity duration-300">${formatDate(article.date)}</span>
 					</div>
 				`;
+
+				// Only hovering the thumbnail (left half) expands it; the title/text half doesn't trigger it
+				const imageWrapper = card.querySelector('.blog-card-image');
+				const image = card.querySelector('.blog-card-img');
+				const textWrapper = card.querySelector('.blog-card-text');
+				const title = card.querySelector('.blog-card-title');
+				const subtitle = card.querySelector('.blog-card-subtitle');
+				const date = card.querySelector('.blog-card-date');
+
+				function setExpanded(expanded) {
+					imageWrapper.classList.toggle('w-1/2', !expanded);
+					imageWrapper.classList.toggle('w-3/5', expanded);
+					textWrapper.classList.toggle('w-1/2', !expanded);
+					textWrapper.classList.toggle('w-2/5', expanded);
+					image.classList.toggle('grayscale', !expanded);
+					image.classList.toggle('scale-105', expanded);
+
+					if (expanded) {
+						subtitle.classList.add('opacity-0');
+						date.classList.add('opacity-0');
+					} else {
+						setTimeout(() => {
+							subtitle.classList.remove('opacity-0');
+							date.classList.remove('opacity-0');
+						}, 500);
+					}
+
+					title.classList.remove('title-blink');
+					void title.offsetWidth;
+					title.classList.add('title-blink');
+				}
+
+				imageWrapper.addEventListener('mouseenter', () => setExpanded(true));
+				imageWrapper.addEventListener('mouseleave', () => setExpanded(false));
+				title.addEventListener('animationend', () => title.classList.remove('title-blink'));
 
 				grid.appendChild(card);
 			});
