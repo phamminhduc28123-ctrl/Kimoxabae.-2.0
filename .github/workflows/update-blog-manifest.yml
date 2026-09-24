@@ -1,0 +1,31 @@
+name: Update blog manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'blog/**'
+      - 'scripts/generate-blog-manifest.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate blog manifest
+        run: python3 scripts/generate_blog_manifest.py
+
+      - name: Commit manifest if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add blog/manifest.json
+          git diff --cached --quiet || git commit -m "chore: update blog manifest"
+          git push
