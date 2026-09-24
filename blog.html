@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Blog</title>
+
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style id="shared-styles"></style>
+</head>
+
+<body class="min-h-screen">
+	<div id="shared-header"></div>
+
+	<main class="pt-24 px-4 md:px-8 pb-16">
+		<div class="max-w-5xl mx-auto">
+			<h1 class="font-lexend text-4xl md:text-5xl font-medium tracking-wider text-black mb-8 uppercase">Blog</h1>
+
+			<div class="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-10">
+				<input id="blog-search" type="text" placeholder="Search articles..."
+					class="w-full sm:max-w-xs px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-black">
+
+				<select id="blog-sort" class="px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-black">
+					<option value="desc">Newest first</option>
+					<option value="asc">Oldest first</option>
+				</select>
+			</div>
+
+			<div id="blog-grid" class="flex flex-col gap-6">
+				<!-- Articles will be injected here -->
+			</div>
+
+			<p id="blog-empty" class="hidden text-sm text-gray-500 mt-6">No articles match your search.</p>
+		</div>
+	</main>
+
+	<!-- Impressum Footer -->
+	<footer id="footer" class="w-full mt-12 py-8 px-4 bg-white border-t border-gray-100">
+		<div class="max-w-2xl mx-auto text-center space-y-1 text-xs">
+			<h3 class="text-base font-bold uppercase mb-4 tracking-widest">Impressum</h3>
+			<p class="text-black font-medium">Name: Minh Đức Phạm</p>
+			<p class="text-black">Address: Nuremberg, Germany</p>
+			<p class="text-black">Email: <a href="mailto:kimoxabae@web.de" class="hover:underline">kimoxabae@web.de</a></p>
+			<p class="text-[0.65rem] text-gray-500 mt-6 pt-4 max-w-md mx-auto">
+				This is a personal portfolio website. All artwork and content are created by the artist and may not be used without permission.
+			</p>
+		</div>
+	</footer>
+
+	<script>
+		const grid = document.getElementById('blog-grid');
+		const emptyMessage = document.getElementById('blog-empty');
+		const searchInput = document.getElementById('blog-search');
+		const sortSelect = document.getElementById('blog-sort');
+
+		// Article list: matches files in /blog with their thumbnails in /blog/Thumbnail
+		const articles = [
+			{
+				slug: 'death-of-creativity',
+				title: 'The Myth of the Sudden Spark',
+				subtitle: 'Why Creativity is a Practice, Not an Event',
+				file: 'blog/Death of Creativity.html',
+				thumbnail: 'blog/Thumbnail/Death of Creativity.png',
+				date: '2026-01-15T10:30:00'
+			},
+			{
+				slug: 'music',
+				title: 'The Architecture of Sound',
+				subtitle: 'Why Constraints and Chaos Make the Best Music',
+				file: 'blog/Music?.html',
+				thumbnail: 'blog/Thumbnail/Music?.png',
+				date: '2026-02-28T18:00:00'
+			}
+		];
+
+		function formatDate(dateString) {
+			const date = new Date(dateString);
+			const datePart = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+			const timePart = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+			return `${datePart} · ${timePart}`;
+		}
+
+		function getVisibleArticles() {
+			const keyword = searchInput.value.trim().toLowerCase();
+
+			return articles
+				.filter(article =>
+					!keyword ||
+					article.title.toLowerCase().includes(keyword) ||
+					article.subtitle.toLowerCase().includes(keyword))
+				.sort((a, b) => {
+					const diff = new Date(a.date) - new Date(b.date);
+					return sortSelect.value === 'asc' ? diff : -diff;
+				});
+		}
+
+		function renderArticles() {
+			grid.innerHTML = '';
+			const visibleArticles = getVisibleArticles();
+			emptyMessage.classList.toggle('hidden', visibleArticles.length > 0);
+
+			visibleArticles.forEach(article => {
+				const card = document.createElement('a');
+				card.href = `article.html?post=${encodeURIComponent(article.slug)}`;
+				card.className = 'group relative flex h-40 md:h-56 overflow-hidden rounded-lg bg-gray-50 cursor-pointer';
+
+				card.innerHTML = `
+					<div class="w-1/2 h-full overflow-hidden">
+						<img src="${article.thumbnail}" alt="${article.title}" loading="lazy"
+							class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105">
+					</div>
+					<div class="w-1/2 h-full relative flex flex-col justify-center p-6 md:p-8">
+						<h2 class="font-lexend text-black text-base md:text-xl font-medium uppercase tracking-wider">${article.title}</h2>
+						<p class="text-gray-600 text-sm mt-1 font-light">${article.subtitle}</p>
+						<span class="absolute bottom-3 right-4 text-[0.7rem] text-gray-400">${formatDate(article.date)}</span>
+					</div>
+				`;
+
+				grid.appendChild(card);
+			});
+		}
+
+		searchInput.addEventListener('input', renderArticles);
+		sortSelect.addEventListener('change', renderArticles);
+
+		renderArticles();
+
+		fetch('./index.html')
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Could not load index.html');
+				}
+
+				return response.text();
+			})
+			.then(html => {
+				const sourceDocument =
+					new DOMParser().parseFromString(html, 'text/html');
+
+				const sourceStyle =
+					sourceDocument.querySelector('style');
+
+				if (sourceStyle) {
+					document.getElementById('shared-styles').textContent =
+						sourceStyle.textContent;
+				}
+
+				const sourceHeader =
+					sourceDocument.querySelector('#smartHeader');
+
+				if (sourceHeader) {
+					document
+						.getElementById('shared-header')
+						.appendChild(document.importNode(sourceHeader, true));
+				}
+
+				const sourceScripts =
+					sourceDocument.querySelectorAll('script:not([src])');
+
+				sourceScripts.forEach(sourceScript => {
+					const script = document.createElement('script');
+					script.textContent = sourceScript.textContent;
+					document.body.appendChild(script);
+				});
+
+				document.dispatchEvent(new Event('DOMContentLoaded'));
+			})
+			.catch(error => {
+				console.error('Blog page error:', error);
+			});
+	</script>
+</body>
+</html>

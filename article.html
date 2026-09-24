@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title id="page-title">Blog</title>
+
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style id="shared-styles"></style>
+</head>
+
+<body class="min-h-screen">
+	<div id="shared-header"></div>
+
+	<!-- Hero: thumbnail with the title overlaid -->
+	<header class="relative w-full h-[45vh] md:h-[55vh] mt-16 overflow-hidden bg-black">
+		<img id="article-hero-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-90">
+		<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
+		<div class="absolute inset-0 flex items-end p-6 md:p-12">
+			<div class="max-w-4xl">
+				<h1 id="article-title" class="font-lexend text-3xl md:text-5xl font-medium uppercase tracking-wider text-white drop-shadow-lg"></h1>
+				<p id="article-subtitle" class="text-white/80 text-sm md:text-base mt-2 font-light"></p>
+			</div>
+		</div>
+	</header>
+
+	<main class="px-4 md:px-8 py-12">
+		<div id="article-body" class="max-w-3xl mx-auto">
+			<!-- Article content will be injected here -->
+		</div>
+	</main>
+
+	<!-- Impressum Footer -->
+	<footer id="footer" class="w-full mt-12 py-8 px-4 bg-white border-t border-gray-100">
+		<div class="max-w-2xl mx-auto text-center space-y-1 text-xs">
+			<h3 class="text-base font-bold uppercase mb-4 tracking-widest">Impressum</h3>
+			<p class="text-black font-medium">Name: Minh Đức Phạm</p>
+			<p class="text-black">Address: Nuremberg, Germany</p>
+			<p class="text-black">Email: <a href="mailto:kimoxabae@web.de" class="hover:underline">kimoxabae@web.de</a></p>
+			<p class="text-[0.65rem] text-gray-500 mt-6 pt-4 max-w-md mx-auto">
+				This is a personal portfolio website. All artwork and content are created by the artist and may not be used without permission.
+			</p>
+		</div>
+	</footer>
+
+	<script>
+		// Same article list as blog.html
+		const articles = [
+			{
+				slug: 'death-of-creativity',
+				title: 'The Myth of the Sudden Spark',
+				subtitle: 'Why Creativity is a Practice, Not an Event',
+				file: 'blog/Death of Creativity.html',
+				thumbnail: 'blog/Thumbnail/Death of Creativity.png',
+				date: '2026-01-15T10:30:00'
+			},
+			{
+				slug: 'music',
+				title: 'The Architecture of Sound',
+				subtitle: 'Why Constraints and Chaos Make the Best Music',
+				file: 'blog/Music?.html',
+				thumbnail: 'blog/Thumbnail/Music?.png',
+				date: '2026-02-28T18:00:00'
+			}
+		];
+
+		function escapeHtml(str) {
+			return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		}
+
+		// Renders the inline content of a node, turning Google Docs bold/italic classes into <strong>/<em>
+		function renderInline(node, styleMap) {
+			let html = '';
+
+			node.childNodes.forEach(child => {
+				if (child.nodeType === Node.TEXT_NODE) {
+					html += escapeHtml(child.textContent);
+					return;
+				}
+
+				if (child.nodeType !== Node.ELEMENT_NODE) return;
+
+				const tag = child.tagName.toLowerCase();
+
+				if (tag === 'a') {
+					const href = child.getAttribute('href') || '#';
+					html += `<a href="${href}" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">${renderInline(child, styleMap)}</a>`;
+					return;
+				}
+
+				let inner = renderInline(child, styleMap);
+				const classes = (child.getAttribute('class') || '').split(/\s+/);
+				let bold = false;
+				let italic = false;
+
+				classes.forEach(cls => {
+					const info = styleMap[cls];
+					if (!info) return;
+					if (info.bold) bold = true;
+					if (info.italic) italic = true;
+				});
+
+				if (bold) inner = `<strong>${inner}</strong>`;
+				if (italic) inner = `<em>${inner}</em>`;
+				html += inner;
+			});
+
+			return html;
+		}
+
+		function buildStyleMap(styleText) {
+			const styleMap = {};
+			const styleRegex = /\.(c\d+)\{([^}]+)\}/g;
+			let match;
+
+			while ((match = styleRegex.exec(styleText))) {
+				const [, cls, props] = match;
+				styleMap[cls] = {
+					bold: /font-weight:\s*700/.test(props),
+					italic: /font-style:\s*italic/.test(props)
+				};
+			}
+
+			return styleMap;
+		}
+
+		function renderArticleBody(sourceBody, styleMap) {
+			const container = document.getElementById('article-body');
+			container.innerHTML = '';
+
+			let skippedTitle = false;
+
+			Array.from(sourceBody.children).forEach(node => {
+				const tag = node.tagName.toLowerCase();
+
+				// The document's own first heading is the title, already shown in the hero
+				if (!skippedTitle && /^h[1-3]$/.test(tag)) {
+					skippedTitle = true;
+					return;
+				}
+
+				if (/^h[1-4]$/.test(tag)) {
+					const el = document.createElement('h2');
+					el.className = 'font-lexend text-2xl md:text-3xl font-medium uppercase tracking-wide text-black mt-10 mb-4';
+					el.innerHTML = renderInline(node, styleMap);
+					container.appendChild(el);
+				} else if (tag === 'p') {
+					if (!node.textContent.trim()) return;
+					const el = document.createElement('p');
+					el.className = 'text-base md:text-lg leading-relaxed text-gray-800 mb-6';
+					el.innerHTML = renderInline(node, styleMap);
+					container.appendChild(el);
+				} else if (tag === 'ul' || tag === 'ol') {
+					const el = document.createElement(tag);
+					el.className = tag === 'ul'
+						? 'list-disc pl-6 space-y-2 mb-6 text-gray-800'
+						: 'list-decimal pl-6 space-y-2 mb-6 text-gray-800';
+
+					Array.from(node.children).forEach(li => {
+						const liEl = document.createElement('li');
+						liEl.innerHTML = renderInline(li, styleMap);
+						el.appendChild(liEl);
+					});
+
+					container.appendChild(el);
+				}
+			});
+		}
+
+		async function initArticle() {
+			const params = new URLSearchParams(window.location.search);
+			const slug = params.get('post');
+			const article = articles.find(a => a.slug === slug);
+
+			if (!article) {
+				window.location.href = 'blog.html';
+				return;
+			}
+
+			document.getElementById('page-title').textContent = article.title;
+			document.getElementById('article-title').textContent = article.title;
+			document.getElementById('article-subtitle').textContent = article.subtitle;
+			document.getElementById('article-hero-img').src = article.thumbnail;
+			document.getElementById('article-hero-img').alt = article.title;
+
+			try {
+				const response = await fetch(article.file);
+				const html = await response.text();
+				const sourceDocument = new DOMParser().parseFromString(html, 'text/html');
+				const sourceStyle = sourceDocument.querySelector('style');
+				const styleMap = sourceStyle ? buildStyleMap(sourceStyle.textContent) : {};
+
+				renderArticleBody(sourceDocument.body, styleMap);
+			} catch (e) {
+				console.error('Article load failed:', e);
+			}
+		}
+
+		initArticle();
+
+		fetch('./index.html')
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Could not load index.html');
+				}
+
+				return response.text();
+			})
+			.then(html => {
+				const sourceDocument =
+					new DOMParser().parseFromString(html, 'text/html');
+
+				const sourceStyle =
+					sourceDocument.querySelector('style');
+
+				if (sourceStyle) {
+					document.getElementById('shared-styles').textContent =
+						sourceStyle.textContent;
+				}
+
+				const sourceHeader =
+					sourceDocument.querySelector('#smartHeader');
+
+				if (sourceHeader) {
+					document
+						.getElementById('shared-header')
+						.appendChild(document.importNode(sourceHeader, true));
+				}
+
+				const sourceScripts =
+					sourceDocument.querySelectorAll('script:not([src])');
+
+				sourceScripts.forEach(sourceScript => {
+					const script = document.createElement('script');
+					script.textContent = sourceScript.textContent;
+					document.body.appendChild(script);
+				});
+
+				document.dispatchEvent(new Event('DOMContentLoaded'));
+			})
+			.catch(error => {
+				console.error('Article page error:', error);
+			});
+	</script>
+</body>
+</html>
