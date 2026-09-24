@@ -244,6 +244,7 @@
             display: block;
             width: 3.146rem;
             height: 3.146rem;
+            border-radius: 50%;
             transform: translate(-50%, -50%);
         }
 
@@ -394,17 +395,25 @@
             const header = document.getElementById('smartHeader');
             const dropdownToggle = document.getElementById('dropdownToggle');
             const dropdownMenu = document.getElementById('dropdownMenu');
-            const menuIcon = document.getElementById('menuIcon');
             const nav = document.querySelector('nav'); 
             const dynamicGreeting = document.getElementById('dynamicGreeting');
             const heroSection = document.getElementById('hero-section'); 
             const welcomeText = document.getElementById('welcome-text'); 
             const gridContainer = document.getElementById('grid-container'); 
-            let menuAnimation;
-            let menuCloseTimer;
-            let isMenuHovered = false;
-            let isMenuClosing = false;
             const menuIconAnimations = [];
+            let menuButtonAnimation = null;
+
+            const playMenuButtonOpen = () => {
+                if (!menuButtonAnimation) return;
+                menuButtonAnimation.loop = false;
+                menuButtonAnimation.playSegments([0, 30], true);
+            };
+
+            const playMenuButtonClose = () => {
+                if (!menuButtonAnimation) return;
+                menuButtonAnimation.loop = false;
+                menuButtonAnimation.playSegments([30, 90], true);
+            };
 
             const getLastTransitionTime = (value) => {
                 const time = value.split(',').pop().trim();
@@ -427,68 +436,6 @@
                         playAnimation();
                     }
                 });
-            };
-
-            const stopMenuIdleLoop = () => {
-                if (menuAnimation) menuAnimation.loop = false;
-            };
-
-            const attachMenuAnimationCompleteHandler = () => {
-                menuAnimation.addEventListener('complete', () => {
-                    if (isMenuClosing) {
-                        isMenuClosing = false;
-                        if (!isMenuHovered) startMenuIdleLoop();
-                    }
-                });
-            };
-
-            // Recreates the Lottie instance from scratch and plays it exactly like the very first page load,
-            // instead of resuming the same instance - reusing it after the open/close segments is what stutters
-            const startMenuIdleLoop = () => {
-                if (isMenuHovered) return;
-                const menu = document.getElementById('menuIcon');
-                if (!menu || !window.lottie) return;
-
-                if (menuAnimation) menuAnimation.destroy();
-
-                menuAnimation = window.lottie.loadAnimation({
-                    container: menu,
-                    renderer: 'svg',
-                    loop: false,
-                    autoplay: false,
-                    path: 'Icons Jsons/menu icon.json'
-                });
-
-                attachMenuAnimationCompleteHandler();
-
-                menuAnimation.goToAndStop(180, true);
-                menuAnimation.loop = true;
-                menuAnimation.playSegments([180, 270], true);
-            };
-
-            const initializeMenuAnimation = () => {
-                const menu = document.getElementById('menuIcon');
-                if (!menu || menu.dataset.loaded === 'true' || !window.lottie) return;
-
-                nav.addEventListener('mouseenter', () => {
-                    isMenuHovered = true;
-                    clearTimeout(menuCloseTimer);
-                    isMenuClosing = false;
-                    stopMenuIdleLoop();
-                    menuAnimation.playSegments([0, 31], true);
-                });
-                nav.addEventListener('mouseleave', () => {
-                    isMenuHovered = false;
-                    menuCloseTimer = setTimeout(() => {
-                        if (!isMenuHovered) {
-                            isMenuClosing = true;
-                            menuAnimation.loop = false;
-                            menuAnimation.playSegments([30, 150], true);
-                        }
-                    }, 500);
-                });
-                menu.dataset.loaded = 'true';
-                startMenuIdleLoop();
             };
 
             const initializeMenuIconAnimations = () => {
@@ -524,6 +471,45 @@
 
                     icon.dataset.loaded = 'true';
                 });
+            };
+
+            const initializeMenuButtonAnimation = () => {
+                const menuIcon = document.getElementById('menuIcon');
+                if (!menuIcon || menuIcon.dataset.loaded === 'true') return;
+
+                const renderMenuIcon = () => {
+                    if (!window.lottie || menuIcon.dataset.loaded === 'true') return;
+
+                    menuButtonAnimation = window.lottie.loadAnimation({
+                        container: menuIcon,
+                        renderer: 'svg',
+                        loop: false,
+                        autoplay: false,
+                        path: 'Icons Jsons/menu icon.json'
+                    });
+
+                    const playIdleLoop = () => {
+                        menuButtonAnimation.loop = true;
+                        menuButtonAnimation.playSegments([90, 270], true);
+                    };
+
+                    menuButtonAnimation.addEventListener('DOMLoaded', playIdleLoop);
+                    menuButtonAnimation.addEventListener('complete', () => {
+                        if (!isDropdownOpen) playIdleLoop();
+                    });
+
+                    menuIcon.dataset.loaded = 'true';
+                };
+
+                if (window.lottie) {
+                    renderMenuIcon();
+                    return;
+                }
+
+                const lottieScript = document.createElement('script');
+                lottieScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
+                lottieScript.onload = renderMenuIcon;
+                document.head.appendChild(lottieScript);
             };
 
             const initializeLogoAnimation = () => {
@@ -581,14 +567,14 @@
                         logoAnimation.playSegments([30, 60], true);
                     });
                     logo.dataset.loaded = 'true';
-                    initializeMenuAnimation();
                     initializeMenuIconAnimations();
+                    initializeMenuButtonAnimation();
                 };
 
                 if (window.lottie) {
                     renderLogo();
-                    initializeMenuAnimation();
                     initializeMenuIconAnimations();
+                    initializeMenuButtonAnimation();
                     return;
                 }
 
@@ -1094,6 +1080,7 @@
                     dropdownMenu.classList.add('visible-menu');
 
                     playMenuIconAnimations([0, 31], true);
+                    playMenuButtonOpen();
                 }
             };
 
@@ -1105,6 +1092,7 @@
                         dropdownMenu.classList.add('hidden-menu');
 
                         playMenuIconAnimations([211, 240]);
+                        playMenuButtonClose();
                     }
                 }, 100);
             };
@@ -1117,6 +1105,7 @@
                     dropdownMenu.classList.add('hidden-menu');
 
                     playMenuIconAnimations([211, 240]);
+                    playMenuButtonClose();
                 } else {
                     openDropdown();
                 }
@@ -1142,6 +1131,7 @@
                     dropdownMenu.classList.add('hidden-menu');
 
                     playMenuIconAnimations([211, 240]);
+                    playMenuButtonClose();
                 }
             });
 
@@ -1243,6 +1233,7 @@
                              dropdownMenu.classList.add('hidden-menu');
 
                              playMenuIconAnimations([211, 240]);
+                             playMenuButtonClose();
                         }
                     } else { showHeader(); }
                 } else { showHeader(); }
