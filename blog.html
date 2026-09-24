@@ -17,13 +17,18 @@
 			<h1 class="font-lexend text-4xl md:text-5xl font-medium tracking-wider text-black mb-8 uppercase">Blog</h1>
 
 			<div class="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between mb-10">
-				<input id="blog-search" type="text" placeholder="Search articles..."
+				<input id="blog-search" type="text" placeholder="Search articles and their text..."
 					class="w-full sm:max-w-xs px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-black">
 
-				<select id="blog-sort" class="px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-black">
-					<option value="desc">Newest first</option>
-					<option value="asc">Oldest first</option>
-				</select>
+				<div class="relative w-full sm:w-auto">
+					<select id="blog-sort" class="appearance-none w-full sm:w-auto pl-4 pr-9 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-black">
+						<option value="desc">Newest first</option>
+						<option value="asc">Oldest first</option>
+					</select>
+					<svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" viewBox="0 0 12 12" fill="none">
+						<path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</div>
 			</div>
 
 			<div id="blog-grid" class="flex flex-col gap-6">
@@ -53,6 +58,9 @@
 		const searchInput = document.getElementById('blog-search');
 		const sortSelect = document.getElementById('blog-sort');
 
+		// GitHub repo hosting this site, used to look up each article's commit date
+		const GITHUB_REPO = 'phamminhduc28123-ctrl/Kimoxabae.-2.0';
+
 		// Article list: matches files in /blog with their thumbnails in /blog/Thumbnail
 		const articles = [
 			{
@@ -61,7 +69,8 @@
 				subtitle: 'Why Creativity is a Practice, Not an Event',
 				file: 'blog/Death of Creativity.html',
 				thumbnail: 'blog/Thumbnail/Death of Creativity.png',
-				date: '2026-01-15T10:30:00'
+				date: null,
+				contentText: ''
 			},
 			{
 				slug: 'music',
@@ -69,15 +78,48 @@
 				subtitle: 'Why Constraints and Chaos Make the Best Music',
 				file: 'blog/Music?.html',
 				thumbnail: 'blog/Thumbnail/Music?.png',
-				date: '2026-02-28T18:00:00'
+				date: null,
+				contentText: ''
 			}
 		];
 
 		function formatDate(dateString) {
+			if (!dateString) return 'Loading date…';
 			const date = new Date(dateString);
 			const datePart = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 			const timePart = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 			return `${datePart} · ${timePart}`;
+		}
+
+		// Looks up the date of the oldest commit that touched this file, i.e. when it was first pushed to GitHub
+		async function fetchGithubUploadDate(path) {
+			try {
+				const url = `https://api.github.com/repos/${GITHUB_REPO}/commits?path=${encodeURIComponent(path)}&per_page=100`;
+				const response = await fetch(url);
+				if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+
+				const commits = await response.json();
+				if (!Array.isArray(commits) || !commits.length) return null;
+
+				const oldestCommit = commits[commits.length - 1];
+				return oldestCommit.commit?.author?.date || oldestCommit.commit?.committer?.date || null;
+			} catch (e) {
+				console.error('Could not fetch GitHub upload date for', path, e);
+				return null;
+			}
+		}
+
+		// Fetches the article's own text so the search box can match against its full content
+		async function loadArticleContent(article) {
+			try {
+				const response = await fetch(article.file);
+				const html = await response.text();
+				const sourceDocument = new DOMParser().parseFromString(html, 'text/html');
+				article.contentText = (sourceDocument.body.textContent || '').toLowerCase();
+			} catch (e) {
+				console.error('Could not load article content for search', article.file, e);
+				article.contentText = '';
+			}
 		}
 
 		function getVisibleArticles() {
@@ -87,9 +129,10 @@
 				.filter(article =>
 					!keyword ||
 					article.title.toLowerCase().includes(keyword) ||
-					article.subtitle.toLowerCase().includes(keyword))
+					article.subtitle.toLowerCase().includes(keyword) ||
+					article.contentText.includes(keyword))
 				.sort((a, b) => {
-					const diff = new Date(a.date) - new Date(b.date);
+					const diff = new Date(a.date || 0) - new Date(b.date || 0);
 					return sortSelect.value === 'asc' ? diff : -diff;
 				});
 		}
@@ -123,7 +166,21 @@
 		searchInput.addEventListener('input', renderArticles);
 		sortSelect.addEventListener('change', renderArticles);
 
-		renderArticles();
+		async function initBlog() {
+			renderArticles();
+
+			await Promise.all(articles.map(async article => {
+				const [uploadDate] = await Promise.all([
+					fetchGithubUploadDate(article.file),
+					loadArticleContent(article)
+				]);
+				article.date = uploadDate;
+			}));
+
+			renderArticles();
+		}
+
+		initBlog();
 
 		fetch('./index.html')
 			.then(response => {
