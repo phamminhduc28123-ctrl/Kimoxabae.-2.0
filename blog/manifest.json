@@ -22,5 +22,13 @@
 		"file": "blog/ha.html",
 		"thumbnail": "blog/Thumbnail/ha.png",
 		"date": "2026-09-24T20:23:46+02:00"
+	},
+	{
+		"slug": "hu",
+		"title": "The Digital Canvas: Navigating the Chaos of Modern Visual Art and 3D Worlds",
+		"subtitle": "We have moved far beyond the days of a simple canvas and a tube of oil paint. Today&rsquo;s visual artists, 3D modelers, and motion desig...",
+		"file": "blog/hu.html",
+		"thumbnail": "blog/Thumbnail/hu.png",
+		"date": "2026-09-24T20:56:23+02:00"
 	}
 ]
