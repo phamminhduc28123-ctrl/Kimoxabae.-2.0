@@ -1,5 +1,13 @@
 [
 	{
+		"slug": "1",
+		"title": "What the fuck is going on?",
+		"subtitle": "It&rsquo;s somewhat not even a question anymore. It has become a state of mind and I&rsquo;m pretty sure we all feel this nowadays with a...",
+		"file": "blog/1.html",
+		"thumbnail": "blog/Thumbnail/1.jpg",
+		"date": "2026-09-25T17:20:49+02:00"
+	},
+	{
 		"slug": "death-of-creativity",
 		"title": "The Myth of the Sudden Spark: Why Creativity is a Practice, Not an Event",
 		"subtitle": "We have all romanticized the \"Eureka!\" moment. We picture the solitary genius struck by lightning\u2014an Archimedes in the bath, a Newton und...",
