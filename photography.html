@@ -17,7 +17,7 @@
 		<div class="max-w-7xl mx-auto">
 			<h1 class="font-lexend text-4xl md:text-5xl font-medium tracking-wider text-black mb-12 uppercase">Photography</h1>
 			
-			<div id="photography-grid" class="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+			<div id="photography-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				<!-- Images will be injected here -->
 			</div>
 		</div>
@@ -134,17 +134,30 @@
 				});
 
 				// 3. Generate images 1 to 83
-				for (let i = 1; i <= 83; i++) {
-					const fileName = `img (${i}).jpg`;
+				const imageEntries = Array.from({ length: 83 }, (_, index) => {
+					const fileName = `img (${index + 1}).jpg`;
 					const info = photoInfoMap[fileName] || { destination: "Untitled", description: "No details available." };
+					const details = info.description.split(';').map(detail => detail.trim());
+					const dateMatch = details[details.length - 2]?.match(/^(\d{1,2})\/(\d{4})$/);
+					const month = dateMatch ? Number(dateMatch[1]) : 0;
+					const sortDate = month >= 1 && month <= 12
+						? Number(dateMatch[2]) * 12 + month
+						: Number.NEGATIVE_INFINITY;
+
+					return { fileName, info, sortDate, originalIndex: index };
+				}).sort((first, second) =>
+					second.sortDate - first.sortDate || first.originalIndex - second.originalIndex
+				);
+
+				for (const { fileName, info } of imageEntries) {
 
 					const container = document.createElement('div');
-					container.className = "break-inside-avoid mb-4 overflow-hidden rounded-lg group relative cursor-pointer bg-gray-50 transition-all duration-300 hover:shadow-2xl";
+					container.className = "overflow-hidden rounded-lg group relative cursor-pointer bg-gray-50 transition-all duration-300 hover:shadow-2xl";
 					
 					const img = document.createElement('img');
 					img.src = `photography/${fileName}`;
 					img.alt = info.destination;
-					img.className = "w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105";
+					img.className = "w-full aspect-[3/2] object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105";
 					img.loading = "lazy";
 					let colorTimeout;
 
