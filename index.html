@@ -318,7 +318,7 @@
                 <a href="blog.html" class="menu-item">
                     <span class="menu-text">Blog</span>
                     <div class="menu-icon-bg"></div>
-                    <img src="icons/Blog.json" alt="Blog" class="menu-icon-img">
+                    <div class="menu-icon-img" data-animation-path="Icons Jsons/blog.json" data-hover-segment="12,84" data-end-segment="96" data-close-segment="84,96" aria-label="Blog"></div>
                 </a>
 
                 <!-- 6. Photography -->
@@ -426,7 +426,7 @@
                     clearTimeout(iconAnimation.startTimer);
                     animation.loop = false;
 
-                    const playAnimation = () => animation.playSegments(segment, true);
+                    const playAnimation = () => animation.playSegments(iconAnimation.closeSegment || segment, true);
                     if (waitForDrop && menuItem) {
                         const styles = getComputedStyle(menuItem);
                         const delay = getLastTransitionTime(styles.transitionDelay);
@@ -452,20 +452,23 @@
                         autoplay: false,
                         path: icon.dataset.animationPath
                     });
-                    const iconAnimation = { animation, menuItem, startTimer: null };
+                    const parseSegment = (value) => value ? value.split(',').map(Number) : null;
+                    const hoverSegment = parseSegment(icon.dataset.hoverSegment) || [31, 211];
+                    const endFrame = Number(icon.dataset.endSegment) || 211;
+                    const iconAnimation = { animation, menuItem, startTimer: null, closeSegment: parseSegment(icon.dataset.closeSegment) };
                     menuIconAnimations.push(iconAnimation);
 
                     menuItem?.addEventListener('mouseenter', () => {
                         if (isDropdownOpen) {
                             clearTimeout(iconAnimation.startTimer);
                             animation.loop = true;
-                            animation.playSegments([31, 211], true);
+                            animation.playSegments(hoverSegment, true);
                         }
                     });
                     menuItem?.addEventListener('mouseleave', () => {
                         if (isDropdownOpen) {
                             animation.loop = false;
-                            animation.playSegments([animation.currentFrame, 211], true);
+                            animation.playSegments([animation.currentFrame, endFrame], true);
                         }
                     });
 
