@@ -24,6 +24,14 @@
 		"date": "2026-09-24T19:56:45+02:00"
 	},
 	{
+		"slug": "designartandshits",
+		"title": "Design, Art and Shits",
+		"subtitle": "If I was going to define myself with one trait, the last word I would choose is &rdquo;Artist&rdquo;. Not that I hate art or creating it,...",
+		"file": "blog/DesignArtandShits.html",
+		"thumbnail": "blog/Thumbnail/DesignArtandShits.png",
+		"date": "2026-10-05T20:45:54+02:00"
+	},
+	{
 		"slug": "thearchitectureofsound",
 		"title": "The Architecture of Sound: Why Constraints and Chaos Make the Best Music",
 		"subtitle": "We often talk about music as if it flows purely from emotion\u2014a mystical overflow of the soul captured in chords and melodies. And while f...",
