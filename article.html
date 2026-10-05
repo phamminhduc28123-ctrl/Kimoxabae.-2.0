@@ -14,18 +14,19 @@
 	<div id="shared-header"></div>
 
 	<!-- Hero: thumbnail with the title overlaid -->
-	<header class="relative w-full h-[45vh] md:h-[55vh] mt-16 overflow-hidden bg-black">
-		<img id="article-hero-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-90">
-		<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
-		<div class="absolute inset-0 flex items-end p-6 md:p-12">
-			<div class="max-w-4xl">
-				<h1 id="article-title" class="font-lexend text-3xl md:text-5xl font-medium uppercase tracking-wider text-white drop-shadow-lg"></h1>
-				<p id="article-subtitle" class="text-white/80 text-sm md:text-base mt-2 font-light"></p>
+	<header class="relative w-full h-[45vh] md:h-[55vh] mt-16 bg-black">
+		<div id="hero-parallax" class="absolute inset-0 will-change-transform">
+			<img id="article-hero-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-90">
+			<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
+			<div class="absolute inset-0 flex items-end p-6 md:p-12">
+				<div class="max-w-4xl">
+					<h1 id="article-title" class="font-lexend text-3xl md:text-5xl font-medium uppercase tracking-wider text-white drop-shadow-lg"></h1>
+				</div>
 			</div>
 		</div>
 	</header>
 
-	<main class="px-4 md:px-8 py-12">
+	<main class="relative z-10 bg-white px-4 md:px-8 py-12">
 		<div id="article-body" class="max-w-3xl mx-auto">
 			<!-- Article content will be injected here -->
 		</div>
@@ -176,7 +177,6 @@
 
 			document.getElementById('page-title').textContent = article.title;
 			document.getElementById('article-title').textContent = article.title;
-			document.getElementById('article-subtitle').textContent = article.subtitle;
 			document.getElementById('article-hero-img').src = article.thumbnail;
 			document.getElementById('article-hero-img').alt = article.title;
 
@@ -192,6 +192,24 @@
 				console.error('Article load failed:', e);
 			}
 		}
+
+		// Hero moves at half the scroll speed; the white text section slides over it
+		const heroParallax = document.getElementById('hero-parallax');
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+		let parallaxTicking = false;
+
+		function updateParallax() {
+			parallaxTicking = false;
+			if (reduceMotion.matches) return;
+			heroParallax.style.transform = `translate3d(0, ${Math.max(0, window.scrollY) * 0.5}px, 0)`;
+		}
+
+		window.addEventListener('scroll', () => {
+			if (parallaxTicking) return;
+			parallaxTicking = true;
+			requestAnimationFrame(updateParallax);
+		}, { passive: true });
+		updateParallax();
 
 		initArticle();
 
