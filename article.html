@@ -60,107 +60,82 @@
 			}
 		}
 
-		function escapeHtml(str) {
-			return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-		}
-
-		// Renders the inline content of a node, turning Google Docs bold/italic classes into <strong>/<em>
-		function renderInline(node, styleMap) {
-			let html = '';
-
-			node.childNodes.forEach(child => {
-				if (child.nodeType === Node.TEXT_NODE) {
-					html += escapeHtml(child.textContent);
-					return;
-				}
-
-				if (child.nodeType !== Node.ELEMENT_NODE) return;
-
-				const tag = child.tagName.toLowerCase();
-
-				if (tag === 'a') {
-					const href = child.getAttribute('href') || '#';
-					html += `<a href="${href}" target="_blank" rel="noopener noreferrer" class="underline hover:no-underline">${renderInline(child, styleMap)}</a>`;
-					return;
-				}
-
-				let inner = renderInline(child, styleMap);
-				const classes = (child.getAttribute('class') || '').split(/\s+/);
-				let bold = false;
-				let italic = false;
-
-				classes.forEach(cls => {
-					const info = styleMap[cls];
-					if (!info) return;
-					if (info.bold) bold = true;
-					if (info.italic) italic = true;
-				});
-
-				if (bold) inner = `<strong>${inner}</strong>`;
-				if (italic) inner = `<em>${inner}</em>`;
-				html += inner;
-			});
-
-			return html;
-		}
-
-		function buildStyleMap(styleText) {
-			const styleMap = {};
-			const styleRegex = /\.(c\d+)\{([^}]+)\}/g;
-			let match;
-
-			while ((match = styleRegex.exec(styleText))) {
-				const [, cls, props] = match;
-				styleMap[cls] = {
-					bold: /font-weight:\s*700/.test(props),
-					italic: /font-style:\s*italic/.test(props)
-				};
-			}
-
-			return styleMap;
-		}
-
-		function renderArticleBody(sourceBody, styleMap) {
+		function renderArticleBody(sourceDocument, articleFile) {
 			const container = document.getElementById('article-body');
 			container.innerHTML = '';
 
-			let skippedTitle = false;
+			const firstHeading = Array.from(sourceDocument.body.children)
+				.find(node => /^H[1-3]$/.test(node.tagName));
+			firstHeading?.remove();
 
-			Array.from(sourceBody.children).forEach(node => {
-				const tag = node.tagName.toLowerCase();
+			sourceDocument.querySelectorAll('script, base, link[rel="stylesheet"]')
+				.forEach(node => node.remove());
 
-				// The document's own first heading is the title, already shown in the hero
-				if (!skippedTitle && /^h[1-3]$/.test(tag)) {
-					skippedTitle = true;
-					return;
-				}
-
-				if (/^h[1-4]$/.test(tag)) {
-					const el = document.createElement('h2');
-					el.className = 'font-lexend text-2xl md:text-3xl font-medium uppercase tracking-wide text-black mt-10 mb-4';
-					el.innerHTML = renderInline(node, styleMap);
-					container.appendChild(el);
-				} else if (tag === 'p') {
-					if (!node.textContent.trim()) return;
-					const el = document.createElement('p');
-					el.className = 'text-base md:text-lg leading-relaxed text-gray-800 mb-6';
-					el.innerHTML = renderInline(node, styleMap);
-					container.appendChild(el);
-				} else if (tag === 'ul' || tag === 'ol') {
-					const el = document.createElement(tag);
-					el.className = tag === 'ul'
-						? 'list-disc pl-6 space-y-2 mb-6 text-gray-800'
-						: 'list-decimal pl-6 space-y-2 mb-6 text-gray-800';
-
-					Array.from(node.children).forEach(li => {
-						const liEl = document.createElement('li');
-						liEl.innerHTML = renderInline(li, styleMap);
-						el.appendChild(liEl);
-					});
-
-					container.appendChild(el);
-				}
+			sourceDocument.head.querySelectorAll('style').forEach(style => {
+				style.textContent = style.textContent.replace(
+					/@import\s+(?:url\([^)]*\)|["'][^"']*["'])\s*[^;]*;/gi,
+					''
+				);
 			});
+
+			const base = sourceDocument.createElement('base');
+			base.href = new URL(articleFile, window.location.href).href;
+			sourceDocument.head.prepend(base);
+
+			const siteFont = sourceDocument.createElement('style');
+			const fontUrl = new URL('fonts/Geom-VariableFont_wght.woff2', window.location.href).href;
+			siteFont.textContent = `
+				html, body { overflow-y: hidden !important; }
+				@font-face {
+					font-family: 'Geom Variable';
+					src: url("${fontUrl}") format("woff2");
+					font-weight: 100 900;
+					font-display: swap;
+				}
+				* { font-family: 'Geom Variable', sans-serif !important; }
+			`;
+			sourceDocument.head.appendChild(siteFont);
+
+			const frame = document.createElement('iframe');
+			frame.title = 'Article content';
+			frame.className = 'block w-full border-0';
+			frame.setAttribute('sandbox', 'allow-same-origin allow-popups');
+			frame.setAttribute('scrolling', 'no');
+			frame.style.height = '1px';
+			frame.addEventListener('load', () => {
+				const frameDocument = frame.contentDocument;
+				if (!frameDocument) return;
+
+				const updateHeight = () => {
+					const body = frameDocument.body;
+					const bodyStyle = frameDocument.defaultView.getComputedStyle(body);
+					const bodyHeight = Math.max(body.scrollHeight, body.getBoundingClientRect().height);
+					const bodyMargins =
+						parseFloat(bodyStyle.marginTop) + parseFloat(bodyStyle.marginBottom);
+					const root = frameDocument.documentElement;
+					const contentHeight = root.scrollHeight > root.clientHeight
+						? root.scrollHeight
+						: bodyHeight + bodyMargins;
+					const height = `${Math.ceil(contentHeight + 2)}px`;
+
+					if (frame.style.height !== height) {
+						frame.style.height = height;
+					}
+				};
+
+				updateHeight();
+				const observer = new ResizeObserver(updateHeight);
+				observer.observe(frameDocument.documentElement);
+				observer.observe(frameDocument.body);
+				frame.contentWindow.addEventListener('resize', updateHeight);
+				frameDocument.querySelectorAll('img').forEach(image => {
+					image.addEventListener('load', updateHeight);
+					image.addEventListener('error', updateHeight);
+				});
+				frameDocument.fonts?.ready.then(updateHeight);
+			});
+			frame.srcdoc = `<!doctype html>${sourceDocument.documentElement.outerHTML}`;
+			container.appendChild(frame);
 		}
 
 		async function initArticle() {
@@ -184,10 +159,7 @@
 				const response = await fetch(article.file);
 				const html = await response.text();
 				const sourceDocument = new DOMParser().parseFromString(html, 'text/html');
-				const sourceStyle = sourceDocument.querySelector('style');
-				const styleMap = sourceStyle ? buildStyleMap(sourceStyle.textContent) : {};
-
-				renderArticleBody(sourceDocument.body, styleMap);
+				renderArticleBody(sourceDocument, article.file);
 			} catch (e) {
 				console.error('Article load failed:', e);
 			}
