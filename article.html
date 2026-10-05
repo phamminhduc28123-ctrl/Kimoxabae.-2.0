@@ -106,6 +106,15 @@
 				const frameDocument = frame.contentDocument;
 				if (!frameDocument) return;
 
+				const textElements = [frameDocument.body, ...frameDocument.body.querySelectorAll('*')]
+					.filter(element => element.textContent.trim());
+				const originalFontSizes = textElements.map(element =>
+					parseFloat(frameDocument.defaultView.getComputedStyle(element).fontSize)
+				);
+				textElements.forEach((element, index) => {
+					element.style.setProperty('font-size', `${originalFontSizes[index] * 2}px`, 'important');
+				});
+
 				const updateHeight = () => {
 					const body = frameDocument.body;
 					const bodyStyle = frameDocument.defaultView.getComputedStyle(body);
