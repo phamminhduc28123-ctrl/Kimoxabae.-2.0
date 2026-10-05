@@ -26,8 +26,8 @@
 		</div>
 	</header>
 
-	<main class="relative z-10 bg-white px-4 md:px-8 py-12">
-		<div id="article-body" class="max-w-3xl mx-auto">
+	<main class="relative z-10 bg-white px-0 py-12">
+		<div id="article-body" class="w-full md:w-1/2 mx-auto">
 			<!-- Article content will be injected here -->
 		</div>
 	</main>
@@ -86,6 +86,9 @@
 			const fontUrl = new URL('fonts/Geom-VariableFont_wght.woff2', window.location.href).href;
 			siteFont.textContent = `
 				html, body { overflow-y: hidden !important; }
+				/* Drop the Google Docs page width/margins so the text fills the container */
+				body { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+				p, h1, h2, h3, h4, h5, h6, li { margin-left: 0 !important; margin-right: 0 !important; }
 				@font-face {
 					font-family: 'Geom Variable';
 					src: url("${fontUrl}") format("woff2");
