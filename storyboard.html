@@ -61,6 +61,23 @@
 			pointer-events: none;
 		}
 
+		.storyboard-hero-progress {
+			position: absolute;
+			z-index: 2;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			height: 5%;
+			background: #fff;
+		}
+
+		.storyboard-hero-progress-fill {
+			width: 0;
+			height: 100%;
+			background: #000;
+			transition: width 125ms linear;
+		}
+
 		#intro-section .hero-content {
 			position: relative;
 			z-index: 1;
@@ -101,6 +118,9 @@
 				<div class="storyboard-hero-video" aria-hidden="true">
 					<img id="storyboard-hero-sequence" class="storyboard-hero-sequence" src="Storyboard Hero Images/Storyboard hero images_00000.jpg" alt="">
 				</div>
+				<div id="storyboard-hero-progress" class="storyboard-hero-progress" role="progressbar" aria-label="Hero image sequence progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+					<div id="storyboard-hero-progress-fill" class="storyboard-hero-progress-fill"></div>
+				</div>
 
 				<div class="hero-content max-w-7xl mx-auto px-4 md:px-8 w-full">
 					<h1 class="font-lexend text-4xl md:text-5xl font-medium tracking-wider text-black mb-8 uppercase">Storyboard</h1>
@@ -132,6 +152,8 @@
 		const introEl = document.getElementById('storyboard-intro');
 		const introText = "I have worked on the storyboard of all the film projects I have taken part in.\n\nWhat I enjoy the most about it is how much I have to work with cameraman or the camera directly.\n\nAnd I doesn't hurt that I can abuse my sketching skill.";
 		const heroSequenceEl = document.getElementById('storyboard-hero-sequence');
+		const heroProgressEl = document.getElementById('storyboard-hero-progress');
+		const heroProgressFillEl = document.getElementById('storyboard-hero-progress-fill');
 		const heroFrameCount = 559;
 		const heroFrameRate = 8;
 		const heroSequencePath = 'Storyboard Hero Images/Storyboard hero images_';
@@ -149,7 +171,10 @@
 			if (nextFrame !== heroSequenceFrame) {
 				heroSequenceFrame = nextFrame;
 				const frameNumber = String(nextFrame).padStart(5, '0');
+				const progress = (nextFrame / (heroFrameCount - 1)) * 100;
 				heroSequenceEl.src = `${heroSequencePath}${frameNumber}.jpg`;
+				heroProgressFillEl.style.width = `${progress}%`;
+				heroProgressEl.setAttribute('aria-valuenow', String(Math.round(progress)));
 			}
 
 			requestAnimationFrame(updateHeroSequence);
