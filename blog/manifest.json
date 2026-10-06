@@ -32,6 +32,14 @@
 		"date": "2026-10-05T20:45:54+02:00"
 	},
 	{
+		"slug": "report",
+		"title": "",
+		"subtitle": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat vo...",
+		"file": "blog/Report.html",
+		"thumbnail": null,
+		"date": "2026-10-07T00:26:32+02:00"
+	},
+	{
 		"slug": "thearchitectureofsound",
 		"title": "The Architecture of Sound: Why Constraints and Chaos Make the Best Music",
 		"subtitle": "We often talk about music as if it flows purely from emotion\u2014a mystical overflow of the soul captured in chords and melodies. And while f...",
