@@ -27,7 +27,7 @@
 	</header>
 
 	<main class="relative z-10 bg-white px-0 py-12">
-		<div id="article-body" class="w-full md:w-1/2 mx-auto">
+		<div id="article-body" class="w-full max-w-5xl mx-auto px-4 md:px-8">
 			<!-- Article content will be injected here -->
 		</div>
 	</main>
@@ -64,40 +64,64 @@
 			const container = document.getElementById('article-body');
 			container.innerHTML = '';
 
-			const firstHeading = Array.from(sourceDocument.body.children)
-				.find(node => /^H[1-3]$/.test(node.tagName));
-			firstHeading?.remove();
+			const documentTitle = sourceDocument.querySelector('p.title');
+			if (documentTitle && !documentTitle.querySelector('img')) {
+				documentTitle.remove();
+			} else {
+				const firstHeading = Array.from(sourceDocument.body.children)
+					.find(node =>
+						/^H[1-3]$/.test(node.tagName) &&
+						!node.querySelector('img') &&
+						node.textContent.trim()
+					);
+				firstHeading?.remove();
+			}
 
 			sourceDocument.querySelectorAll('script, base, link[rel="stylesheet"]')
 				.forEach(node => node.remove());
 
-			sourceDocument.head.querySelectorAll('style').forEach(style => {
-				style.textContent = style.textContent.replace(
-					/@import\s+(?:url\([^)]*\)|["'][^"']*["'])\s*[^;]*;/gi,
-					''
-				);
+			sourceDocument.querySelectorAll('p, h1, h2, h3, h4, h5, h6').forEach(paragraph => {
+				if (paragraph.querySelector('img') && !paragraph.textContent.trim()) {
+					paragraph.style.textAlign = 'center';
+				}
 			});
 
 			const base = sourceDocument.createElement('base');
 			base.href = new URL(articleFile, window.location.href).href;
 			sourceDocument.head.prepend(base);
 
-			const siteFont = sourceDocument.createElement('style');
-			const fontUrl = new URL('fonts/Geom-VariableFont_wght.woff2', window.location.href).href;
-			siteFont.textContent = `
+			const responsiveStyles = sourceDocument.createElement('style');
+			responsiveStyles.id = 'article-responsive-styles';
+			responsiveStyles.textContent = `
 				html, body { overflow-y: hidden !important; }
-				/* Drop the Google Docs page width/margins so the text fills the container */
-				body { max-width: none !important; margin: 0 !important; padding: 0 !important; }
-				p, h1, h2, h3, h4, h5, h6, li { margin-left: 0 !important; margin-right: 0 !important; }
-				@font-face {
-					font-family: 'Geom Variable';
-					src: url("${fontUrl}") format("woff2");
-					font-weight: 100 900;
-					font-display: swap;
+				body { margin-left: auto !important; margin-right: auto !important; }
+				@media (max-width: 640px) {
+					body {
+						box-sizing: border-box;
+						width: 100% !important;
+						max-width: 100% !important;
+						padding-left: 16px !important;
+						padding-right: 16px !important;
+					}
+					p, h1, h2, h3, h4, h5, h6, li {
+						margin-left: 0 !important;
+						margin-right: 0 !important;
+					}
+					p.google-doc-image-column {
+						float: none !important;
+					}
+					span[style*="display: inline-block"] {
+						box-sizing: border-box;
+						max-width: 100% !important;
+						height: auto !important;
+					}
+					img {
+						max-width: 100% !important;
+						height: auto !important;
+					}
 				}
-				* { font-family: 'Geom Variable', sans-serif !important; }
 			`;
-			sourceDocument.head.appendChild(siteFont);
+			sourceDocument.head.appendChild(responsiveStyles);
 
 			const frame = document.createElement('iframe');
 			frame.title = 'Article content';
@@ -109,14 +133,32 @@
 				const frameDocument = frame.contentDocument;
 				if (!frameDocument) return;
 
-				const textElements = [frameDocument.body, ...frameDocument.body.querySelectorAll('*')]
-					.filter(element => element.textContent.trim());
-				const originalFontSizes = textElements.map(element =>
-					parseFloat(frameDocument.defaultView.getComputedStyle(element).fontSize)
-				);
-				textElements.forEach((element, index) => {
-					element.style.setProperty('font-size', `${originalFontSizes[index] * 2}px`, 'important');
+				const responsiveStyles =
+					frameDocument.getElementById('article-responsive-styles');
+				if (responsiveStyles) responsiveStyles.disabled = true;
+
+				Array.from(frameDocument.body.children).forEach(element => {
+					if (
+						element.tagName !== 'P' ||
+						!element.querySelector('img') ||
+						element.textContent.trim()
+					) {
+						return;
+					}
+
+					const followingParagraph = element.nextElementSibling;
+					const image = element.querySelector('img');
+					if (followingParagraph?.tagName !== 'P' || !image) return;
+
+					const textColumnStart = parseFloat(
+						frameDocument.defaultView.getComputedStyle(followingParagraph).marginLeft
+					);
+					if (textColumnStart > image.getBoundingClientRect().width) {
+						element.classList.add('google-doc-image-column');
+						element.style.float = 'left';
+					}
 				});
+				if (responsiveStyles) responsiveStyles.disabled = false;
 
 				const updateHeight = () => {
 					const body = frameDocument.body;

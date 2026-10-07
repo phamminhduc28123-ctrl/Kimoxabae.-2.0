@@ -49,10 +49,40 @@ def extract_title_and_subtitle(html):
     body_match = re.search(r"<body[\s\S]*?</body>", html, re.IGNORECASE)
     body = body_match.group(0) if body_match else html
 
-    heading_match = re.search(r"<h[1-3][^>]*>([\s\S]*?)</h[1-3]>", body, re.IGNORECASE)
-    title = extract_text(heading_match.group(1)) if heading_match else "Untitled"
+    title_paragraph_match = next(
+        (
+            match for match in re.finditer(
+                r"<p\b([^>]*)>([\s\S]*?)</p>", body, re.IGNORECASE
+            )
+            if re.search(
+                r"\bclass\s*=\s*['\"][^'\"]*\btitle\b[^'\"]*['\"]",
+                match.group(1),
+                re.IGNORECASE,
+            )
+            and extract_text(match.group(2))
+            and not re.search(r"<img\b", match.group(2), re.IGNORECASE)
+        ),
+        None,
+    )
+    heading_match = next(
+        (
+            match for match in re.finditer(
+                r"<h[1-3][^>]*>([\s\S]*?)</h[1-3]>", body, re.IGNORECASE
+            )
+            if extract_text(match.group(1))
+            and not re.search(r"<img\b", match.group(1), re.IGNORECASE)
+        ),
+        None,
+    )
+    if title_paragraph_match:
+        title = extract_text(title_paragraph_match.group(2))
+    elif heading_match:
+        title = extract_text(heading_match.group(1))
+    else:
+        title = "Untitled"
 
-    after_heading = body[heading_match.end():] if heading_match else body
+    title_element_match = title_paragraph_match or heading_match
+    after_heading = body[title_element_match.end():] if title_element_match else body
     paragraph_match = re.search(r"<p[^>]*>([\s\S]*?)</p>", after_heading, re.IGNORECASE)
     subtitle = extract_text(paragraph_match.group(1)) if paragraph_match else ""
 

@@ -33,8 +33,8 @@
 	},
 	{
 		"slug": "report",
-		"title": "",
-		"subtitle": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat vo...",
+		"title": "REPORT TITLE",
+		"subtitle": "LOREM IPSUM DOLOR SIT AMET",
 		"file": "blog/Report.html",
 		"thumbnail": null,
 		"date": "2026-10-07T00:26:32+02:00"
