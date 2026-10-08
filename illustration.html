@@ -552,7 +552,7 @@
     <script>
     (() => {
         // Seamlessly tiling Voronoi displacement map: each pixel encodes its offset from the nearest cell seed
-        const N = 1024, CELLS = 5, TILE = 4000, SPEED = 24, c = document.createElement('canvas');
+        const N = 1024, CELLS = 5, SPEED = 24, c = document.createElement('canvas');
         c.width = c.height = N;
         const ctx = c.getContext('2d'), img = ctx.createImageData(N, N);
         const cell = N / CELLS, seeds = [];
@@ -577,11 +577,16 @@
         const map = document.getElementById('voronoi-map');
         map.setAttribute('href', c.toDataURL());
         if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        // Scroll the tile upward; the filter re-renders only while the legacy section is on screen
+        // Use the source tile's height as the loop length so each reset lands on the same texture.
+        const tileHeight = map.height.baseVal.value;
+        const cycleDuration = tileHeight / SPEED * 1000;
         let visible = false;
-        new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(document.getElementById('legacy'));
+        new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(document.getElementById('legacy'));
         const tick = now => {
-            if (visible) map.setAttribute('y', -((now / 1000 * SPEED) % TILE));
+            if (visible) {
+                const cycleTime = now % cycleDuration;
+                map.setAttribute('y', -(cycleTime / 1000 * SPEED));
+            }
             requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
