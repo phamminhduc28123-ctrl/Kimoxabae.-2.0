@@ -53,6 +53,7 @@
             bottom: 0;
             background: linear-gradient(to top, #fff 0%, transparent 100%);
         }
+        #legacy-empty-bar { height: 20vh; }
         @media (max-width: 767px) {
             #hero { flex-direction: column; min-height: 0; padding-bottom: 1rem; }
             #hero-image-area, #hero-text { width: 100%; }
@@ -105,6 +106,7 @@
             <div id="hero-bottom-gradient"></div>
         </section>
         <section id="legacy" class="bg-white px-4 md:px-8 py-16 overflow-hidden">
+            <div id="legacy-empty-bar" aria-hidden="true"></div>
             <div id="wall"><div id="wall-blur"></div></div>
         </section>
     </main>
