@@ -10,853 +10,293 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style id="shared-styles"></style>
     <style>
-        :root {
-            color-scheme: light;
-            --paper: #f4f0e9;
-            --ink: #242321;
-            --muted: #77736d;
-            --line: #e6e0d7;
-            --accent: #e86645;
-        }
-
-        body {
-            background: var(--paper);
-            color: var(--ink);
-        }
-
-        button,
-        select {
-            font: inherit;
-        }
-
-        .illustration-page {
-            width: min(100% - 2rem, 78rem);
-            margin: 0 auto;
-            padding: 7.25rem 0 5rem;
-        }
-
-        .page-heading {
-            display: flex;
-            align-items: end;
-            justify-content: space-between;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .eyebrow,
-        .post-kicker,
-        .loop-kicker {
-            color: var(--muted);
-            font-size: .68rem;
-            font-weight: 800;
-            letter-spacing: .19em;
-            text-transform: uppercase;
-        }
-
-        .page-heading h1 {
-            margin: .35rem 0 .4rem;
-            font-size: clamp(2.75rem, 7vw, 5.2rem);
-            font-weight: 750;
-            letter-spacing: -.075em;
-            line-height: .95;
-        }
-
-        .page-heading p:last-child {
-            max-width: 32rem;
-            margin: .75rem 0 0;
-            color: var(--muted);
-            font-size: .98rem;
-            line-height: 1.6;
-        }
-
-        .feed-stats {
-            flex: none;
-            padding-bottom: .3rem;
-            color: var(--muted);
-            font-size: .8rem;
-            font-weight: 650;
-        }
-
-        .feature-layout {
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(18rem, .8fr);
-            align-items: stretch;
-            gap: 1.25rem;
-        }
-
-        .post-card,
-        .loop-panel {
-            overflow: hidden;
-            border: 1px solid var(--line);
-            border-radius: 1.35rem;
-            background: #fffefa;
-            box-shadow: 0 12px 35px rgb(47 39 25 / 5%);
-        }
-
-        .post-head {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-            padding: 1rem 1.2rem;
-        }
-
-        .artist-mark {
-            display: grid;
-            width: 2.6rem;
-            height: 2.6rem;
-            flex: none;
-            place-items: center;
-            border: 1px solid #e8d3c9;
-            border-radius: 50%;
-            background: #f9e9df;
-            color: #98452f;
-            font-size: .88rem;
-            font-weight: 850;
-        }
-
-        .post-author {
-            min-width: 0;
-            font-size: .86rem;
-            font-weight: 800;
-        }
-
-        .post-date {
-            margin-top: .15rem;
-            color: var(--muted);
-            font-size: .75rem;
-        }
-
-        .latest-badge {
-            margin-left: auto;
-            padding: .4rem .65rem;
-            border-radius: 999px;
-            background: #fae9df;
-            color: #a64730;
-            font-size: .62rem;
-            font-weight: 850;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-        }
-
-        .post-media {
-            display: grid;
-            min-height: 19rem;
-            aspect-ratio: 1 / 1.02;
-            place-items: center;
-            overflow: hidden;
-            background:
-                radial-gradient(ellipse at 50% 47%, #fffefa 0, #f3efe8 75%);
-        }
-
-        .post-media img {
-            display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .post-copy {
-            padding: 1rem 1.2rem 1.15rem;
-        }
-
-        .post-caption {
-            margin: 0;
-            font-size: .96rem;
-            line-height: 1.65;
-            overflow-wrap: anywhere;
-        }
-
-        .post-caption strong {
-            margin-right: .35rem;
-            font-weight: 850;
-        }
-
-        .post-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-top: .85rem;
-            padding-top: .75rem;
-            border-top: 1px solid #f0ece6;
-        }
-
-        .permalink,
-        .share-button {
-            color: #625e58;
-            font-size: .78rem;
-            font-weight: 750;
-            text-decoration: none;
-        }
-
-        .permalink:hover,
-        .share-button:hover {
-            color: var(--accent);
-        }
-
-        .share-button {
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            border: 0;
-            background: transparent;
-            cursor: pointer;
-        }
-
-        .share-button svg {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .loop-panel {
-            display: flex;
-            min-width: 0;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1.3rem 0 1.2rem;
-            background: #ede7de;
-        }
-
-        .loop-heading {
-            display: flex;
-            align-items: start;
-            justify-content: space-between;
-            gap: .8rem;
-            padding: 0 1.25rem 1.1rem;
-        }
-
-        .loop-heading h2 {
-            margin: .35rem 0 0;
-            font-size: 1.55rem;
-            font-weight: 780;
-            letter-spacing: -.055em;
-        }
-
-        .loop-heading p {
-            margin: .35rem 0 0;
-            color: var(--muted);
-            font-size: .78rem;
-            line-height: 1.45;
-        }
-
-        .loop-toggle {
-            flex: none;
-            padding: .48rem .68rem;
-            border: 1px solid #d9d0c5;
-            border-radius: 999px;
-            background: #f8f4ee;
-            color: #49453f;
-            font-size: .72rem;
-            font-weight: 750;
-            cursor: pointer;
-        }
-
-        .loop-toggle:disabled {
-            cursor: not-allowed;
-            opacity: .72;
-        }
-
-        .ambient-window {
-            position: relative;
-            overflow: hidden;
-            padding: .6rem 0;
-            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-        }
-
-        .ambient-track {
-            display: flex;
-            width: max-content;
-            animation: drift 42s linear infinite;
-            will-change: transform;
-        }
-
-        .ambient-track.is-paused {
-            animation-play-state: paused;
-        }
-
-        .ambient-group {
-            display: flex;
-            flex: none;
-            gap: .7rem;
-            padding-right: .7rem;
-        }
-
-        .ambient-tile {
-            position: relative;
-            width: clamp(7rem, 13vw, 9rem);
-            height: clamp(10rem, 19vw, 13rem);
-            flex: none;
-            overflow: hidden;
-            border: 1px solid rgb(80 69 53 / 12%);
-            border-radius: .85rem;
-            background: #f8f5ef;
-            box-shadow: 0 8px 15px rgb(47 39 25 / 9%);
-            transform: rotate(var(--tilt, 0deg));
-        }
-
-        .ambient-tile img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .ambient-tile span {
-            position: absolute;
-            right: .45rem;
-            bottom: .45rem;
-            padding: .25rem .4rem;
-            border-radius: 999px;
-            background: rgb(255 254 250 / 88%);
-            color: #4e4941;
-            font-size: .62rem;
-            font-weight: 800;
-        }
-
-        @keyframes drift {
-            to { transform: translateX(-50%); }
-        }
-
-        .loop-note {
-            margin: 1rem 1.25rem 0;
-            color: #777168;
-            font-size: .72rem;
-            line-height: 1.5;
-        }
-
-        .feed-tools {
-            display: flex;
-            align-items: end;
-            justify-content: space-between;
-            gap: 1rem;
-            margin: 4.25rem 0 1.2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #ded8cf;
-        }
-
-        .feed-tools h2 {
-            margin: .3rem 0 0;
-            font-size: clamp(1.7rem, 3vw, 2.35rem);
-            font-weight: 780;
-            letter-spacing: -.06em;
-        }
-
-        .sort-control {
-            display: flex;
-            align-items: center;
-            gap: .55rem;
-            color: var(--muted);
-            font-size: .75rem;
-            font-weight: 700;
-        }
-
-        .sort-control select {
-            padding: .6rem 2rem .6rem .75rem;
-            border: 1px solid #dcd5cb;
-            border-radius: .75rem;
-            background: #fffefa;
-            color: var(--ink);
-            font-size: .78rem;
-            font-weight: 750;
-        }
-
-        .feed-list {
-            display: grid;
-            width: min(100%, 42rem);
-            gap: 1.25rem;
-            margin: 0 auto;
-        }
-
-        .post-card[data-unseen="true"] .post-head::after {
-            width: .55rem;
-            height: .55rem;
-            flex: none;
-            margin-left: auto;
-            border-radius: 50%;
-            background: var(--accent);
+        #shared-header #smartHeader { background-color: #000 !important; }
+        #hero { display: flex; min-height: 100vh; padding-top: 4rem; background: #000; color: #fff; }
+        #hero-image-area { width: 50%; display: flex; align-items: center; justify-content: center; padding: 2rem; cursor: pointer; }
+        #hero-img { max-width: 100%; max-height: calc(100vh - 8rem); object-fit: contain; transition: opacity .5s ease; }
+        #hero-text { width: 50%; display: flex; flex-direction: column; justify-content: center; padding: 3rem; transition: opacity .5s ease; }
+        .fade-out { opacity: 0 !important; }
+        #wall { position: relative; width: 100%; }
+        #legacy { position: relative; }
+        #legacy::before, #legacy::after {
             content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 10%;
+            pointer-events: none;
+            z-index: 2;
         }
-
-        .post-card[data-new="true"] .post-kicker::after {
-            display: inline-block;
-            margin-left: .5rem;
-            padding: .2rem .4rem;
-            border-radius: 999px;
-            background: #fae9df;
-            color: #a64730;
-            content: "NEW";
-            font-size: .55rem;
-            letter-spacing: .08em;
-            vertical-align: .1rem;
+        #legacy::before {
+            top: 0;
+            background: linear-gradient(to bottom, #fff 0%, transparent 100%);
         }
-
-        .page-status,
-        .share-status {
-            min-height: 1.3rem;
-            color: var(--muted);
-            font-size: .78rem;
+        #legacy::after {
+            bottom: 0;
+            background: linear-gradient(to top, #fff 0%, transparent 100%);
         }
-
-        .share-status {
-            position: fixed;
-            right: 1rem;
-            bottom: 1rem;
-            z-index: 20;
-            max-width: min(24rem, calc(100vw - 2rem));
-            margin: 0;
-            padding: .8rem 1rem;
-            border: 1px solid var(--line);
-            border-radius: .8rem;
-            background: #fffefa;
-            box-shadow: 0 8px 24px rgb(47 39 25 / 12%);
-            text-align: left;
+        @media (max-width: 767px) {
+            #hero { flex-direction: column; min-height: 0; padding-bottom: 1rem; }
+            #hero-image-area, #hero-text { width: 100%; }
+            #hero-text { padding: 1.5rem 2rem 2.5rem; }
         }
-
-        .share-status:empty {
-            display: none;
-        }
-
-        .empty-state {
-            padding: 2rem;
-            border: 1px dashed #cfc7bc;
-            border-radius: 1rem;
-            color: var(--muted);
-            text-align: center;
-        }
-
-        @media (max-width: 760px) {
-            .illustration-page {
-                width: min(100% - 1.25rem, 42rem);
-                padding-top: 6.6rem;
-            }
-
-            .page-heading {
-                align-items: start;
-                flex-direction: column;
-                gap: .7rem;
-            }
-
-            .feature-layout {
-                grid-template-columns: minmax(0, 1fr);
-            }
-
-            .loop-panel {
-                min-height: 15rem;
-            }
-
-            .post-media {
-                min-height: 14rem;
-            }
-
-            .feed-tools {
-                margin-top: 3.2rem;
-            }
-        }
-
-        @media (max-width: 430px) {
-            .feed-tools {
-                align-items: start;
-                flex-direction: column;
-            }
-
-            .sort-control {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .sort-control select {
-                flex: 1;
-                max-width: 12rem;
-            }
-
-            .post-head {
-                padding: .85rem .9rem;
-            }
-
-            .post-copy {
-                padding: .85rem .9rem 1rem;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                scroll-behavior: auto !important;
-            }
-
-            .ambient-track {
-                animation: none;
-                will-change: auto;
-            }
-        }
+        #wall-blur { position: absolute; inset: 0; pointer-events: none; }
+        #wall-blur-soft { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+        .blur-item { position: absolute; filter: grayscale(1); opacity: .85;
+            -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 72%, transparent 100%); }
+        .blur-item-soft { position: absolute; filter: grayscale(1) blur(20px); opacity: .2;
+            -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 72%, transparent 100%); }
+        .blur-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+        .blur-item .b-low { filter: blur(3px); }
+        .blur-item .b-high { filter: blur(28px);
+            -webkit-mask-image: radial-gradient(closest-side, transparent 15%, #000 85%);
+            mask-image: radial-gradient(closest-side, transparent 15%, #000 85%); }
+        .wall-item { position: absolute; cursor: pointer; transition: transform .6s ease, filter .6s ease; filter: grayscale(1); z-index: 3;
+            -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent 100%);
+            mask-image: radial-gradient(closest-side, #000 72%, transparent 100%); }
+        .wall-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .wall-item:hover { transform: scale(1.3); filter: grayscale(0); z-index: 5; }
+        #lightbox-img { transition: all 1s ease-out; }
     </style>
 </head>
 
-<body class="min-h-screen">
+<body class="min-h-screen flex flex-col">
     <div id="shared-header"></div>
 
-    <main class="illustration-page">
-        <header class="page-heading">
-            <div>
-                <p class="eyebrow">A little from my sketchbook</p>
-                <h1>Illustration</h1>
-                <p>Drawings, experiments, and little things I wanted to make. Stay for a while and look around.</p>
+    <main class="flex-grow">
+        <section id="hero" class="hidden">
+            <div id="hero-image-area"><img id="hero-img" src="" alt=""></div>
+            <div id="hero-text">
+                <p id="hero-caption" class="text-lg md:text-xl leading-relaxed font-light"></p>
+                <p id="hero-date" class="mt-6 text-xs uppercase tracking-[0.2em] text-gray-400"></p>
             </div>
-            <p id="feed-stats" class="feed-stats" aria-live="polite">Loading drawings…</p>
-        </header>
-
-        <section class="feature-layout" aria-label="Latest drawing and studio loop">
-            <div id="latest-post">
-                <p class="page-status" role="status">Loading the latest drawing…</p>
-            </div>
-
-            <aside class="loop-panel" aria-labelledby="loop-title">
-                <div class="loop-heading">
-                    <div>
-                        <span class="loop-kicker">An ever-changing archive</span>
-                        <h2 id="loop-title">Studio loop</h2>
-                        <p>Older drawings, drifting by while you browse.</p>
-                    </div>
-                    <button id="loop-toggle" class="loop-toggle" type="button" aria-pressed="false" aria-label="Pause the moving drawing loop">Pause loop</button>
-                </div>
-                <div class="ambient-window" aria-label="Random older drawings">
-                    <div id="ambient-track" class="ambient-track"></div>
-                </div>
-                <p class="loop-note">A small, random shuffle from the archive — the newest post stays up top.</p>
-            </aside>
         </section>
-
-        <section aria-labelledby="feed-title">
-            <div class="feed-tools">
-                <div>
-                    <p class="eyebrow">The full archive</p>
-                    <h2 id="feed-title">More drawings</h2>
-                </div>
-                <label class="sort-control" for="sort-order">
-                    <span>Sort posts</span>
-                    <select id="sort-order">
-                        <option value="newest">Newest first</option>
-                        <option value="oldest">Oldest first</option>
-                    </select>
-                </label>
-            </div>
-            <p id="new-post-status" class="page-status" aria-live="polite"></p>
-            <div id="illustration-gallery" class="feed-list"></div>
+        <section id="legacy" class="bg-white px-4 md:px-8 py-16 overflow-hidden">
+            <div id="wall"><div id="wall-blur"></div></div>
         </section>
-        <p id="share-status" class="share-status" role="status" aria-live="polite"></p>
     </main>
 
+    <div id="lightbox" class="fixed inset-0 bg-black/95 z-[100] hidden flex flex-col md:flex-row items-center justify-center cursor-default opacity-0 transition-opacity duration-300">
+        <button id="close-lightbox" class="absolute top-6 right-8 text-white text-4xl font-light hover:scale-110 transition-transform z-[110] cursor-pointer">&times;</button>
+        <div id="lightbox-image-area" class="flex-1 relative flex items-center justify-center p-4 h-[60vh] md:h-full overflow-hidden cursor-pointer">
+            <img id="lightbox-img" src="" alt="Illustration" class="max-w-full max-h-full object-contain opacity-0 translate-y-8">
+        </div>
+        <div class="w-full md:w-96 h-[40vh] md:h-full bg-black text-white p-8 md:p-12 flex flex-col justify-center border-t md:border-t-0 md:border-l border-white/10 overflow-y-auto">
+            <p id="lightbox-caption" class="text-sm text-gray-400 leading-relaxed font-light"></p>
+            <p id="lightbox-date" class="mt-6 text-xs uppercase tracking-[0.2em] text-gray-500"></p>
+        </div>
+    </div>
+
+
+    <footer id="footer" class="w-full mt-6 py-5 px-4 bg-white">
+        <div class="max-w-2xl mx-auto text-center space-y-0.5 text-xs">
+            <h3 class="text-base font-bold uppercase mb-3 tracking-widest">Impressum</h3>
+            <p class="text-black font-medium">Name: Minh Đức Phạm</p>
+            <p class="text-black">Address: Nuremberg, Germany</p>
+            <p class="text-black">Email: <a href="mailto:kimoxabae@web.de" class="hover:underline">kimoxabae@web.de</a></p>
+            <p class="text-[0.65rem] text-gray-500 mt-4 pt-2 border-t border-gray-200 max-w-md mx-auto">
+                This is a personal portfolio website. All artwork and content are created by the artist and may not be used without permission.
+            </p>
+        </div>
+    </footer>
+
     <script>
-        const gallery = document.getElementById('illustration-gallery');
-        const latestPost = document.getElementById('latest-post');
-        const ambientTrack = document.getElementById('ambient-track');
-        const feedStats = document.getElementById('feed-stats');
-        const newPostStatus = document.getElementById('new-post-status');
-        const sortOrder = document.getElementById('sort-order');
-        const loopToggle = document.getElementById('loop-toggle');
-        const shareStatus = document.getElementById('share-status');
-        const seenStorageKey = 'illustration-seen-posts';
-        const visitStorageKey = 'illustration-last-visit';
-        const sortStorageKey = 'illustration-sort-order';
-        const loopStorageKey = 'illustration-loop-paused';
-        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        (async function () {
+            const DAY = 86400000;
+            const fmt = d => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            const src = e => encodeURI(e.file);
 
-        let illustrations = [];
-        let seenIds = new Set(JSON.parse(localStorage.getItem(seenStorageKey) || '[]'));
-        let seenObserver;
-
-        function postId(item) {
-            return `post-${item.id}`;
-        }
-
-        function postLink(item) {
-            return `${window.location.href.split('#')[0]}#${postId(item)}`;
-        }
-
-        function displayDate(value) {
-            const date = new Date(`${value}T00:00:00`);
-            if (Number.isNaN(date.getTime())) {
-                return value || 'Date unknown';
-            }
-
-            return new Intl.DateTimeFormat(undefined, {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            }).format(date);
-        }
-
-        function sortedItems(order) {
-            const direction = order === 'oldest' ? 1 : -1;
-            return [...illustrations].sort((first, second) =>
-                direction * (first.date.localeCompare(second.date) || first.order - second.order)
-            );
-        }
-
-        function createPost(item, isLatest, newSinceVisit) {
-            const article = document.createElement('article');
-            article.className = 'post-card';
-            article.id = postId(item);
-            article.dataset.postId = item.id;
-            article.dataset.unseen = String(!seenIds.has(item.id));
-            article.dataset.new = String(newSinceVisit);
-
-            const postHead = document.createElement('div');
-            postHead.className = 'post-head';
-
-            const mark = document.createElement('span');
-            mark.className = 'artist-mark';
-            mark.textContent = 'K';
-            mark.setAttribute('aria-hidden', 'true');
-
-            const author = document.createElement('div');
-            const authorName = document.createElement('div');
-            authorName.className = 'post-author';
-            authorName.textContent = '@kimoxabae';
-            const date = document.createElement('div');
-            date.className = 'post-date';
-            date.textContent = displayDate(item.date);
-            author.append(authorName, date);
-            postHead.append(mark, author);
-
-            if (isLatest) {
-                const badge = document.createElement('span');
-                badge.className = 'latest-badge';
-                badge.textContent = 'Latest drawing';
-                postHead.appendChild(badge);
-            } else if (newSinceVisit) {
-                const kicker = document.createElement('span');
-                kicker.className = 'post-kicker';
-                kicker.textContent = 'New';
-                postHead.appendChild(kicker);
-            }
-
-            const media = document.createElement('figure');
-            media.className = 'post-media';
-            const image = document.createElement('img');
-            image.src = item.file;
-            image.alt = item.description || `Illustration posted ${displayDate(item.date)}`;
-            image.loading = isLatest ? 'eager' : 'lazy';
-            image.decoding = 'async';
-            media.appendChild(image);
-
-            const copy = document.createElement('div');
-            copy.className = 'post-copy';
-            const caption = document.createElement('p');
-            caption.className = 'post-caption';
-            const account = document.createElement('strong');
-            account.textContent = '@kimoxabae';
-            caption.appendChild(account);
-            caption.append(document.createTextNode(item.description || 'A drawing from my archive.'));
-
-            const actions = document.createElement('div');
-            actions.className = 'post-actions';
-            const permalink = document.createElement('a');
-            permalink.className = 'permalink';
-            permalink.href = `#${postId(item)}`;
-            permalink.textContent = 'View post link';
-
-            const shareButton = document.createElement('button');
-            shareButton.className = 'share-button';
-            shareButton.type = 'button';
-            shareButton.setAttribute('aria-label', `Share drawing posted ${displayDate(item.date)}`);
-            shareButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg><span>Share</span>';
-            shareButton.addEventListener('click', () => sharePost(item));
-            actions.append(permalink, shareButton);
-            copy.append(caption, actions);
-            article.append(postHead, media, copy);
-
-            if (seenObserver) {
-                seenObserver.observe(article);
-            }
-
-            return article;
-        }
-
-        async function sharePost(item) {
-            const url = postLink(item);
-            const title = item.description || 'Illustration by Kimoxabae';
-            shareStatus.textContent = '';
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title, text: title, url });
-                    shareStatus.textContent = 'Thanks for sharing this drawing.';
-                } catch (error) {
-                    if (error.name !== 'AbortError') {
-                        shareStatus.textContent = `Sharing failed: ${error.message || 'please try again.'}`;
-                    }
-                }
+            let items = [];
+            try {
+                items = await (await fetch('illu/manifest.json')).json();
+            } catch (e) {
+                console.error('Illustration manifest error:', e);
                 return;
             }
 
-            if (navigator.clipboard && window.isSecureContext) {
-                try {
-                    await navigator.clipboard.writeText(url);
-                    shareStatus.textContent = 'Post link copied to clipboard.';
-                } catch (error) {
-                    shareStatus.textContent = `Could not copy the post link: ${error.message || 'clipboard access was denied.'}`;
-                }
-                return;
+            items.sort((a, b) =>
+                (b.date > a.date ? 1 : b.date < a.date ? -1 : 0) ||
+                (a.legacy - b.legacy) || (a.order - b.order));
+
+            const now = Date.now();
+            let hero = items.filter(i => !i.legacy && now - new Date(i.date).getTime() <= 30 * DAY);
+            if (!hero.length) hero = items.slice(0, 5);
+            const wallItems = items.filter(i => !hero.includes(i));
+
+            // Hero
+            const lightbox = document.getElementById('lightbox');
+            const heroEl = document.getElementById('hero');
+            const heroArea = document.getElementById('hero-image-area');
+            const heroImg = document.getElementById('hero-img');
+            const heroText = document.getElementById('hero-text');
+            const heroCaption = document.getElementById('hero-caption');
+            const heroDate = document.getElementById('hero-date');
+            let heroIndex = 0, heroBusy = false;
+
+            function fill(i) {
+                const it = hero[i];
+                heroImg.src = src(it);
+                heroImg.alt = it.description || 'Illustration';
+                heroCaption.textContent = it.description;
+                heroDate.textContent = it.legacy ? '' : fmt(it.date);
             }
-
-            window.prompt('Copy this link to share the drawing:', url);
-        }
-
-        function renderFeed() {
-            const ordered = sortedItems(sortOrder.value);
-            const latest = sortedItems('newest')[0];
-            const feed = ordered.filter(item => item.id !== latest.id);
-            gallery.querySelectorAll('[data-post-id]').forEach(post => seenObserver.unobserve(post));
-            gallery.replaceChildren(...feed.map(item =>
-                createPost(item, false, item.date > lastVisitDate)
-            ));
-            feedStats.textContent = `${illustrations.length} drawings · ${seenIds.size} seen`;
-        }
-
-        function shuffle(items) {
-            const shuffled = [...items];
-            for (let index = shuffled.length - 1; index > 0; index -= 1) {
-                const swapIndex = Math.floor(Math.random() * (index + 1));
-                [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+            function heroGo(i) {
+                if (heroBusy || hero.length < 2) return;
+                heroBusy = true;
+                heroImg.classList.add('fade-out');
+                heroText.classList.add('fade-out');
+                setTimeout(() => {
+                    heroIndex = (i + hero.length) % hero.length;
+                    fill(heroIndex);
+                    heroImg.onload = heroImg.onerror = () => {
+                        heroImg.classList.remove('fade-out');
+                        heroText.classList.remove('fade-out');
+                        heroBusy = false;
+                    };
+                }, 500);
             }
-            return shuffled;
-        }
-
-        function renderAmbientLoop(olderItems) {
-            if (olderItems.length === 0) {
-                ambientTrack.parentElement.textContent = 'The archive loop will appear as more drawings are added.';
-                loopToggle.hidden = true;
-                return;
-            }
-
-            const selected = shuffle(olderItems).slice(0, Math.min(8, olderItems.length));
-
-            function createGroup(isDuplicate) {
-                const group = document.createElement('div');
-                group.className = 'ambient-group';
-                if (isDuplicate) {
-                    group.setAttribute('aria-hidden', 'true');
-                }
-
-                selected.forEach((item, index) => {
-                    const tile = document.createElement('div');
-                    tile.className = 'ambient-tile';
-                    tile.style.setProperty('--tilt', `${index % 2 === 0 ? '-2' : '2'}deg`);
-                    const image = document.createElement('img');
-                    image.src = item.file;
-                    image.alt = isDuplicate ? '' : item.description || `Older drawing posted ${displayDate(item.date)}`;
-                    image.loading = 'lazy';
-                    image.decoding = 'async';
-                    const label = document.createElement('span');
-                    label.textContent = displayDate(item.date);
-                    tile.append(image, label);
-                    group.appendChild(tile);
+            if (hero.length) {
+                heroEl.classList.remove('hidden');
+                fill(0);
+                heroArea.addEventListener('click', e => {
+                    const r = heroArea.getBoundingClientRect();
+                    heroGo(heroIndex + (e.clientX - r.left < r.width / 2 ? -1 : 1));
                 });
-                return group;
+                heroEl.addEventListener('click', e => {
+                    if (heroArea.contains(e.target)) return;
+                    heroGo(heroIndex + 1);
+                });
+                document.addEventListener('keydown', e => {
+                    if (!lightbox.classList.contains('hidden')) return;
+                    if (e.key === 'ArrowRight') heroGo(heroIndex + 1);
+                    if (e.key === 'ArrowLeft') heroGo(heroIndex - 1);
+                });
             }
 
-            ambientTrack.replaceChildren(createGroup(false), createGroup(true));
-            const shouldPause = reducedMotion.matches || localStorage.getItem(loopStorageKey) === 'true';
-            ambientTrack.classList.toggle('is-paused', shouldPause);
-            loopToggle.textContent = reducedMotion.matches ? 'Motion reduced' : shouldPause ? 'Play loop' : 'Pause loop';
-            loopToggle.setAttribute('aria-pressed', String(shouldPause));
-            loopToggle.disabled = reducedMotion.matches;
-        }
-
-        let lastVisitDate = localStorage.getItem(visitStorageKey) || '';
-
-        function updateSeenCount() {
-            feedStats.textContent = `${illustrations.length} drawings · ${seenIds.size} seen`;
-        }
-
-        seenObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) {
-                    return;
-                }
-                const id = entry.target.dataset.postId;
-                if (!seenIds.has(id)) {
-                    seenIds.add(id);
-                    localStorage.setItem(seenStorageKey, JSON.stringify([...seenIds]));
-                    entry.target.dataset.unseen = 'false';
-                    updateSeenCount();
-                }
-                seenObserver.unobserve(entry.target);
-            });
-        }, { threshold: 0.6 });
-
-        sortOrder.value = localStorage.getItem(sortStorageKey) || 'newest';
-        if (!['newest', 'oldest'].includes(sortOrder.value)) {
-            sortOrder.value = 'newest';
-        }
-        sortOrder.addEventListener('change', () => {
-            localStorage.setItem(sortStorageKey, sortOrder.value);
-            renderFeed();
-        });
-
-        loopToggle.addEventListener('click', () => {
-            const shouldPause = !ambientTrack.classList.contains('is-paused');
-            ambientTrack.classList.toggle('is-paused', shouldPause);
-            localStorage.setItem(loopStorageKey, String(shouldPause));
-            loopToggle.textContent = shouldPause ? 'Play loop' : 'Pause loop';
-            loopToggle.setAttribute('aria-pressed', String(shouldPause));
-        });
-
-        reducedMotion.addEventListener('change', () => {
-            if (reducedMotion.matches) {
-                ambientTrack.classList.add('is-paused');
-                loopToggle.textContent = 'Motion reduced';
-                loopToggle.disabled = true;
-                loopToggle.setAttribute('aria-pressed', 'true');
-            } else {
-                loopToggle.disabled = false;
-                const shouldPause = localStorage.getItem(loopStorageKey) === 'true';
-                ambientTrack.classList.toggle('is-paused', shouldPause);
-                loopToggle.textContent = shouldPause ? 'Play loop' : 'Pause loop';
-                loopToggle.setAttribute('aria-pressed', String(shouldPause));
+            // Wall
+            const wall = document.getElementById('wall');
+            function layoutWall() {
+                wall.innerHTML = '<div id="wall-blur"></div><div id="wall-blur-soft"></div>';
+                const blurLayer = wall.firstChild;
+                const softBlurLayer = wall.children[1];
+                const W = wall.clientWidth;
+                const base = Math.max(90, Math.min(190, W / 6));
+                const placed = [];
+                const overlap = 0.02;
+                wallItems.forEach((it, idx) => {
+                    const d = base * (0.8 + Math.random() * 0.4);
+                    const r = d / 2;
+                    let best = null;
+                    for (let t = 0; t < 120; t++) {
+                        const x = r + Math.random() * Math.max(1, W - 2 * r);
+                        let y = r;
+                        for (const p of placed) {
+                            const min = r + p.r - overlap * Math.min(r, p.r) * 2;
+                            const dx = x - p.x;
+                            if (Math.abs(dx) < min) y = Math.max(y, p.y + Math.sqrt(min * min - dx * dx));
+                        }
+                        if (!best || y < best.y) best = { x, y };
+                    }
+                    placed.push({ x: best.x, y: best.y, r, idx });
+                });
+                const size = 1.2;
+                let H = 0;
+                placed.forEach(p => {
+                    const it = wallItems[p.idx];
+                    const el = document.createElement('div');
+                    el.className = 'wall-item';
+                    const s = p.r * 2 * size;
+                    el.style.cssText = `width:${s}px;height:${s}px;left:${p.x - s / 2}px;top:${p.y - s / 2}px`;
+                    const img = document.createElement('img');
+                    img.src = src(it);
+                    img.alt = it.description || 'Illustration';
+                    img.loading = 'lazy';
+                    el.appendChild(img);
+                    el.addEventListener('click', () => openLightbox(p.idx));
+                    wall.appendChild(el);
+                    const bs = s * 2;
+                    const bel = document.createElement('div');
+                    bel.className = 'blur-item';
+                    bel.style.cssText = `width:${bs}px;height:${bs}px;left:${p.x - bs / 2}px;top:${p.y - bs / 2}px`;
+                    ['b-low', 'b-high'].forEach(cls => {
+                        const bimg = document.createElement('img');
+                        bimg.className = cls;
+                        bimg.src = src(it);
+                        bimg.alt = '';
+                        bimg.loading = 'lazy';
+                        bel.appendChild(bimg);
+                    });
+                    blurLayer.appendChild(bel);
+                    const softBel = document.createElement('div');
+                    softBel.className = 'blur-item-soft';
+                    softBel.style.cssText = `width:${bs}px;height:${bs}px;left:${p.x - bs / 2}px;top:${p.y - bs / 2}px`;
+                    const softImg = document.createElement('img');
+                    softImg.src = src(it);
+                    softImg.alt = '';
+                    softImg.loading = 'lazy';
+                    softBel.appendChild(softImg);
+                    softBlurLayer.appendChild(softBel);
+                    H = Math.max(H, p.y + p.r);
+                });
+                wall.style.height = H + 'px';
             }
-        });
-
-        fetch('./illu/manifest.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Could not load illustration manifest (${response.status})`);
-                }
-                return response.json();
-            })
-            .then(items => {
-                if (!Array.isArray(items) || items.length === 0) {
-                    throw new Error('The illustration manifest is empty or invalid.');
-                }
-
-                illustrations = items;
-                const sortedNewest = sortedItems('newest');
-                const latest = sortedNewest[0];
-                latestPost.replaceChildren(createPost(latest, true, latest.date > lastVisitDate));
-                renderFeed();
-                renderAmbientLoop(sortedNewest.slice(3));
-
-                const newCount = lastVisitDate
-                    ? illustrations.filter(item => item.date > lastVisitDate).length
-                    : 0;
-                newPostStatus.textContent = newCount
-                    ? `${newCount} new ${newCount === 1 ? 'drawing' : 'drawings'} since your last visit.`
-                    : '';
-
-                localStorage.setItem(visitStorageKey, new Date().toISOString().slice(0, 10));
-                if (window.location.hash) {
-                    const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
-                    target?.scrollIntoView({ block: 'center' });
-                }
-            })
-            .catch(error => {
-                console.error('Illustration feed error:', error);
-                latestPost.innerHTML = '<p class="empty-state">The drawings could not be loaded right now. Please refresh the page to try again.</p>';
-                gallery.innerHTML = '';
-                feedStats.textContent = 'Drawings unavailable';
+            layoutWall();
+            let lastW = wall.clientWidth, rt;
+            window.addEventListener('resize', () => {
+                clearTimeout(rt);
+                rt = setTimeout(() => {
+                    if (wall.clientWidth !== lastW) { lastW = wall.clientWidth; layoutWall(); }
+                }, 250);
             });
 
+            // Lightbox (same behaviour as photography.html)
+            let current = 0;
+            const lightboxArea = document.getElementById('lightbox-image-area');
+            const lightboxImg = document.getElementById('lightbox-img');
+            function show(i) {
+                if (!wallItems.length) return;
+                current = (i + wallItems.length) % wallItems.length;
+                const it = wallItems[current];
+                lightboxImg.src = src(it);
+                document.getElementById('lightbox-caption').textContent = it.description;
+                document.getElementById('lightbox-date').textContent = it.legacy ? '' : fmt(it.date);
+            }
+            function openLightbox(i) {
+                show(i);
+                lightbox.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                void lightbox.offsetWidth;
+                lightbox.classList.remove('opacity-0');
+                lightboxImg.classList.remove('opacity-0', 'translate-y-8');
+            }
+            function closeBox() {
+                lightbox.classList.add('opacity-0');
+                lightboxImg.classList.add('opacity-0', 'translate-y-8');
+                setTimeout(() => {
+                    lightbox.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }, 1000);
+            }
+            document.getElementById('close-lightbox').addEventListener('click', closeBox);
+            lightboxImg.addEventListener('click', closeBox);
+            lightbox.addEventListener('click', e => { if (e.target === lightbox) closeBox(); });
+            lightboxArea.addEventListener('click', e => {
+                if (e.target !== lightboxArea) return;
+                const r = lightboxArea.getBoundingClientRect();
+                show(current + (e.clientX - r.left < r.width / 2 ? -1 : 1));
+            });
+            document.addEventListener('keydown', e => {
+                if (lightbox.classList.contains('hidden')) return;
+                if (e.key === 'ArrowRight') show(current + 1);
+                else if (e.key === 'ArrowLeft') show(current - 1);
+                else if (e.key === 'Escape') closeBox();
+            });
+        })();
+    </script>
+
+    <script>
         fetch('./index.html')
             .then(response => {
                 if (!response.ok) {
@@ -866,30 +306,21 @@
                 return response.text();
             })
             .then(html => {
-                const sourceDocument =
-                    new DOMParser().parseFromString(html, 'text/html');
-
-                const sourceStyle =
-                    sourceDocument.querySelector('style');
+                const sourceDocument = new DOMParser().parseFromString(html, 'text/html');
+                const sourceStyle = sourceDocument.querySelector('style');
 
                 if (sourceStyle) {
-                    document.getElementById('shared-styles').textContent =
-                        sourceStyle.textContent;
+                    document.getElementById('shared-styles').textContent = sourceStyle.textContent;
                 }
 
-                const sourceHeader =
-                    sourceDocument.querySelector('#smartHeader');
-
+                const sourceHeader = sourceDocument.querySelector('#smartHeader');
                 if (sourceHeader) {
                     document
                         .getElementById('shared-header')
                         .appendChild(document.importNode(sourceHeader, true));
                 }
 
-                const sourceScripts =
-                    sourceDocument.querySelectorAll('script:not([src])');
-
-                sourceScripts.forEach(sourceScript => {
+                sourceDocument.querySelectorAll('script:not([src])').forEach(sourceScript => {
                     const script = document.createElement('script');
                     script.textContent = sourceScript.textContent;
                     document.body.appendChild(script);

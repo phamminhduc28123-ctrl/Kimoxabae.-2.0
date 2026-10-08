@@ -12,6 +12,7 @@ on:
       - 'illu/*.webp'
       - 'illu/*.gif'
       - 'illu/descriptions.txt'
+      - 'illu legacy/**'
       - 'scripts/generate_illustration_manifest.py'
   workflow_dispatch:
 

@@ -2,12 +2,13 @@
 """Build the illustration feed manifest with captions and first-commit dates."""
 
 import json
+from datetime import date
 import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ILLU_DIR = REPO_ROOT / "illu"
-DESCRIPTIONS_PATH = ILLU_DIR / "descriptions.txt"
+LEGACY_DIR = REPO_ROOT / "illu legacy"
 MANIFEST_PATH = ILLU_DIR / "manifest.json"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
@@ -23,8 +24,11 @@ def image_order(path):
     return 3, 0, name.casefold()
 
 
-def read_descriptions(image_names):
+def read_descriptions(directory, image_names):
+    DESCRIPTIONS_PATH = directory / "descriptions.txt"
     descriptions = {}
+    if not DESCRIPTIONS_PATH.exists():
+        return descriptions
     for line_number, raw_line in enumerate(
         DESCRIPTIONS_PATH.read_text(encoding="utf-8").splitlines(), start=1
     ):
@@ -52,6 +56,8 @@ def read_descriptions(image_names):
 
 
 def first_commit_dates(image_paths):
+    if not image_paths:
+        return {}
     output = subprocess.run(
         [
             "git",
@@ -62,6 +68,7 @@ def first_commit_dates(image_paths):
             "--name-only",
             "--",
             "illu/",
+            "illu legacy/",
         ],
         cwd=REPO_ROOT,
         capture_output=True,
@@ -100,42 +107,47 @@ def first_commit_dates(image_paths):
         if history:
             dates[relative_path] = history[-1][:10]
         else:
-            raise ValueError(
-                f"No Git commit date found for {relative_path}; commit the image first."
-            )
+            dates[relative_path] = date.today().isoformat()
 
     return dates
 
 
-def main():
-    image_paths = sorted(
+def list_images(directory):
+    if not directory.is_dir():
+        return []
+    return sorted(
         (
             path
-            for path in ILLU_DIR.iterdir()
+            for path in directory.iterdir()
             if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS
         ),
         key=image_order,
     )
-    if not image_paths:
-        raise ValueError(f"No illustration images found in {ILLU_DIR}")
 
-    image_names = {path.name for path in image_paths}
-    descriptions = read_descriptions(image_names)
-    dates = first_commit_dates(image_paths)
+
+def main():
+    groups = [(ILLU_DIR, False), (LEGACY_DIR, True)]
+    all_paths = [path for directory, _ in groups for path in list_images(directory)]
+    dates = first_commit_dates(all_paths)
 
     illustrations = []
-    for order, path in enumerate(image_paths):
-        relative_path = path.relative_to(REPO_ROOT).as_posix()
-        illustrations.append(
-            {
-                "id": path.stem,
-                "file": relative_path,
-                "date": dates[relative_path],
-                "description": descriptions.get(path.name, ""),
-                "order": order,
-            }
-        )
+    for directory, legacy in groups:
+        paths = list_images(directory)
+        descriptions = read_descriptions(directory, {path.name for path in paths})
+        for order, path in enumerate(paths):
+            relative_path = path.relative_to(REPO_ROOT).as_posix()
+            illustrations.append(
+                {
+                    "id": path.stem,
+                    "file": relative_path,
+                    "date": dates[relative_path],
+                    "description": descriptions.get(path.name, ""),
+                    "legacy": legacy,
+                    "order": order,
+                }
+            )
 
+    ILLU_DIR.mkdir(exist_ok=True)
     MANIFEST_PATH.write_text(
         json.dumps(illustrations, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
