@@ -60,8 +60,8 @@
             #hero-date { right: 2rem; bottom: 1.5rem; }
             .hero-next-cue { width: 2.5rem; height: 2.5rem; }
         }
-        #wall-blur { position: absolute; inset: 0; pointer-events: none; filter: url(#voronoi-distort); }
-        #wall-blur-soft { position: absolute; inset: 0; pointer-events: none; z-index: 1; filter: url(#voronoi-distort); }
+        #wall-blur { position: absolute; inset: 0; pointer-events: none; filter: url(#voronoi-distort);}
+        #wall-blur-soft { position: absolute; inset: 0; pointer-events: none; z-index: 1; filter: url(#voronoi-distort);}
         .blur-item { position: absolute; filter: grayscale(1); opacity: .85;
             -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
             mask-image: radial-gradient(closest-side, #000 55%, transparent 100%); }
@@ -268,18 +268,24 @@
             // Wall
             const wall = document.getElementById('wall');
             // Water-like spring simulation: circles get nudged, wobble, then settle
+            const MAX_RIPPLE_NEIGHBORS = 9, MAX_MOTION_MS = 3000;
             let sim = [], simRaf = 0, lastSimTime = 0, pendingPointer = null;
             const activeBodies = new Set();
             const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
             const clampV = v => Math.max(-8, Math.min(8, v));
+            function activateBody(b) {
+                if (!activeBodies.has(b)) b.startedAt = performance.now();
+                activeBodies.add(b);
+            }
             function kick(b, ix, iy) {
                 b.vx = clampV(b.vx + ix);
                 b.vy = clampV(b.vy + iy);
-                activeBodies.add(b);
+                activateBody(b);
                 if (!simRaf) simRaf = requestAnimationFrame(stepSim);
             }
             function ripple(src) {
                 if (reduceMotion) return;
+                const neighbors = [];
                 sim.forEach(b => {
                     if (b === src) return;
                     const dx = b.x - src.x, dy = b.y - src.y;
@@ -287,6 +293,10 @@
                     const gap = Math.max(0, dist - src.r - b.r);
                     const k = 3.5 * Math.exp(-gap / 110);
                     if (k < .05) return;
+                    neighbors.push({ b, dx, dy, dist, k });
+                });
+                neighbors.sort((a, b) => a.dist - b.dist);
+                neighbors.slice(0, MAX_RIPPLE_NEIGHBORS).forEach(({ b, dx, dy, dist, k }) => {
                     kick(b, dx / dist * k, dy / dist * k);
                 });
             }
@@ -303,11 +313,17 @@
                         if (dx * dx + dy * dy <= b.r * b.r) {
                             b.vx = clampV(b.vx + pointerDx * 0.06);
                             b.vy = clampV(b.vy + pointerDy * 0.06);
-                            activeBodies.add(b);
+                            activateBody(b);
                         }
                     });
                 }
                 activeBodies.forEach(b => {
+                    if (now - b.startedAt >= MAX_MOTION_MS) {
+                        b.ox = b.oy = b.vx = b.vy = 0;
+                        b.els.forEach(e => { e.style.translate = ''; });
+                        activeBodies.delete(b);
+                        return;
+                    }
                     b.vx += -0.045 * b.ox * dt;
                     b.vy += -0.045 * b.oy * dt;
                     const damping = Math.pow(0.93, dt);
@@ -534,7 +550,7 @@
     <script>
     (() => {
         // Seamlessly tiling Voronoi displacement map: each pixel encodes its offset from the nearest cell seed
-        const N = 512, CELLS = 7, TILE = 1000, SPEED = 18, c = document.createElement('canvas');
+        const N = 1024, CELLS = 5, TILE = 4000, SPEED = 24, c = document.createElement('canvas');
         c.width = c.height = N;
         const ctx = c.getContext('2d'), img = ctx.createImageData(N, N);
         const cell = N / CELLS, seeds = [];
