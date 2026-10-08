@@ -104,6 +104,21 @@ def first_commit_dates(image_paths):
             text=True,
             check=True,
         ).stdout.splitlines()
+        if not history and path.parent == LEGACY_DIR:
+            history = subprocess.run(
+                [
+                    "git",
+                    "log",
+                    "--follow",
+                    "--format=%cI",
+                    "--",
+                    (ILLU_DIR / path.name).relative_to(REPO_ROOT).as_posix(),
+                ],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.splitlines()
         if history:
             dates[relative_path] = history[-1][:10]
         else:
