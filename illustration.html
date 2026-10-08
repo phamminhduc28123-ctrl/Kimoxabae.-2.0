@@ -383,7 +383,7 @@
                     const body = { x: p.x, y: p.y, r: s / 2, ox: 0, oy: 0, vx: 0, vy: 0, els: [el] };
                     sim.push(body);
                     el.addEventListener('mouseenter', () => ripple(body));
-                    const bs = s * 2;
+                    const bs = s * 1.5;
                     const bel = document.createElement('div');
                     bel.className = 'blur-item';
                     bel.style.cssText = `width:${bs}px;height:${bs}px;left:${p.x - bs / 2}px;top:${p.y - bs / 2}px`;
@@ -534,7 +534,7 @@
     <script>
     (() => {
         // Seamlessly tiling Voronoi displacement map: each pixel encodes its offset from the nearest cell seed
-        const N = 512, CELLS = 7, TILE = 1000, SPEED = 12, c = document.createElement('canvas');
+        const N = 512, CELLS = 7, TILE = 1000, SPEED = 18, c = document.createElement('canvas');
         c.width = c.height = N;
         const ctx = c.getContext('2d'), img = ctx.createImageData(N, N);
         const cell = N / CELLS, seeds = [];
