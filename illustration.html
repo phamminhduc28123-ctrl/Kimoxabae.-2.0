@@ -526,24 +526,25 @@
     </script>
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
         <filter id="voronoi-distort" x="-50%" y="-20%" width="200%" height="140%" color-interpolation-filters="sRGB">
-            <feImage id="voronoi-map" x="-50%" y="-20%" width="200%" height="140%" preserveAspectRatio="none" result="map" />
+            <feImage id="voronoi-map" x="0" y="0" width="1000" height="1000" preserveAspectRatio="none" result="tile" />
+            <feTile in="tile" result="map" />
             <feDisplacementMap in="SourceGraphic" in2="map" scale="150" xChannelSelector="R" yChannelSelector="G" />
         </filter>
     </svg>
     <script>
     (() => {
-        // Voronoi displacement map: each pixel encodes its offset from the nearest cell seed
-        const N = 512, CELLS = 7, c = document.createElement('canvas');
+        // Seamlessly tiling Voronoi displacement map: each pixel encodes its offset from the nearest cell seed
+        const N = 512, CELLS = 7, TILE = 1000, SPEED = 12, c = document.createElement('canvas');
         c.width = c.height = N;
         const ctx = c.getContext('2d'), img = ctx.createImageData(N, N);
-        const seeds = [];
-        for (let y = -1; y <= CELLS; y++) for (let x = -1; x <= CELLS; x++)
-            seeds.push([(x + 0.15 + Math.random() * 0.7) * N / CELLS, (y + 0.15 + Math.random() * 0.7) * N / CELLS]);
-        const cell = N / CELLS;
+        const cell = N / CELLS, seeds = [];
+        for (let y = 0; y < CELLS; y++) for (let x = 0; x < CELLS; x++)
+            seeds.push([(x + 0.15 + Math.random() * 0.7) * cell, (y + 0.15 + Math.random() * 0.7) * cell]);
+        const wrap = d => d - N * Math.round(d / N);
         for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
             let d1 = 1e9, d2 = 1e9, bx = 0, by = 0;
             for (const [sx, sy] of seeds) {
-                const dx = x - sx, dy = y - sy, d = Math.hypot(dx, dy);
+                const dx = wrap(x - sx), dy = wrap(y - sy), d = Math.hypot(dx, dy);
                 if (d < d1) { d2 = d1; d1 = d; bx = dx; by = dy; } else if (d < d2) d2 = d;
             }
             // displacement fades to zero at cell borders, so no visible seams
@@ -555,7 +556,17 @@
             img.data[k + 3] = 255;
         }
         ctx.putImageData(img, 0, 0);
-        document.getElementById('voronoi-map').setAttribute('href', c.toDataURL());
+        const map = document.getElementById('voronoi-map');
+        map.setAttribute('href', c.toDataURL());
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        // Scroll the tile upward; the filter re-renders only while the legacy section is on screen
+        let visible = false;
+        new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(document.getElementById('legacy'));
+        const tick = now => {
+            if (visible) map.setAttribute('y', -((now / 1000 * SPEED) % TILE));
+            requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
     })();
     </script>
     <script>
