@@ -262,6 +262,78 @@
 
             // Wall
             const wall = document.getElementById('wall');
+            // Water-like spring simulation: circles get nudged, wobble, then settle
+            let sim = [], simRaf = 0, lastSimTime = 0, pendingPointer = null;
+            const activeBodies = new Set();
+            const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const clampV = v => Math.max(-8, Math.min(8, v));
+            function kick(b, ix, iy) {
+                b.vx = clampV(b.vx + ix);
+                b.vy = clampV(b.vy + iy);
+                activeBodies.add(b);
+                if (!simRaf) simRaf = requestAnimationFrame(stepSim);
+            }
+            function ripple(src) {
+                if (reduceMotion) return;
+                sim.forEach(b => {
+                    if (b === src) return;
+                    const dx = b.x - src.x, dy = b.y - src.y;
+                    const dist = Math.hypot(dx, dy) || 1;
+                    const gap = Math.max(0, dist - src.r - b.r);
+                    const k = 3.5 * Math.exp(-gap / 110);
+                    if (k < .05) return;
+                    kick(b, dx / dist * k, dy / dist * k);
+                });
+            }
+            function stepSim(now) {
+                const dt = lastSimTime ? Math.min(2.5, (now - lastSimTime) / 16.67) : 1;
+                lastSimTime = now;
+                if (pendingPointer) {
+                    const rect = wall.getBoundingClientRect();
+                    const { clientX, clientY, dx: pointerDx, dy: pointerDy } = pendingPointer;
+                    const x = clientX - rect.left, y = clientY - rect.top;
+                    pendingPointer = null;
+                    sim.forEach(b => {
+                        const dx = x - (b.x + b.ox), dy = y - (b.y + b.oy);
+                        if (dx * dx + dy * dy <= b.r * b.r) {
+                            b.vx = clampV(b.vx + pointerDx * 0.06);
+                            b.vy = clampV(b.vy + pointerDy * 0.06);
+                            activeBodies.add(b);
+                        }
+                    });
+                }
+                activeBodies.forEach(b => {
+                    b.vx += -0.045 * b.ox * dt;
+                    b.vy += -0.045 * b.oy * dt;
+                    const damping = Math.pow(0.93, dt);
+                    b.vx *= damping;
+                    b.vy *= damping;
+                    b.ox += b.vx * dt;
+                    b.oy += b.vy * dt;
+                    const moving = Math.abs(b.vx) + Math.abs(b.vy) + Math.abs(b.ox) + Math.abs(b.oy) > 0.02;
+                    if (!moving) { b.ox = b.oy = b.vx = b.vy = 0; }
+                    if (moving) {
+                        const t = `${b.ox.toFixed(2)}px ${b.oy.toFixed(2)}px`;
+                        b.els.forEach(e => { e.style.translate = t; });
+                    } else {
+                        b.els.forEach(e => { e.style.translate = ''; });
+                        activeBodies.delete(b);
+                    }
+                });
+                simRaf = activeBodies.size || pendingPointer ? requestAnimationFrame(stepSim) : 0;
+                if (!simRaf) lastSimTime = 0;
+            }
+            document.getElementById('legacy').addEventListener('pointermove', e => {
+                if (reduceMotion) return;
+                const previous = pendingPointer;
+                pendingPointer = {
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    dx: (previous?.dx || 0) + e.movementX,
+                    dy: (previous?.dy || 0) + e.movementY
+                };
+                if (!simRaf) simRaf = requestAnimationFrame(stepSim);
+            });
             function layoutWall() {
                 wall.innerHTML = '<div id="wall-blur"></div><div id="wall-blur-soft"></div>';
                 const blurLayer = wall.firstChild;
@@ -288,6 +360,8 @@
                 });
                 const size = 1.2;
                 let H = 0;
+                sim = [];
+                activeBodies.clear();
                 placed.forEach(p => {
                     const it = wallItems[p.idx];
                     const el = document.createElement('div');
@@ -301,6 +375,9 @@
                     el.appendChild(img);
                     el.addEventListener('click', () => openLightbox(p.idx));
                     wall.appendChild(el);
+                    const body = { x: p.x, y: p.y, r: s / 2, ox: 0, oy: 0, vx: 0, vy: 0, els: [el] };
+                    sim.push(body);
+                    el.addEventListener('mouseenter', () => ripple(body));
                     const bs = s * 2;
                     const bel = document.createElement('div');
                     bel.className = 'blur-item';
@@ -314,6 +391,7 @@
                         bel.appendChild(bimg);
                     });
                     blurLayer.appendChild(bel);
+                    body.els.push(bel);
                     const softBel = document.createElement('div');
                     softBel.className = 'blur-item-soft';
                     softBel.style.cssText = `width:${bs}px;height:${bs}px;left:${p.x - bs / 2}px;top:${p.y - bs / 2}px`;
@@ -323,6 +401,7 @@
                     softImg.loading = 'lazy';
                     softBel.appendChild(softImg);
                     softBlurLayer.appendChild(softBel);
+                    body.els.push(softBel);
                     H = Math.max(H, p.y + p.r);
                 });
                 wall.style.height = H + 'px';
