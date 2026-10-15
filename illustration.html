@@ -53,7 +53,11 @@
             bottom: 0;
             background: linear-gradient(to top, #fff 0%, transparent 100%);
         }
-        #legacy-empty-bar { height: 20vh; }
+        #legacy-empty-bar { height: calc(10vh + 1rem); }
+        #legacy { overflow: clip; display: flow-root; }
+        /* Centered in the gap between the hero's bottom edge and the grid start (4rem + 20vh), then sticks under the header */
+        #wall-controls { position: sticky; top: 4.5rem; z-index: 20; box-sizing: border-box; height: 2rem; width: fit-content; max-width: 100%; margin: calc(10vh + 1rem) auto 0; padding: 0 1rem; transition: opacity .25s, transform .25s; }
+        #wall-controls.stuck-hidden { opacity: 0; transform: translateY(-.5rem); pointer-events: none; }
         @media (max-width: 767px) {
             #hero { flex-direction: column; min-height: 0; padding-bottom: 1rem; }
             #hero-image-area, #hero-text { width: 100%; }
@@ -78,11 +82,19 @@
             -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
             -webkit-mask-image: var(--edge-mask-0, radial-gradient(closest-side, #000 72%, transparent 100%));
             mask-image: var(--edge-mask-0, radial-gradient(closest-side, #000 72%, transparent 100%)); }
-        .wall-item:nth-child(4n+1) { -webkit-mask-image: var(--edge-mask-1, radial-gradient(closest-side, #000 72%, transparent 100%)); mask-image: var(--edge-mask-1, radial-gradient(closest-side, #000 72%, transparent 100%)); }
-        .wall-item:nth-child(4n+2) { -webkit-mask-image: var(--edge-mask-2, radial-gradient(closest-side, #000 72%, transparent 100%)); mask-image: var(--edge-mask-2, radial-gradient(closest-side, #000 72%, transparent 100%)); }
-        .wall-item:nth-child(4n+3) { -webkit-mask-image: var(--edge-mask-3, radial-gradient(closest-side, #000 72%, transparent 100%)); mask-image: var(--edge-mask-3, radial-gradient(closest-side, #000 72%, transparent 100%)); }
+        .wall-item[data-m="1"] { -webkit-mask-image: var(--edge-mask-1, radial-gradient(closest-side, #000 72%, transparent 100%)); mask-image: var(--edge-mask-1, radial-gradient(closest-side, #000 72%, transparent 100%)); }
+        .wall-item[data-m="2"] { -webkit-mask-image: var(--edge-mask-2, radial-gradient(closest-side, #000 72%, transparent 100%)); mask-image: var(--edge-mask-2, radial-gradient(closest-side, #000 72%, transparent 100%)); }
+        .wall-item[data-m="3"] { -webkit-mask-image: var(--edge-mask-3, radial-gradient(closest-side, #000 72%, transparent 100%)); mask-image: var(--edge-mask-3, radial-gradient(closest-side, #000 72%, transparent 100%)); }
         .wall-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .wall-item:hover { transform: scale(1.3); filter: grayscale(0); z-index: 5; }
+        .wall-btn { padding: .35rem .8rem; border: 1px solid #000;         border-radius: 999px; background: #fff; color: #000; cursor: pointer; transition: background .2s, color .2s; }
+                .wall-btn:hover { background: #e5e5e5; }
+        .wall-btn.active { background: #000; color: #fff; }
+        .wall-btn:disabled { opacity: .35; cursor: default; }
+        .wall-arrow { border: 0; background: none; padding: 0 .5rem; color: #000; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+        .wall-arrow:disabled { opacity: .3; cursor: default; }
+        .wall-arrow.hidden { display: none; }
+        #wall-pager.hidden { display: none; }
         #lightbox-img { transition: all 1s ease-out; }
     </style>
 </head>
@@ -105,9 +117,31 @@
             </button>
             <div id="hero-bottom-gradient"></div>
         </section>
-        <section id="legacy" class="bg-white px-4 md:px-8 py-16 overflow-hidden">
+        <section id="legacy" class="bg-white px-4 md:px-8 pb-16 overflow-hidden">
+            <div id="wall-controls" class="flex flex-wrap justify-center items-center gap-x-8 gap-y-2 text-xs uppercase tracking-[0.2em]">
+                <button type="button" id="ctl-prev" class="wall-arrow hidden" aria-label="Previous page">&lt;</button>
+                <div class="flex items-center gap-2" role="group" aria-label="Maximum number of images">
+                    <span class="text-black">Show</span>
+                    <button type="button" class="wall-btn" data-limit="25">25</button>
+                    <button type="button" class="wall-btn" data-limit="50">50</button>
+                    <button type="button" class="wall-btn" data-limit="100">100</button>
+                    <button type="button" class="wall-btn" data-limit="all">All</button>
+                </div>
+                <div class="flex items-center gap-2" role="group" aria-label="Sort order">
+                    <span class="text-black">Sort</span>
+                    <button type="button" class="wall-btn" data-sort="random">Random</button>
+                    <button type="button" class="wall-btn" data-sort="newest">Newest</button>
+                    <button type="button" class="wall-btn" data-sort="oldest">Oldest</button>
+                </div>
+                <button type="button" id="ctl-next" class="wall-arrow hidden" aria-label="Next page">&gt;</button>
+            </div>
             <div id="legacy-empty-bar" aria-hidden="true"></div>
             <div id="wall"><div id="wall-blur"></div></div>
+            <div id="wall-pager" class="hidden flex justify-center items-center gap-4 mt-28 text-xs uppercase tracking-[0.2em]">
+                <button type="button" id="page-prev" class="wall-arrow" aria-label="Previous page">&lt;</button>
+                <span id="page-info"></span>
+                <button type="button" id="page-next" class="wall-arrow" aria-label="Next page">&gt;</button>
+            </div>
         </section>
     </main>
 
@@ -140,9 +174,7 @@
             const DAY = 86400000;
             const fmt = d => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
             const src = e => encodeURI(e.file);
-            const previewSrc = e => e.legacy
-                ? encodeURI(e.file.replace(/([^/]+)$/, 'preview/$1'))
-                : src(e);
+            const previewSrc = e => encodeURI(e.file.replace(/([^/]+)$/, 'preview/$1'));
 
             let items = [];
             try {
@@ -159,7 +191,36 @@
             const now = Date.now();
             let hero = items.filter(i => !i.legacy && now - new Date(i.date).getTime() <= 30 * DAY);
             if (!hero.length) hero = items.slice(0, 5);
-            const wallItems = items.filter(i => !hero.includes(i));
+            // The wall shows every image, regardless of date
+            let wallItems = [];
+            let animateIn = false;
+            const popIn = [{ transform: 'scale(0)' }, { transform: 'scale(1.2)', offset: 0.7 }, { transform: 'scale(1)' }];
+            const popOpts = { duration: 500, easing: 'ease-in-out' };
+            // Circles animate top to bottom: delay grows with vertical position
+            const STAGGER_MAX = 1000;
+            const staggerDelay = dy => Math.min(STAGGER_MAX, Math.max(0, dy) * 0.5);
+            const wallState = { limit: 'all', sort: 'random', page: 0 };
+            let ordered = [];
+            function orderItems() {
+                ordered = items.slice(); // already sorted newest first
+                if (wallState.sort === 'random') {
+                    for (let i = ordered.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+                    }
+                } else if (wallState.sort === 'oldest') ordered.reverse();
+                wallState.page = 0;
+            }
+            const pageCount = () => wallState.limit === 'all' ? 1 : Math.max(1, Math.ceil(ordered.length / +wallState.limit));
+            function buildWallItems() {
+                if (wallState.limit === 'all') wallItems = ordered;
+                else {
+                    const n = +wallState.limit;
+                    wallItems = ordered.slice(wallState.page * n, (wallState.page + 1) * n);
+                }
+            }
+            orderItems();
+            buildWallItems();
 
             // Hero
             const lightbox = document.getElementById('lightbox');
@@ -386,21 +447,35 @@
                 sim = [];
                 activeBodies.clear();
                 placed.forEach(p => {
-                    const it = wallItems[p.idx];
-                    const el = document.createElement('div');
-                    el.className = 'wall-item';
                     const s = p.r * 2 * size;
-                    el.style.cssText = `width:${s}px;height:${s}px;left:${p.x - s / 2}px;top:${p.y - s / 2}px`;
-                    const img = document.createElement('img');
-                    img.src = previewSrc(it);
-                    img.alt = it.description || 'Illustration';
-                    img.loading = 'lazy';
-                    el.appendChild(img);
-                    el.addEventListener('click', () => openLightbox(p.idx));
-                    wall.appendChild(el);
-                    const body = { x: p.x, y: p.y, r: s / 2, ox: 0, oy: 0, vx: 0, vy: 0, els: [el] };
+                    const body = { idx: p.idx, x: p.x, y: p.y, r: s / 2, ox: 0, oy: 0, vx: 0, vy: 0, els: [], mounted: false,
+                        blurLayer, softBlurLayer };
                     sim.push(body);
-                    el.addEventListener('mouseenter', () => ripple(body));
+                    H = Math.max(H, p.y + s / 2);
+                });
+                wall.style.height = H + 'px';
+                updateVisible();
+            }
+            // Only circles near the viewport exist in the DOM; others are created/removed while scrolling
+            function mountBody(body) {
+                const { x, y, idx, blurLayer, softBlurLayer } = body;
+                const it = wallItems[idx];
+                const s = body.r * 2;
+                const el = document.createElement('div');
+                el.className = 'wall-item';
+                el.dataset.m = idx % 4;
+                el.style.cssText = `width:${s}px;height:${s}px;left:${x - s / 2}px;top:${y - s / 2}px`;
+                const img = document.createElement('img');
+                img.src = previewSrc(it);
+                img.alt = it.description || 'Illustration';
+                img.decoding = 'async';
+                el.appendChild(img);
+                el.addEventListener('click', () => openLightbox(idx));
+                wall.appendChild(el);
+                body.els = [el];
+                el.addEventListener('mouseenter', () => ripple(body));
+                {
+                    const p = { x, y };
                     const bs = s * 1.5;
                     const bel = document.createElement('div');
                     bel.className = 'blur-item';
@@ -425,16 +500,119 @@
                     softBel.appendChild(softImg);
                     softBlurLayer.appendChild(softBel);
                     body.els.push(softBel);
-                    H = Math.max(H, p.y + s / 2);
-                });
-                wall.style.height = H + 'px';
+                }
+                body.mounted = true;
+                if (animateIn) {
+                    const delay = staggerDelay(body.y - Math.min(...sim.map(b => b.y)));
+                    body.els.forEach(e => e.animate(popIn, { ...popOpts, delay, fill: 'backwards' }));
+                }
             }
+            function unmountBody(body) {
+                body.els.forEach(e => e.remove());
+                body.els = [];
+                body.ox = body.oy = body.vx = body.vy = 0;
+                activeBodies.delete(body);
+                body.mounted = false;
+            }
+            function updateVisible() {
+                const top = wall.getBoundingClientRect().top;
+                const margin = innerHeight * 0.75;
+                sim.forEach(b => {
+                    const y0 = top + b.y - b.r * 1.5, y1 = top + b.y + b.r * 1.5;
+                    const visible = y1 > -margin && y0 < innerHeight + margin;
+                    if (visible && !b.mounted) mountBody(b);
+                    else if (!visible && b.mounted) unmountBody(b);
+                });
+            }
+            let visTicking = false;
+            window.addEventListener('scroll', () => {
+                if (visTicking) return;
+                visTicking = true;
+                requestAnimationFrame(() => { visTicking = false; updateVisible(); });
+            }, { passive: true });
             layoutWall();
+            const controls = document.getElementById('wall-controls');
+            function syncControls() {
+                controls.querySelectorAll('.wall-btn').forEach(b => {
+                    const on = b.dataset.limit ? b.dataset.limit === wallState.limit : b.dataset.sort === wallState.sort;
+                    b.classList.toggle('active', on);
+                    b.setAttribute('aria-pressed', on);
+                });
+            }
+            controls.addEventListener('click', e => {
+                const b = e.target.closest('.wall-btn');
+                if (!b || b.classList.contains('wall-arrow')) return;
+                if (b.dataset.limit) wallState.limit = b.dataset.limit;
+                else wallState.sort = b.dataset.sort;
+                syncControls();
+                orderItems();
+                buildWallItems();
+                layoutWall();
+                syncPager();
+            });
+            const pager = document.getElementById('wall-pager');
+            const pagePrev = document.getElementById('page-prev'), pageNext = document.getElementById('page-next');
+            function syncPager() {
+                const total = pageCount();
+                pager.classList.toggle('hidden', total <= 1);
+                document.getElementById('page-info').textContent = `${wallState.page + 1} / ${total}`;
+                pagePrev.disabled = wallState.page <= 0;
+                pageNext.disabled = wallState.page >= total - 1;
+                ctlPrev.classList.toggle('hidden', total <= 1);
+                ctlNext.classList.toggle('hidden', total <= 1);
+                ctlPrev.disabled = pagePrev.disabled;
+                ctlNext.disabled = pageNext.disabled;
+            }
+            let busy = false;
+            const POP_MS = 500;
+            const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const popOut = [{ transform: 'scale(1)' }, { transform: 'scale(1.2)', offset: 0.3 }, { transform: 'scale(0)' }];
+            async function goPage(delta) {
+                const p = wallState.page + delta;
+                if (busy || p < 0 || p >= pageCount()) return;
+                busy = true;
+                if (!reduced) {
+                    const anims = [];
+                    const mountedBodies = sim.filter(b => b.mounted);
+                    const minY = Math.min(...mountedBodies.map(b => b.y));
+                    mountedBodies.forEach(b => b.els.forEach(e => anims.push(e.animate(popOut, { ...popOpts, delay: staggerDelay(b.y - minY), fill: 'both' }).finished)));
+                    await Promise.all(anims).catch(() => {});
+                }
+                wallState.page = p;
+                buildWallItems();
+                animateIn = !reduced;
+                layoutWall();
+                syncPager();
+                const legacyEl = document.getElementById('legacy');
+                scrollTo({ top: legacyEl.getBoundingClientRect().top + scrollY - 4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize), behavior: 'smooth' });
+                setTimeout(() => { animateIn = false; busy = false; }, STAGGER_MAX + 500 + 50);
+            }
+            const ctlPrev = document.getElementById('ctl-prev'), ctlNext = document.getElementById('ctl-next');
+            ctlPrev.addEventListener('click', () => goPage(-1));
+            ctlNext.addEventListener('click', () => goPage(1));
+            pagePrev.addEventListener('click', () => goPage(-1));
+            pageNext.addEventListener('click', () => goPage(1));
+            syncPager();
+            syncControls();
+            // Once stuck under the header, show the bar only while the pointer is near the top
+            let nearTop = false;
+            const STICK_TOP = 4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+            function updateControls() {
+                const stuck = controls.getBoundingClientRect().top <= STICK_TOP + 2;
+                controls.classList.toggle('stuck-hidden', stuck && !nearTop);
+            }
+            window.addEventListener('scroll', updateControls, { passive: true });
+            window.addEventListener('pointermove', e => {
+                const near = e.clientY < STICK_TOP + 180;
+                if (near !== nearTop) { nearTop = near; updateControls(); }
+            }, { passive: true });
+            document.addEventListener('mouseleave', () => { nearTop = false; updateControls(); });
+            updateControls();
             let lastW = wall.clientWidth, rt;
             window.addEventListener('resize', () => {
                 clearTimeout(rt);
                 rt = setTimeout(() => {
-                    if (wall.clientWidth !== lastW) { lastW = wall.clientWidth; layoutWall(); }
+                    if (wall.clientWidth !== lastW) { lastW = wall.clientWidth; layoutWall(); } else updateVisible();
                 }, 250);
             });
 

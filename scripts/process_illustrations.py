@@ -14,7 +14,7 @@ from scripts.generate_illustration_manifest import first_commit_dates, list_imag
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ILLU_DIR = REPO_ROOT / "illu"
 LEGACY_DIR = REPO_ROOT / "illu legacy"
-PREVIEW_SCALE = 0.5
+PREVIEW_MAX_SIDE = 640
 
 
 def preview_path(image_path):
@@ -41,9 +41,10 @@ def create_preview(source, destination):
             temporary_path = Path(temporary.name)
 
         with Image.open(source) as original:
+            scale = min(1, PREVIEW_MAX_SIDE / max(original.width, original.height))
             size = (
-                max(1, round(original.width * PREVIEW_SCALE)),
-                max(1, round(original.height * PREVIEW_SCALE)),
+                max(1, round(original.width * scale)),
+                max(1, round(original.height * scale)),
             )
             icc_profile = original.info.get("icc_profile")
 
@@ -77,7 +78,7 @@ def create_preview(source, destination):
                 if icc_profile:
                     save_options["icc_profile"] = icc_profile
                 if image_format in {"JPEG", "WEBP"}:
-                    save_options.update(quality=85, optimize=True)
+                    save_options.update(quality=80, optimize=True)
                 elif image_format == "PNG":
                     save_options["optimize"] = True
                 image.save(temporary_path, format=image_format, **save_options)
