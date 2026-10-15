@@ -199,7 +199,7 @@
             // Circles animate top to bottom: delay grows with vertical position
             const STAGGER_MAX = 1000;
             const staggerDelay = dy => Math.min(STAGGER_MAX, Math.max(0, dy) * 0.5);
-            const wallState = { limit: 'all', sort: 'random', page: 0 };
+            const wallState = { limit: '25', sort: 'random', page: 0 };
             let ordered = [];
             function orderItems() {
                 ordered = items.slice(); // already sorted newest first
