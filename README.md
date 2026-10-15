@@ -32,3 +32,4 @@ Lets Fucking Go!!!!!
   + ✅Layout
   + ❌Hero?
 
+- ✅ Linked minhducpham.de / kimoxabae.de
