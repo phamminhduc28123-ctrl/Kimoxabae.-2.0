@@ -18,6 +18,7 @@ Lets Fucking Go!!!!!
   + ✅Dots River (legacy)
   + ✅Each image is a circle. blurred on the edge placed on a stream. When hovered on the image stop and get clearer.
   + ❌Clicked on open the image and the link.
+  + ❌Fractal Noise Bug
 - Blog phone layout fix:
   + ❌ Stack optoion
   + ❌ Thumbnail crop
