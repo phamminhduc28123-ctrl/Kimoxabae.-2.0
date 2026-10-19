@@ -470,6 +470,51 @@
 
     <!-- --- JAVASCRIPT --- -->
     <script>
+        window.loadLottieLibrary = (() => {
+            const LOTTIE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
+            let loadPromise = null;
+
+            return () => {
+                if (window.lottie) return Promise.resolve(window.lottie);
+                if (loadPromise) return loadPromise;
+
+                const script = document.createElement('script');
+                script.src = LOTTIE_URL;
+                script.async = true;
+                let timer;
+
+                loadPromise = new Promise((resolve, reject) => {
+                    let settled = false;
+                    const finish = (error) => {
+                        if (settled) return;
+                        settled = true;
+                        clearTimeout(timer);
+                        script.removeEventListener('load', onLoad);
+                        script.removeEventListener('error', onError);
+                        if (error) reject(error);
+                        else resolve(window.lottie);
+                    };
+                    const onLoad = () => {
+                        if (window.lottie) finish();
+                        else finish(new Error('Lottie script loaded without exposing window.lottie'));
+                    };
+                    const onError = () => finish(new Error(`Failed to load Lottie from ${LOTTIE_URL}`));
+
+                    script.addEventListener('load', onLoad);
+                    script.addEventListener('error', onError);
+                    timer = setTimeout(() => finish(new Error(`Timed out loading Lottie from ${LOTTIE_URL}`)), 15000);
+                    document.head.appendChild(script);
+                }).catch((error) => {
+                    script.remove();
+                    loadPromise = null;
+                    console.error('Unable to load the Lottie animation library.', error);
+                    throw error;
+                });
+
+                return loadPromise;
+            };
+        })();
+
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
             const header = document.getElementById('smartHeader');
@@ -581,15 +626,9 @@
                     menuIcon.dataset.loaded = 'true';
                 };
 
-                if (window.lottie) {
-                    renderMenuIcon();
-                    return;
-                }
-
-                const lottieScript = document.createElement('script');
-                lottieScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
-                lottieScript.onload = renderMenuIcon;
-                document.head.appendChild(lottieScript);
+                window.loadLottieLibrary().then(renderMenuIcon).catch((error) => {
+                    console.error('Unable to initialize the menu animation.', error);
+                });
             };
 
             const initializeLogoAnimation = () => {
@@ -651,17 +690,9 @@
                     initializeMenuButtonAnimation();
                 };
 
-                if (window.lottie) {
-                    renderLogo();
-                    initializeMenuIconAnimations();
-                    initializeMenuButtonAnimation();
-                    return;
-                }
-
-                const lottieScript = document.createElement('script');
-                lottieScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
-                lottieScript.onload = renderLogo;
-                document.head.appendChild(lottieScript);
+                window.loadLottieLibrary().then(renderLogo).catch((error) => {
+                    console.error('Unable to initialize the logo animation.', error);
+                });
             };
 
             initializeLogoAnimation();
@@ -1328,8 +1359,6 @@
         const MAX_AREA = 86;
         const CHANGE_INTERVAL = 2000 / 3;
         const LEG_MS = 270;
-        const LOTTIE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
-
         const CATEGORIES = [
             { name: 'Illustration', json: 'Icons Jsons/illustration.json', link: 'illustration.html' },
             { name: 'Storyboard', json: 'Icons Jsons/storyboard.json', link: 'storyboard.html' },
@@ -1395,54 +1424,50 @@
         };
 
         // ---------- Lottie ----------
-        let lottiePromise = null;
-        const loadLottie = () => {
-            if (window.lottie) return Promise.resolve(window.lottie);
-            if (lottiePromise) return lottiePromise;
-            lottiePromise = new Promise((resolve, reject) => {
-                let script = [...document.scripts].find(s => s.src === LOTTIE_URL);
-                if (!script) {
-                    script = document.createElement('script');
-                    script.src = LOTTIE_URL;
-                    document.head.appendChild(script);
-                }
-                const timer = setTimeout(() => reject(new Error('Lottie load timeout')), 5000);
-                const done = () => { clearTimeout(timer); resolve(window.lottie); };
-                script.addEventListener('load', done);
-                script.addEventListener('error', (e) => { clearTimeout(timer); reject(e); });
-                if (window.lottie) { clearTimeout(timer); resolve(window.lottie); }
-            });
-            return lottiePromise;
-        };
+        const loadLottie = () => window.loadLottieLibrary();
 
         const showFallback = (holder, cat) => {
-            if (holder.querySelector('img, svg.fallback-icon')) return;
+            if (holder.dataset.fallbackShown === 'true') return;
+            holder.dataset.fallbackShown = 'true';
+            holder._anim?.destroy?.();
+            holder._anim = null;
             holder.innerHTML = '';
+
+            const showTextFallback = () => {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'fallback-icon');
+                svg.setAttribute('viewBox', '0 0 100 100');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', '50');
+                text.setAttribute('y', '55');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-size', '40');
+                text.setAttribute('fill', 'currentColor');
+                text.textContent = (cat.name || '?').charAt(0);
+                svg.appendChild(text);
+                holder.appendChild(svg);
+            };
+
             if (cat.fallback) {
                 const img = document.createElement('img');
                 img.src = cat.fallback;
                 img.alt = cat.name;
+                img.addEventListener('error', () => {
+                    img.remove();
+                    showTextFallback();
+                }, { once: true });
                 holder.appendChild(img);
                 return;
             }
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttribute('class', 'fallback-icon');
-            svg.setAttribute('viewBox', '0 0 100 100');
-            svg.setAttribute('width', '100%');
-            svg.setAttribute('height', '100%');
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', '50');
-            text.setAttribute('y', '55');
-            text.setAttribute('text-anchor', 'middle');
-            text.setAttribute('font-size', '40');
-            text.setAttribute('fill', 'currentColor');
-            text.textContent = (cat.name || '?').charAt(0);
-            svg.appendChild(text);
-            holder.appendChild(svg);
+            showTextFallback();
         };
 
         const mountIcon = (holder, cat) => {
+            if (!holder.isConnected) return;
             loadLottie().then((lottie) => {
+                if (!holder.isConnected) return;
                 let anim;
                 try {
                     anim = lottie.loadAnimation({
@@ -1454,16 +1479,25 @@
                         rendererSettings: { preserveAspectRatio: 'xMidYMid meet' }
                     });
                 } catch (e) {
+                    console.error(`Unable to initialize the "${cat.name}" grid animation.`, e);
                     showFallback(holder, cat);
                     return;
                 }
                 if (anim && anim.addEventListener) {
-                    anim.addEventListener('data_failed', () => showFallback(holder, cat));
-                    anim.addEventListener('error', () => showFallback(holder, cat));
+                    const handleAnimationError = (event) => {
+                        console.error(`Unable to load grid icon JSON for "${cat.name}" (${cat.json}).`, event);
+                        showFallback(holder, cat);
+                    };
+                    anim.addEventListener('data_failed', handleAnimationError);
+                    anim.addEventListener('error', handleAnimationError);
                     anim.addEventListener('DOMLoaded', () => { try { anim.resize(); } catch (e) {} });
                 }
                 holder._anim = anim;
-            }).catch(() => showFallback(holder, cat));
+            }).catch((error) => {
+                if (!holder.isConnected) return;
+                console.error(`Unable to load grid icon "${cat.name}" from ${cat.json}.`, error);
+                showFallback(holder, cat);
+            });
         };
 
         // ---------- Rectangle creation ----------
@@ -1572,7 +1606,11 @@
         const rebuild = () => {
             COLS = landscapeQuery.matches ? 12 : 8;
             ROWS = landscapeQuery.matches ? 8 : 12;
-            rects.forEach(r => r.el.remove());
+            rects.forEach(r => {
+                r.holder._anim?.destroy?.();
+                r.holder._anim = null;
+                r.el.remove();
+            });
             rects.length = 0;
             initialLayout();
         };
