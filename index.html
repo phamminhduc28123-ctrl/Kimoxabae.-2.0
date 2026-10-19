@@ -63,16 +63,8 @@
         }
 
         #hero-section,
-        #main-content {
+        #interactive-grid {
             transition: none;
-        }
-
-        body:not(.grid-section-active) #main-content {
-            opacity: 0.78;
-        }
-
-        body.grid-section-active #main-content {
-            opacity: 1;
         }
 
         /* 1. Header Hide/Show Animation */
@@ -248,6 +240,73 @@
             transform: translate(-50%, -50%);
         }
 
+        /* --- Interactive 4x6 Grid --- */
+        #grid-container {
+            --grid-gap: 0.5rem;
+            --grid-move-time: 0.27s;
+            /* Fallback for browsers without container query units */
+            --grid-radius: 2rem;
+            /* 2:3 portrait box (square cells), never taller than ~80% of the viewport */
+            width: min(100%, max(16rem, calc(80vh * 2 / 3)));
+            container-type: inline-size;
+        }
+
+        /* Corner radius scales with the grid itself, so the visible curve stays
+           the same relative to the rectangles at every resolution.
+           2.9cqw reproduces the 2rem look the grid had at 4K. */
+        @supports (border-radius: 1cqw) {
+            #grid-container {
+                --grid-radius: 2.9cqw;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #grid-container {
+                --grid-gap: 1rem;
+            }
+        }
+
+        .grid-rect {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--grid-radius);
+            overflow: hidden;
+            transition:
+                left var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
+                top var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
+                width var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
+                height var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .grid-rect.paused {
+            transition: none;
+        }
+
+        .grid-rect-icon {
+            position: absolute;
+            inset: 6%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-rect-icon.invert {
+            filter: invert(1);
+        }
+
+        .grid-rect-icon svg,
+        .grid-rect-icon img {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .grid-rect-icon img {
+            object-fit: contain;
+        }
+
     </style>
 </head>
 <body class="min-h-screen">
@@ -351,25 +410,19 @@
         </div>
     </div>
 
+    <!-- SECTION 1.5: Interactive 4x6 Grid -->
+    <section id="interactive-grid" class="relative z-10 w-full bg-white py-16 md:py-24 overflow-hidden">
+        <div class="max-w-6xl mx-auto px-4 md:px-8">
+            <div id="grid-container"
+                 class="grid grid-cols-4 grid-rows-6 gap-2 md:gap-4 relative mx-auto aspect-[2/3]">
+                <!-- 8 rectangles injected by JS -->
+            </div>
+        </div>
+    </section>
+
     <!-- WRAPPER for Parallax Content -->
     <div class="relative z-10 bg-white">
         
-        <!-- SECTION 2: Main Content + Grid -->
-        <main id="main-content" class="h-screen w-full flex flex-col items-center justify-center px-8 box-border relative">
-            
-            <!-- Welcome Text (Top of Section 2) -->
-            <div class="text-center shrink-0 mb-10 z-20">
-                <h1 id="welcome-text" class="text-4xl font-bold text-black pb-4 inline-block transition-all duration-300 ease-out opacity-0 translate-y-10">hellu there...</h1>
-            </div>
-
-            <!-- Random Rectangles Grid -->
-            <div class="w-full flex items-center justify-center">
-                <div id="grid-container" class="relative w-full max-w-[min(90vw,70vh)] aspect-square bg-transparent">
-                    <!-- Javascript will inject 8 absolute divs here -->
-                </div>
-            </div>
-        </main>
-
         <!-- Impressum Footer -->
         <footer id="footer" class="w-full mt-6 py-5 px-4 bg-white">
             <div class="max-w-2xl mx-auto text-center space-y-0.5 text-xs">
@@ -394,9 +447,6 @@
             const dropdownMenu = document.getElementById('dropdownMenu');
             const nav = document.querySelector('nav'); 
             const dynamicGreeting = document.getElementById('dynamicGreeting');
-            const heroSection = document.getElementById('hero-section'); 
-            const welcomeText = document.getElementById('welcome-text'); 
-            const gridContainer = document.getElementById('grid-container'); 
             const menuIconAnimations = [];
             let menuButtonAnimation = null;
 
@@ -617,10 +667,8 @@
             let lastScrollTop = 0;
             let isDropdownOpen = false;
             let closeTimeout;
-            let isWelcomeChanged = false; 
-
             // --- RANDOM GRID GENERATOR WITH INTERACTION ---
-            if (gridContainer) {
+            if (typeof gridContainer !== 'undefined' && gridContainer) {
                 const gridSize = 4; // 4x4 Grid
                 const numDynamicRectangles = 7; 
                 const numBlackRectangles = 2;
@@ -1005,15 +1053,6 @@
                 }, 5000);
             }
 
-            // --- INITIAL REVEAL LOGIC ---
-            if (welcomeText) {
-                setTimeout(() => {
-                    if (!isWelcomeChanged) {
-                        welcomeText.classList.remove('opacity-0', 'translate-y-10');
-                    }
-                }, 1000);
-            }
-
             // --- KEYBOARD NAVIGATION LOGIC ---
             window.addEventListener('keydown', (e) => {
                 if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
@@ -1028,7 +1067,7 @@
 
                     const targets = [
                         0, 
-                        getOffset('main-content'),
+                        getOffset('interactive-grid'),
                         getOffset('footer')
                     ].sort((a, b) => a - b);
 
@@ -1138,13 +1177,13 @@
             // --- SCROLL LOGIC ---
             const hideHeader = () => { header.classList.add('header-hidden'); };
             const showHeader = () => { header.classList.remove('header-hidden'); };
-            const mainContent = document.getElementById('main-content');
+            const gridSection = document.getElementById('interactive-grid');
             let wheelDistance = 0;
             let sectionAnimationFrame;
             let isSectionAnimating = false;
             const getGridOffset = () => {
-                if (!mainContent) return 0;
-                return mainContent.getBoundingClientRect().top + window.scrollY;
+                if (!gridSection) return 0;
+                return gridSection.getBoundingClientRect().top + window.scrollY;
             };
 
             const moveToSection = (target) => {
@@ -1176,7 +1215,7 @@
 
             // Keep each section still until the scroll intent crosses the jump threshold.
             window.addEventListener('wheel', (event) => {
-                if (!mainContent || Math.abs(event.deltaY) < 1) return;
+                if (!gridSection || Math.abs(event.deltaY) < 1) return;
 
                 if (isSectionAnimating) {
                     event.preventDefault();
@@ -1206,23 +1245,6 @@
             window.addEventListener('scroll', () => {
                 const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
 
-                const gridSectionIsActive = mainContent && currentScrollTop >= getGridOffset() - 10;
-
-                document.body.classList.toggle('grid-section-active', gridSectionIsActive);
-
-                if (welcomeText) {
-                    const textPosition = welcomeText.getBoundingClientRect().top;
-                    const triggerPoint = window.innerHeight * 0.4; 
-                    if (textPosition < triggerPoint && !isWelcomeChanged) {
-                        isWelcomeChanged = true; 
-                        welcomeText.classList.add('opacity-0'); 
-                        setTimeout(() => {
-                            welcomeText.textContent = "Welcome to my website.";
-                            welcomeText.classList.remove('opacity-0'); 
-                        }, 300); 
-                    }
-                }
-
                 if (currentScrollTop > headerHeight * 2) { 
                     if (currentScrollTop > lastScrollTop) {
                         hideHeader();
@@ -1246,6 +1268,413 @@
                 }
             });
         });
+    </script>
+
+    <!-- --- INTERACTIVE 4x6 GRID --- -->
+    <script>
+    (() => {
+        const container = document.getElementById('grid-container');
+        if (!container) return;
+
+        const COLS = 4;
+        const ROWS = 6;
+        // Cell-based size limits: min 2 cells (1x2 / 2x1), max 2x2.
+        const SIZES = [[1, 2], [2, 1], [2, 2]];
+        const MAX_W = 2;
+        const MAX_H = 2;
+        const MIN_AREA = 2;
+        // Total occupied cells (of 24). Keeps the grid mostly full but leaves room to move.
+        const MAX_AREA = 22;
+        const CHANGE_INTERVAL = 2000 / 3;
+        const LEG_MS = 270;
+        const LOTTIE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
+
+        const CATEGORIES = [
+            { name: 'Illustration', json: 'Icons Jsons/illustration.json', link: 'illustration.html' },
+            { name: 'Storyboard', json: 'Icons Jsons/storyboard.json', link: 'storyboard.html' },
+            { name: 'Animation', json: 'Icons Jsons/animation.json', link: 'animation.html' },
+            { name: '3D/CGI', json: 'Icons Jsons/3d.json', link: '3d.html' },
+            // Placeholder JSON: swap in a dedicated animation later
+            { name: 'Web Design', json: 'Icons Jsons/illustration.json', fallback: 'icons/Web Designxhdpi.png', link: 'https://kimoxabae.de/web_design' },
+            { name: 'Blog', json: 'Icons Jsons/blog.json', link: 'blog.html' },
+            { name: 'Photography', json: 'Icons Jsons/photography.json', link: 'photography.html' },
+            // Placeholder JSON: swap in a dedicated animation later
+            { name: 'Music', json: 'Icons Jsons/blog.json', fallback: 'icons/Musikxhdpi.png', link: 'music.html' }
+        ];
+
+        const rand = (n) => Math.floor(Math.random() * n);
+        const shuffle = (arr) => {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = rand(i + 1);
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        };
+
+        // ---------- Geometry ----------
+        const overlaps = (a, b) =>
+            a.c < b.c + b.w && b.c < a.c + a.w && a.r < b.r + b.h && b.r < a.r + a.h;
+
+        const inBounds = (b) => b.c >= 0 && b.r >= 0 && b.c + b.w <= COLS && b.r + b.h <= ROWS;
+
+        const union = (...boxes) => {
+            const c = Math.min(...boxes.map(b => b.c));
+            const r = Math.min(...boxes.map(b => b.r));
+            const c2 = Math.max(...boxes.map(b => b.c + b.w));
+            const r2 = Math.max(...boxes.map(b => b.r + b.h));
+            return { c, r, w: c2 - c, h: r2 - r };
+        };
+
+        const boxOf = (rect) => ({ c: rect.c, r: rect.r, w: rect.w, h: rect.h });
+        const isMaxSize = (rect) => rect.w === MAX_W && rect.h === MAX_H;
+
+        // ---------- State ----------
+        const rects = [];
+
+        // A moving rectangle blocks its entire swept region until it settles.
+        const regionOf = (rect) => rect.reserved || boxOf(rect);
+
+        const isFree = (box, self) =>
+            inBounds(box) && rects.every(o => o === self || !overlaps(box, regionOf(o)));
+
+        const totalArea = (except) =>
+            rects.reduce((sum, o) => sum + (o === except ? 0 : o.w * o.h), 0);
+
+        // ---------- Rendering ----------
+        const UNIT_W = '((100% - 3 * var(--grid-gap)) / 4)';
+        const UNIT_H = '((100% - 5 * var(--grid-gap)) / 6)';
+
+        const applyBox = (rect, box) => {
+            const s = rect.el.style;
+            s.left = `calc(${box.c} * (${UNIT_W} + var(--grid-gap)))`;
+            s.top = `calc(${box.r} * (${UNIT_H} + var(--grid-gap)))`;
+            s.width = `calc(${box.w} * ${UNIT_W} + ${box.w - 1} * var(--grid-gap))`;
+            s.height = `calc(${box.h} * ${UNIT_H} + ${box.h - 1} * var(--grid-gap))`;
+        };
+
+        // ---------- Lottie ----------
+        let lottiePromise = null;
+        const loadLottie = () => {
+            if (window.lottie) return Promise.resolve(window.lottie);
+            if (lottiePromise) return lottiePromise;
+            lottiePromise = new Promise((resolve, reject) => {
+                let script = [...document.scripts].find(s => s.src === LOTTIE_URL);
+                if (!script) {
+                    script = document.createElement('script');
+                    script.src = LOTTIE_URL;
+                    document.head.appendChild(script);
+                }
+                script.addEventListener('load', () => resolve(window.lottie));
+                script.addEventListener('error', reject);
+                if (window.lottie) resolve(window.lottie);
+            });
+            return lottiePromise;
+        };
+
+        const showFallback = (holder, cat) => {
+            if (!cat.fallback || holder.querySelector('img')) return;
+            holder.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = cat.fallback;
+            img.alt = cat.name;
+            holder.appendChild(img);
+        };
+
+        const mountIcon = (holder, cat) => {
+            loadLottie().then((lottie) => {
+                const anim = lottie.loadAnimation({
+                    container: holder,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: cat.json,
+                    rendererSettings: { preserveAspectRatio: 'xMidYMid meet' }
+                });
+                anim.addEventListener('data_failed', () => showFallback(holder, cat));
+            }).catch(() => showFallback(holder, cat));
+        };
+
+        // ---------- Rectangle creation ----------
+        const createRect = (cat, box) => {
+            const variant = Math.random() < 0.5 ? 'white' : 'black';
+            const el = document.createElement('a');
+            el.href = cat.link;
+            el.setAttribute('aria-label', cat.name);
+            el.className = 'grid-rect border-2 border-black ' + (variant === 'white' ? 'bg-white' : 'bg-black');
+
+            const holder = document.createElement('div');
+            holder.className = 'grid-rect-icon' + (variant === 'black' ? ' invert' : '');
+            el.appendChild(holder);
+
+            const rect = {
+                cat, variant, el,
+                c: box.c, r: box.r, w: box.w, h: box.h,
+                moving: false, hovered: false, wantsExpand: false, restoreBox: null, reserved: null
+            };
+
+            el.addEventListener('mouseenter', () => {
+                rect.hovered = true;
+                if (!rect.moving) onHover(rect);
+            });
+            el.addEventListener('mouseleave', () => {
+                rect.hovered = false;
+                rect.wantsExpand = false;
+                el.classList.remove('paused');
+                if (!rect.moving && rect.restoreBox) collapse(rect);
+            });
+
+            applyBox(rect, box);
+            container.appendChild(el);
+            mountIcon(holder, cat);
+            return rect;
+        };
+
+        // ---------- Initial layout ----------
+        const layoutOnce = () => {
+            const placed = [];
+            let extra = MAX_AREA - MIN_AREA * CATEGORIES.length;
+
+            for (let i = 0; i < CATEGORIES.length; i++) {
+                const sizes = shuffle(SIZES.filter(([w, h]) => w * h - MIN_AREA <= extra));
+                let box = null;
+
+                for (const [w, h] of sizes) {
+                    const positions = [];
+                    for (let c = 0; c + w <= COLS; c++) {
+                        for (let r = 0; r + h <= ROWS; r++) positions.push({ c, r, w, h });
+                    }
+                    box = shuffle(positions).find(p => placed.every(o => !overlaps(p, o)));
+                    if (box) break;
+                }
+
+                if (!box) return null;
+                extra -= box.w * box.h - MIN_AREA;
+                placed.push(box);
+            }
+            return placed;
+        };
+
+        const fallbackLayout = () => {
+            const placed = [];
+            for (let i = 0; i < CATEGORIES.length; i++) {
+                placed.push({ c: i % COLS, r: Math.floor(i / COLS) * 2, w: 1, h: 2 });
+            }
+            return placed;
+        };
+
+        const initialLayout = () => {
+            let layout = null;
+            for (let attempt = 0; attempt < 200 && !layout; attempt++) layout = layoutOnce();
+            (layout || fallbackLayout()).forEach((box, i) => rects.push(createRect(CATEGORIES[i], box)));
+        };
+
+        // ---------- Change planning ----------
+        // Returns { start, mid, end } or null. Movement is L-shaped (H->V or V->H),
+        // the resize happens during the first leg.
+        // opts.avoid: box the final position must stay out of.
+        // opts.keepSize: only relocate, never resize.
+        const planChange = (rect, opts = {}) => {
+            const start = boxOf(rect);
+            const sizes = opts.keepSize ? [[rect.w, rect.h]] : shuffle(SIZES);
+
+            for (const [w, h] of sizes) {
+                if (!opts.keepSize && totalArea(rect) + w * h > MAX_AREA) continue;
+
+                const candidates = [];
+                for (let c = 0; c + w <= COLS; c++) {
+                    for (let r = 0; r + h <= ROWS; r++) {
+                        if (c === start.c && r === start.r && w === start.w && h === start.h) continue;
+                        candidates.push({ c, r, w, h });
+                    }
+                }
+
+                for (const end of shuffle(candidates)) {
+                    if (opts.avoid && overlaps(end, opts.avoid)) continue;
+                    if (!isFree(end, rect)) continue;
+
+                    for (const order of shuffle(['HV', 'VH'])) {
+                        const mid = order === 'HV'
+                            ? { c: end.c, r: start.r, w, h }
+                            : { c: start.c, r: end.r, w, h };
+
+                        if (!isFree(mid, rect)) continue;
+                        if (!isFree(union(start, mid), rect)) continue;
+                        if (!isFree(union(mid, end), rect)) continue;
+
+                        return { start, mid, end };
+                    }
+                }
+            }
+            return null;
+        };
+
+        const settle = (rect, box) => {
+            rect.c = box.c;
+            rect.r = box.r;
+            rect.w = box.w;
+            rect.h = box.h;
+            rect.reserved = null;
+            rect.moving = false;
+            if (rect.hovered) onHover(rect);
+            else if (rect.restoreBox) collapse(rect);
+            else rect.el.style.zIndex = '';
+        };
+
+        // Shrink a hover-expanded rectangle back to the box it grew from.
+        const collapse = (rect) => {
+            const box = rect.restoreBox;
+            rect.restoreBox = null;
+            rect.moving = true;
+            rect.reserved = boxOf(rect);
+            applyBox(rect, box);
+            setTimeout(() => settle(rect, box), LEG_MS);
+        };
+
+        const runChange = (rect, plan) => {
+            rect.moving = true;
+            rect.reserved = union(plan.start, plan.mid, plan.end);
+
+            applyBox(rect, plan.mid);
+            setTimeout(() => applyBox(rect, plan.end), LEG_MS);
+            setTimeout(() => settle(rect, plan.end), LEG_MS * 2);
+        };
+
+        // ---------- Hover: expand to max size ----------
+        // Finds a max-size box that contains the rectangle, asks overlapping neighbours
+        // to move out of the way (all-or-nothing), then grows the rectangle into it.
+        const tryExpand = (rect) => {
+            const targets = [];
+            for (let c = Math.max(0, rect.c + rect.w - MAX_W); c <= Math.min(rect.c, COLS - MAX_W); c++) {
+                for (let r = Math.max(0, rect.r + rect.h - MAX_H); r <= Math.min(rect.r, ROWS - MAX_H); r++) {
+                    const box = { c, r, w: MAX_W, h: MAX_H };
+                    const blockers = rects.filter(o => o !== rect && overlaps(box, regionOf(o)));
+                    if (blockers.some(b => b.moving || b.hovered)) continue;
+                    targets.push({ box, blockers });
+                }
+            }
+            targets.sort((a, b) => a.blockers.length - b.blockers.length);
+
+            for (const { box, blockers } of targets) {
+                const plans = [];
+                let ok = true;
+
+                for (const b of blockers) {
+                    const plan = planChange(b, { avoid: box, keepSize: true });
+                    if (!plan) { ok = false; break; }
+                    b.reserved = union(plan.start, plan.mid, plan.end);
+                    plans.push([b, plan]);
+                }
+
+                if (!ok) {
+                    plans.forEach(([b]) => { b.reserved = null; });
+                    continue;
+                }
+
+                plans.forEach(([b, plan]) => runChange(b, plan));
+
+                rect.moving = true;
+                rect.reserved = box;
+                rect.restoreBox = boxOf(rect);
+
+                const grow = () => {
+                    if (!rect.hovered) {
+                        rect.moving = false;
+                        rect.reserved = null;
+                        rect.restoreBox = null;
+                        return;
+                    }
+                    rect.el.style.zIndex = '5';
+                    applyBox(rect, box);
+                    setTimeout(() => settle(rect, box), LEG_MS);
+                };
+
+                if (blockers.length) setTimeout(grow, LEG_MS * 2 + 30);
+                else grow();
+                return true;
+            }
+            return false;
+        };
+
+        // Neighbours may be mid-move when the pointer arrives, so retry briefly.
+        // While a hovered rectangle waits to expand, the scheduler holds off new moves.
+        // If neighbours cannot be cleared away, the rectangle grows over them instead.
+        const growInto = (rect, box) => {
+            rect.moving = true;
+            rect.reserved = box;
+            rect.restoreBox = boxOf(rect);
+            rect.el.style.zIndex = '5';
+            applyBox(rect, box);
+            setTimeout(() => settle(rect, box), LEG_MS);
+        };
+
+        const overlayExpand = (rect) => {
+            const targets = [];
+            for (let c = Math.max(0, rect.c + rect.w - MAX_W); c <= Math.min(rect.c, COLS - MAX_W); c++) {
+                for (let r = Math.max(0, rect.r + rect.h - MAX_H); r <= Math.min(rect.r, ROWS - MAX_H); r++) {
+                    const box = { c, r, w: MAX_W, h: MAX_H };
+                    const covered = rects.filter(o => o !== rect && overlaps(box, regionOf(o))).length;
+                    targets.push({ box, covered });
+                }
+            }
+            if (!targets.length) return false;
+            targets.sort((a, b) => a.covered - b.covered);
+            growInto(rect, targets[0].box);
+            return true;
+        };
+
+        const attemptExpand = (rect, tries) => {
+            if (!rect.hovered || rect.moving) {
+                rect.wantsExpand = false;
+                return;
+            }
+            if (tryExpand(rect)) {
+                rect.wantsExpand = false;
+                return;
+            }
+            if (tries >= 6) {
+                rect.wantsExpand = false;
+                if (!overlayExpand(rect)) rect.el.classList.add('paused');
+                return;
+            }
+            setTimeout(() => attemptExpand(rect, tries + 1), 120);
+        };
+
+        const onHover = (rect) => {
+            if (isMaxSize(rect)) {
+                rect.el.classList.add('paused');
+                return;
+            }
+            rect.wantsExpand = true;
+            attemptExpand(rect, 0);
+        };
+
+        // ---------- Scheduler ----------
+        let inView = true;
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver((entries) => {
+                inView = entries[0].isIntersecting;
+            }).observe(container);
+        }
+
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const tick = () => {
+            if (document.hidden || !inView) return;
+            if (rects.some(r => r.wantsExpand)) return;
+            const eligible = shuffle(rects.filter(r => !r.hovered && !r.moving));
+            for (const rect of eligible) {
+                const plan = planChange(rect);
+                if (plan) {
+                    runChange(rect, plan);
+                    return;
+                }
+            }
+        };
+
+        initialLayout();
+        if (!reducedMotion) setInterval(tick, CHANGE_INTERVAL);
+    })();
     </script>
 </body>
 </html>
