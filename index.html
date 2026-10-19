@@ -240,13 +240,13 @@
             transform: translate(-50%, -50%);
         }
 
-        /* --- Interactive 4x6 Grid --- */
+        /* --- Interactive 8x12 / 12x8 Grid --- */
         #grid-container {
             --grid-gap: 0.5rem;
             --grid-move-time: 0.27s;
             /* Fallback for browsers without container query units */
             --grid-radius: 2rem;
-            /* 2:3 portrait box (square cells), never taller than ~80% of the viewport */
+            /* 2:3 portrait box (8x12, square cells), never taller than ~80% of the viewport */
             width: min(100%, max(16rem, calc(80vh * 2 / 3)));
             container-type: inline-size;
         }
@@ -263,6 +263,8 @@
         @media (min-width: 768px) {
             #grid-container {
                 --grid-gap: 1rem;
+                /* Landscape 12x8 grid on desktop, never taller than ~80% of the viewport */
+                width: min(100%, max(24rem, calc(80vh * 3 / 2)));
             }
         }
 
@@ -277,7 +279,8 @@
                 left var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
                 top var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
                 width var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
-                height var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1);
+                height var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
+                background-color 0.5s ease;
         }
 
         .grid-rect.paused {
@@ -290,6 +293,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: filter 0.5s ease, transform 0.27s cubic-bezier(0.65, 0, 0.35, 1);
+            transform-origin: center;
+        }
+
+        .grid-rect:hover .grid-rect-icon {
+            transform: scale(0.75);
         }
 
         .grid-rect-icon.invert {
@@ -305,6 +314,27 @@
 
         .grid-rect-icon img {
             object-fit: contain;
+        }
+
+        .grid-rect-label {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0.6rem;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            opacity: 0;
+            transform: translateY(120%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .grid-rect:hover .grid-rect-label {
+            opacity: 1;
+            transform: translateY(0);
         }
 
     </style>
@@ -410,11 +440,11 @@
         </div>
     </div>
 
-    <!-- SECTION 1.5: Interactive 4x6 Grid -->
+    <!-- SECTION 1.5: Interactive 8x12 / 12x8 Grid -->
     <section id="interactive-grid" class="relative z-10 w-full bg-white py-16 md:py-24 overflow-hidden">
         <div class="max-w-6xl mx-auto px-4 md:px-8">
             <div id="grid-container"
-                 class="grid grid-cols-4 grid-rows-6 gap-2 md:gap-4 relative mx-auto aspect-[2/3]">
+                 class="grid grid-cols-8 grid-rows-12 gap-2 md:grid-cols-12 md:grid-rows-8 md:gap-4 relative mx-auto aspect-[2/3] md:aspect-[3/2]">
                 <!-- 8 rectangles injected by JS -->
             </div>
         </div>
@@ -1270,21 +1300,32 @@
         });
     </script>
 
-    <!-- --- INTERACTIVE 4x6 GRID --- -->
+    <!-- --- INTERACTIVE 8x12 / 12x8 GRID --- -->
     <script>
     (() => {
         const container = document.getElementById('grid-container');
         if (!container) return;
 
-        const COLS = 4;
-        const ROWS = 6;
-        // Cell-based size limits: min 2 cells (1x2 / 2x1), max 2x2.
-        const SIZES = [[1, 2], [2, 1], [2, 2]];
-        const MAX_W = 2;
-        const MAX_H = 2;
-        const MIN_AREA = 2;
-        // Total occupied cells (of 24). Keeps the grid mostly full but leaves room to move.
-        const MAX_AREA = 22;
+        // Portrait: 8 cols x 12 rows. Desktop (md+): 12 cols x 8 rows.
+        const landscapeQuery = window.matchMedia('(min-width: 768px)');
+        let COLS = landscapeQuery.matches ? 12 : 8;
+        let ROWS = landscapeQuery.matches ? 8 : 12;
+        // Sizes range from 2x2 up to either maximum orientation: 4x8 or 8x4.
+        const MAX_SIZES = [[4, 8], [8, 4]];
+        const isValidSize = (w, h) => w >= 2 && h >= 2 && ((w <= 4 && h <= 8) || (w <= 8 && h <= 4));
+        const SIZES = [];
+        for (let w = 2; w <= 8; w++) {
+            for (let h = 2; h <= 8; h++) {
+                if (isValidSize(w, h)) SIZES.push([w, h]);
+            }
+        }
+        // Hover can grow a rectangle to a maximum size or to a square (3x3 / 4x4).
+        const EXPAND_SIZES = [...MAX_SIZES, [3, 3], [4, 4]];
+        const MIN_AREA = 4;
+        // At least one rectangle must always be at least this big (e.g. 4x4).
+        const BIG_AREA = 16;
+        // Keep ~90% of the cells occupied; the free cells leave room to move.
+        const MAX_AREA = 86;
         const CHANGE_INTERVAL = 2000 / 3;
         const LEG_MS = 270;
         const LOTTIE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js';
@@ -1327,7 +1368,7 @@
         };
 
         const boxOf = (rect) => ({ c: rect.c, r: rect.r, w: rect.w, h: rect.h });
-        const isMaxSize = (rect) => rect.w === MAX_W && rect.h === MAX_H;
+        const isMaxSize = (rect) => EXPAND_SIZES.every(([w, h]) => w * h <= rect.w * rect.h);
 
         // ---------- State ----------
         const rects = [];
@@ -1342,15 +1383,15 @@
             rects.reduce((sum, o) => sum + (o === except ? 0 : o.w * o.h), 0);
 
         // ---------- Rendering ----------
-        const UNIT_W = '((100% - 3 * var(--grid-gap)) / 4)';
-        const UNIT_H = '((100% - 5 * var(--grid-gap)) / 6)';
-
         const applyBox = (rect, box) => {
+            const UNIT_W = `((100% - ${COLS - 1} * var(--grid-gap)) / ${COLS})`;
+            const UNIT_H = `((100% - ${ROWS - 1} * var(--grid-gap)) / ${ROWS})`;
             const s = rect.el.style;
             s.left = `calc(${box.c} * (${UNIT_W} + var(--grid-gap)))`;
             s.top = `calc(${box.r} * (${UNIT_H} + var(--grid-gap)))`;
             s.width = `calc(${box.w} * ${UNIT_W} + ${box.w - 1} * var(--grid-gap))`;
             s.height = `calc(${box.h} * ${UNIT_H} + ${box.h - 1} * var(--grid-gap))`;
+            requestAnimationFrame(() => { try { rect.holder?._anim?.resize?.(); } catch (e) {} });
         };
 
         // ---------- Lottie ----------
@@ -1365,39 +1406,88 @@
                     script.src = LOTTIE_URL;
                     document.head.appendChild(script);
                 }
-                script.addEventListener('load', () => resolve(window.lottie));
-                script.addEventListener('error', reject);
-                if (window.lottie) resolve(window.lottie);
+                const timer = setTimeout(() => reject(new Error('Lottie load timeout')), 5000);
+                const done = () => { clearTimeout(timer); resolve(window.lottie); };
+                script.addEventListener('load', done);
+                script.addEventListener('error', (e) => { clearTimeout(timer); reject(e); });
+                if (window.lottie) { clearTimeout(timer); resolve(window.lottie); }
             });
             return lottiePromise;
         };
 
         const showFallback = (holder, cat) => {
-            if (!cat.fallback || holder.querySelector('img')) return;
+            if (holder.querySelector('img, svg.fallback-icon')) return;
             holder.innerHTML = '';
-            const img = document.createElement('img');
-            img.src = cat.fallback;
-            img.alt = cat.name;
-            holder.appendChild(img);
+            if (cat.fallback) {
+                const img = document.createElement('img');
+                img.src = cat.fallback;
+                img.alt = cat.name;
+                holder.appendChild(img);
+                return;
+            }
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'fallback-icon');
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', '50');
+            text.setAttribute('y', '55');
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '40');
+            text.setAttribute('fill', 'currentColor');
+            text.textContent = (cat.name || '?').charAt(0);
+            svg.appendChild(text);
+            holder.appendChild(svg);
         };
 
         const mountIcon = (holder, cat) => {
             loadLottie().then((lottie) => {
-                const anim = lottie.loadAnimation({
-                    container: holder,
-                    renderer: 'svg',
-                    loop: true,
-                    autoplay: true,
-                    path: cat.json,
-                    rendererSettings: { preserveAspectRatio: 'xMidYMid meet' }
-                });
-                anim.addEventListener('data_failed', () => showFallback(holder, cat));
+                let anim;
+                try {
+                    anim = lottie.loadAnimation({
+                        container: holder,
+                        renderer: 'svg',
+                        loop: true,
+                        autoplay: true,
+                        path: encodeURI(cat.json),
+                        rendererSettings: { preserveAspectRatio: 'xMidYMid meet' }
+                    });
+                } catch (e) {
+                    showFallback(holder, cat);
+                    return;
+                }
+                if (anim && anim.addEventListener) {
+                    anim.addEventListener('data_failed', () => showFallback(holder, cat));
+                    anim.addEventListener('error', () => showFallback(holder, cat));
+                    anim.addEventListener('DOMLoaded', () => { try { anim.resize(); } catch (e) {} });
+                }
+                holder._anim = anim;
             }).catch(() => showFallback(holder, cat));
         };
 
         // ---------- Rectangle creation ----------
-        const createRect = (cat, box) => {
+        const setVariant = (rect, variant) => {
+            rect.variant = variant;
+            rect.el.classList.toggle('bg-white', variant === 'white');
+            rect.el.classList.toggle('bg-black', variant === 'black');
+            rect.holder.classList.toggle('invert', variant === 'black');
+            if (rect.label) rect.label.style.color = variant === 'black' ? '#fff' : '#000';
+        };
+
+        // Random new colour for a rectangle; the opposite-coloured partner swaps
+        // with it so there are always exactly 4 black and 4 white rectangles.
+        const recolor = (rect) => {
             const variant = Math.random() < 0.5 ? 'white' : 'black';
+            if (variant === rect.variant) return;
+            const partners = rects.filter(o => o !== rect && o.variant === variant);
+            if (!partners.length) return;
+            const partner = partners[rand(partners.length)];
+            setVariant(partner, rect.variant);
+            setVariant(rect, variant);
+        };
+
+        const createRect = (cat, box, variant) => {
             const el = document.createElement('a');
             el.href = cat.link;
             el.setAttribute('aria-label', cat.name);
@@ -1407,8 +1497,14 @@
             holder.className = 'grid-rect-icon' + (variant === 'black' ? ' invert' : '');
             el.appendChild(holder);
 
+            const label = document.createElement('div');
+            label.className = 'grid-rect-label';
+            label.textContent = cat.name;
+            label.style.color = variant === 'black' ? '#fff' : '#000';
+            el.appendChild(label);
+
             const rect = {
-                cat, variant, el,
+                cat, variant, el, holder, label,
                 c: box.c, r: box.r, w: box.w, h: box.h,
                 moving: false, hovered: false, wantsExpand: false, restoreBox: null, reserved: null
             };
@@ -1426,7 +1522,7 @@
 
             applyBox(rect, box);
             container.appendChild(el);
-            mountIcon(holder, cat);
+            requestAnimationFrame(() => mountIcon(holder, cat));
             return rect;
         };
 
@@ -1434,9 +1530,11 @@
         const layoutOnce = () => {
             const placed = [];
             let extra = MAX_AREA - MIN_AREA * CATEGORIES.length;
+            const bigIdx = rand(CATEGORIES.length);
 
             for (let i = 0; i < CATEGORIES.length; i++) {
-                const sizes = shuffle(SIZES.filter(([w, h]) => w * h - MIN_AREA <= extra));
+                const sizes = shuffle(SIZES.filter(([w, h]) =>
+                    w * h - MIN_AREA <= extra && (i !== bigIdx || w * h >= BIG_AREA)));
                 let box = null;
 
                 for (const [w, h] of sizes) {
@@ -1457,8 +1555,9 @@
 
         const fallbackLayout = () => {
             const placed = [];
+            const perRow = Math.floor(COLS / 2);
             for (let i = 0; i < CATEGORIES.length; i++) {
-                placed.push({ c: i % COLS, r: Math.floor(i / COLS) * 2, w: 1, h: 2 });
+                placed.push({ c: (i % perRow) * 2, r: Math.floor(i / perRow) * 2, w: 2, h: 2 });
             }
             return placed;
         };
@@ -1466,7 +1565,16 @@
         const initialLayout = () => {
             let layout = null;
             for (let attempt = 0; attempt < 200 && !layout; attempt++) layout = layoutOnce();
-            (layout || fallbackLayout()).forEach((box, i) => rects.push(createRect(CATEGORIES[i], box)));
+            const variants = shuffle(CATEGORIES.map((_, i) => i < CATEGORIES.length / 2 ? 'white' : 'black'));
+            (layout || fallbackLayout()).forEach((box, i) => rects.push(createRect(CATEGORIES[i], box, variants[i])));
+        };
+
+        const rebuild = () => {
+            COLS = landscapeQuery.matches ? 12 : 8;
+            ROWS = landscapeQuery.matches ? 8 : 12;
+            rects.forEach(r => r.el.remove());
+            rects.length = 0;
+            initialLayout();
         };
 
         // ---------- Change planning ----------
@@ -1474,12 +1582,26 @@
         // the resize happens during the first leg.
         // opts.avoid: box the final position must stay out of.
         // opts.keepSize: only relocate, never resize.
+        // Area a rectangle will have once its current move / hover settles.
+        const effectiveArea = (o) =>
+            o.restoreBox ? o.restoreBox.w * o.restoreBox.h : (o.nextArea || o.w * o.h);
+
         const planChange = (rect, opts = {}) => {
             const start = boxOf(rect);
-            const sizes = opts.keepSize ? [[rect.w, rect.h]] : shuffle(SIZES);
+            const otherBig = rects.some(o => o !== rect && effectiveArea(o) >= BIG_AREA);
+            const mustBeBig = opts.forceBig || !otherBig;
+            // Prefer big size jumps and long moves so each change is clearly visible.
+            const area = rect.w * rect.h;
+            const sizes = opts.keepSize ? [[rect.w, rect.h]]
+                : opts.shrink ? SIZES.filter(([w, h]) => w * h <= area && (!mustBeBig || w * h >= BIG_AREA))
+                    .map(sz => ({ sz, k: sz[0] * sz[1] + Math.random() * 4 }))
+                    .sort((a, b) => a.k - b.k).map(o => o.sz)
+                : SIZES.filter(([w, h]) => !mustBeBig || w * h >= BIG_AREA)
+                    .map(sz => ({ sz, k: Math.abs(sz[0] * sz[1] - area) + Math.random() * 8 }))
+                    .sort((a, b) => b.k - a.k).map(o => o.sz);
 
             for (const [w, h] of sizes) {
-                if (!opts.keepSize && totalArea(rect) + w * h > MAX_AREA) continue;
+                if (!opts.keepSize && !opts.shrink && totalArea(rect) + w * h > MAX_AREA) continue;
 
                 const candidates = [];
                 for (let c = 0; c + w <= COLS; c++) {
@@ -1489,7 +1611,12 @@
                     }
                 }
 
-                for (const end of shuffle(candidates)) {
+                const dist = (e) => Math.abs(e.c - start.c) + Math.abs(e.r - start.r);
+                const ordered = candidates
+                    .map(e => ({ e, k: dist(e) + Math.random() * 6 }))
+                    .sort((a, b) => b.k - a.k).map(o => o.e);
+
+                for (const end of ordered) {
                     if (opts.avoid && overlaps(end, opts.avoid)) continue;
                     if (!isFree(end, rect)) continue;
 
@@ -1515,6 +1642,7 @@
             rect.w = box.w;
             rect.h = box.h;
             rect.reserved = null;
+            rect.nextArea = 0;
             rect.moving = false;
             if (rect.hovered) onHover(rect);
             else if (rect.restoreBox) collapse(rect);
@@ -1527,6 +1655,7 @@
             rect.restoreBox = null;
             rect.moving = true;
             rect.reserved = boxOf(rect);
+            rect.nextArea = box.w * box.h;
             applyBox(rect, box);
             setTimeout(() => settle(rect, box), LEG_MS);
         };
@@ -1534,6 +1663,8 @@
         const runChange = (rect, plan) => {
             rect.moving = true;
             rect.reserved = union(plan.start, plan.mid, plan.end);
+            rect.nextArea = plan.end.w * plan.end.h;
+            recolor(rect);
 
             applyBox(rect, plan.mid);
             setTimeout(() => applyBox(rect, plan.end), LEG_MS);
@@ -1545,22 +1676,26 @@
         // to move out of the way (all-or-nothing), then grows the rectangle into it.
         const tryExpand = (rect) => {
             const targets = [];
+            for (const [MAX_W, MAX_H] of EXPAND_SIZES)
             for (let c = Math.max(0, rect.c + rect.w - MAX_W); c <= Math.min(rect.c, COLS - MAX_W); c++) {
                 for (let r = Math.max(0, rect.r + rect.h - MAX_H); r <= Math.min(rect.r, ROWS - MAX_H); r++) {
+                    if (MAX_W * MAX_H <= rect.w * rect.h) continue;
                     const box = { c, r, w: MAX_W, h: MAX_H };
                     const blockers = rects.filter(o => o !== rect && overlaps(box, regionOf(o)));
                     if (blockers.some(b => b.moving || b.hovered)) continue;
                     targets.push({ box, blockers });
                 }
             }
-            targets.sort((a, b) => a.blockers.length - b.blockers.length);
+            targets.sort((a, b) => (a.blockers.length - b.blockers.length) || (Math.random() - 0.5));
 
             for (const { box, blockers } of targets) {
                 const plans = [];
                 let ok = true;
 
                 for (const b of blockers) {
-                    const plan = planChange(b, { avoid: box, keepSize: true });
+                    const plan = planChange(b, { avoid: box, keepSize: true })
+                        || planChange(b, { avoid: box, shrink: true })
+                        || planChange(b, { avoid: box });
                     if (!plan) { ok = false; break; }
                     b.reserved = union(plan.start, plan.mid, plan.end);
                     plans.push([b, plan]);
@@ -1575,13 +1710,16 @@
 
                 rect.moving = true;
                 rect.reserved = box;
-                rect.restoreBox = boxOf(rect);
+                // Keep the original box when expanding repeatedly while hovered.
+                const prevRestore = rect.restoreBox;
+                rect.restoreBox = prevRestore || boxOf(rect);
 
                 const grow = () => {
                     if (!rect.hovered) {
                         rect.moving = false;
                         rect.reserved = null;
-                        rect.restoreBox = null;
+                        if (!prevRestore) rect.restoreBox = null;
+                        else collapse(rect);
                         return;
                     }
                     rect.el.style.zIndex = '5';
@@ -1610,8 +1748,10 @@
 
         const overlayExpand = (rect) => {
             const targets = [];
+            for (const [MAX_W, MAX_H] of EXPAND_SIZES)
             for (let c = Math.max(0, rect.c + rect.w - MAX_W); c <= Math.min(rect.c, COLS - MAX_W); c++) {
                 for (let r = Math.max(0, rect.r + rect.h - MAX_H); r <= Math.min(rect.r, ROWS - MAX_H); r++) {
+                    if (MAX_W * MAX_H <= rect.w * rect.h) continue;
                     const box = { c, r, w: MAX_W, h: MAX_H };
                     const covered = rects.filter(o => o !== rect && overlaps(box, regionOf(o))).length;
                     targets.push({ box, covered });
@@ -1632,9 +1772,10 @@
                 rect.wantsExpand = false;
                 return;
             }
-            if (tries >= 6) {
+            // Never cover neighbours: keep trying to clear space while hovered.
+            if (tries >= 60) {
                 rect.wantsExpand = false;
-                if (!overlayExpand(rect)) rect.el.classList.add('paused');
+                rect.el.classList.add('paused');
                 return;
             }
             setTimeout(() => attemptExpand(rect, tries + 1), 120);
@@ -1663,6 +1804,18 @@
             if (document.hidden || !inView) return;
             if (rects.some(r => r.wantsExpand)) return;
             const eligible = shuffle(rects.filter(r => !r.hovered && !r.moving));
+
+            // Now and then hand the "big" role to another random rectangle.
+            const promote = rects.every(r => effectiveArea(r) < BIG_AREA) || Math.random() < 0.25;
+            if (promote) {
+                for (const rect of eligible.filter(r => effectiveArea(r) < BIG_AREA)) {
+                    const plan = planChange(rect, { forceBig: true });
+                    if (plan) {
+                        runChange(rect, plan);
+                        return;
+                    }
+                }
+            }
             for (const rect of eligible) {
                 const plan = planChange(rect);
                 if (plan) {
@@ -1673,6 +1826,7 @@
         };
 
         initialLayout();
+        landscapeQuery.addEventListener('change', rebuild);
         if (!reducedMotion) setInterval(tick, CHANGE_INTERVAL);
     })();
     </script>
