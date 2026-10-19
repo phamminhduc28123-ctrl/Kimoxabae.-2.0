@@ -9,7 +9,8 @@
 
 
 Lets Fucking Go!!!!!
-- ✅Add all icons Jsons date
+- ✅Add all icons Jsons date:
+  + ❌ Musik und Webdesign Jsons animation
 - About me Page layout:
   + ✅ Skript
   + ❌ Json Animation
@@ -36,3 +37,4 @@ Lets Fucking Go!!!!!
   + ❌Hero?
 - ❌ CGI Reel reediting/reupload ❗❗❗
 - ✅ Linked minhducpham.de / kimoxabae.de
+- ✅Grid Section in index.html fix
