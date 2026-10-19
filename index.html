@@ -245,26 +245,26 @@
             --grid-gap: 0.5rem;
             --grid-move-time: 0.27s;
             /* Fallback for browsers without container query units */
-            --grid-radius: 2rem;
-            /* 2:3 portrait box (8x12, square cells), never taller than ~85% of the viewport */
-            width: min(100%, max(16rem, calc(85vh * 2 / 3)));
+            --grid-radius: 1rem;
+            /* 2:3 portrait box (8x12, square cells) — full width on mobile */
+            width: 100%;
             container-type: inline-size;
         }
 
         /* Corner radius scales with the grid itself, so the visible curve stays
            the same relative to the rectangles at every resolution.
-           2.9cqw reproduces the 2rem look the grid had at 4K. */
+           1.45cqw reproduces the 1rem look the grid had at 4K. */
         @supports (border-radius: 1cqw) {
             #grid-container {
-                --grid-radius: 2.9cqw;
+                --grid-radius: 1.45cqw;
             }
         }
 
         @media (min-width: 768px) {
             #grid-container {
                 --grid-gap: 1rem;
-                /* Landscape 12x8 grid on desktop, never taller than ~85% of the viewport */
-                width: min(100%, max(24rem, calc(85vh * 3 / 2)));
+                /* Landscape 12x8 grid on desktop — 50% of screen width */
+                width: 50vw;
             }
         }
 
@@ -441,7 +441,7 @@
     </div>
 
     <!-- SECTION 1.5: Interactive 8x12 / 12x8 Grid -->
-    <section id="interactive-grid" class="relative z-10 w-full bg-white py-12 md:py-16 overflow-hidden">
+    <section id="interactive-grid" class="relative z-10 w-full bg-white min-h-screen flex items-center justify-center pt-24 md:pt-32 pb-12 md:pb-16 overflow-hidden">
         <div class="max-w-6xl mx-auto px-4 md:px-8">
             <div id="grid-container"
                  class="grid grid-cols-8 grid-rows-12 gap-2 md:grid-cols-12 md:grid-rows-8 md:gap-4 relative mx-auto aspect-[2/3] md:aspect-[3/2]">
@@ -903,7 +903,7 @@
                     const el = document.createElement('div');
                     el.id = `grid-item-${item.id}`; 
                     
-                    let baseClasses = "absolute rounded-[2rem] flex items-center justify-center overflow-hidden transition-all duration-300 cursor-pointer"; 
+                    let baseClasses = "absolute rounded-[1rem] flex items-center justify-center overflow-hidden transition-all duration-300 cursor-pointer"; 
                     if (item.isBlack) {
                         el.className = `${baseClasses} bg-black`;
                     } else {
