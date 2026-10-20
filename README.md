@@ -10,6 +10,8 @@
 
 Lets Fucking Go!!!!!
 
+- ❌ Languages Menu: Deutsch, Francais, Vietnamese, (Russian?)
+- ❌ Mobile Device View Update
 - ❌ General Reel för index/header:
   + 1 minute 
   + Black and white
