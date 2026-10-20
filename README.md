@@ -9,6 +9,11 @@
 
 
 Lets Fucking Go!!!!!
+
+- ❌ General Reel för index/header:
+  + 1 minute 
+  + Black and white
+  + Logo, Drawing BTS, Illu, Animation, CGI, Music.
 - ✅Add all icons Jsons date:
   + ❌ Musik und Webdesign Jsons animation
 - About me Page layout:
