@@ -55,16 +55,23 @@
             font-family: 'Geom Variable', sans-serif;
             background-color: #ffffff;
             color: #000000;
+            /* Never let the browser shift the page while the grid reshuffles. */
+            overflow-anchor: none;
         }
 
         html {
             scroll-behavior: auto;
             scroll-snap-type: none;
+            overflow-anchor: none;
         }
 
         #hero-section,
         #interactive-grid {
             transition: none;
+            /* Both sections are exactly one screen tall, so a snap can only
+               ever show the hero or the grid — never a mix of the two. */
+            height: 100vh;
+            height: 100svh;
         }
 
         /* 1. Header Hide/Show Animation */
@@ -241,13 +248,29 @@
         }
 
         /* --- Interactive 8x12 / 12x8 Grid --- */
+        #interactive-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            /* Symmetric padding keeps the grid exactly in the viewport centre
+               while still clearing the fixed 4rem header. */
+            padding: 4rem 1rem;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
         #grid-container {
             --grid-gap: 0.5rem;
             --grid-move-time: 0.27s;
             /* Fallback for browsers without container query units */
             --grid-radius: 1rem;
-            /* 2:3 portrait box (8x12, square cells) — full width on mobile */
+            /* 2:3 portrait box (8x12, square cells) — full width on mobile,
+               but never taller than the screen height available for it. */
             width: 100%;
+            width: min(100%, calc((100vh - 8rem) * 2 / 3));
+            width: min(100%, calc((100svh - 8rem) * 2 / 3));
+            max-width: 100%;
             container-type: inline-size;
         }
 
@@ -261,10 +284,17 @@
         }
 
         @media (min-width: 768px) {
+            #interactive-grid {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+
             #grid-container {
                 --grid-gap: 1rem;
-                /* Landscape 12x8 grid on desktop — 50% of screen width */
-                width: 50vw;
+                /* Landscape 12x8 grid on desktop — half the viewport width,
+                   capped so it always fits inside one screen height. */
+                width: min(50vw, calc((100vh - 8rem) * 3 / 2));
+                width: min(50vw, calc((100svh - 8rem) * 3 / 2));
             }
         }
 
@@ -464,8 +494,8 @@
     </div>
 
     <!-- SECTION 1.5: Interactive 8x12 / 12x8 Grid -->
-    <section id="interactive-grid" class="relative z-10 w-full bg-white min-h-screen flex items-center justify-center pt-24 md:pt-32 pb-12 md:pb-16 overflow-hidden">
-        <div class="max-w-6xl mx-auto px-4 md:px-8">
+    <section id="interactive-grid" class="relative z-10 w-full bg-white overflow-hidden">
+        <div class="w-full flex justify-center">
             <div id="grid-container"
                  class="grid grid-cols-8 grid-rows-12 gap-2 md:grid-cols-12 md:grid-rows-8 md:gap-4 relative mx-auto aspect-[2/3] md:aspect-[3/2]">
                 <!-- 8 rectangles injected by JS -->
@@ -1142,18 +1172,12 @@
                 if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
                     e.preventDefault(); 
 
-                    const getOffset = (id) => {
-                        const el = document.getElementById(id);
-                        if (!el) return 0;
-                        const rect = el.getBoundingClientRect();
-                        return rect.top + window.scrollY;
-                    };
-
                     const targets = [
-                        0, 
-                        getOffset('interactive-grid'),
-                        getOffset('footer')
-                    ].sort((a, b) => a - b);
+                        0,
+                        getGridTarget(),
+                        getMaxScroll()
+                    ].filter((value, index, list) => list.indexOf(value) === index)
+                     .sort((a, b) => a - b);
 
                     const currentScroll = window.scrollY;
                     const threshold = 10; 
@@ -1262,29 +1286,63 @@
             const hideHeader = () => { header.classList.add('header-hidden'); };
             const showHeader = () => { header.classList.remove('header-hidden'); };
             const gridSection = document.getElementById('interactive-grid');
+            const gridElement = document.getElementById('grid-container');
             let wheelDistance = 0;
             let sectionAnimationFrame;
             let isSectionAnimating = false;
+            // The section the page last settled on, used to keep it aligned
+            // when the window is resized or the mobile URL bar changes height.
+            let activeSection = 'hero';
             // How much wheel travel is required before a section jump is triggered.
             const SECTION_JUMP_DISTANCE = 300;
+            // Positions this close to the grid target still count as "on the grid".
+            const GRID_SNAP_TOLERANCE = 40;
+
+            const getMaxScroll = () => Math.max(
+                0,
+                document.documentElement.scrollHeight - window.innerHeight
+            );
+
             const getGridOffset = () => {
                 if (!gridSection) return 0;
                 return gridSection.getBoundingClientRect().top + window.scrollY;
             };
-            const getGridBottom = () => {
+
+            // Scroll position at which the grid itself (not just the section
+            // around it) sits exactly in the middle of the viewport.
+            const getGridTarget = () => {
                 if (!gridSection) return 0;
-                return gridSection.getBoundingClientRect().bottom + window.scrollY;
+                const sectionTop = getGridOffset();
+                if (!gridElement) return sectionTop;
+                const gridRect = gridElement.getBoundingClientRect();
+                const gridCenter = gridRect.top + window.scrollY + gridRect.height / 2;
+                // Never scroll above the start of the grid section, so no part
+                // of the hero can peek in at the top of the screen.
+                return Math.min(
+                    Math.max(sectionTop, gridCenter - window.innerHeight / 2),
+                    getMaxScroll()
+                );
             };
-            // The single threshold line that separates the hero (header) section
-            // from the grid/rectangles section.
-            const getGridBoundary = () => getGridOffset() - 10;
 
             const moveToSection = (target) => {
+                const clampedTarget = Math.max(0, Math.min(target, getMaxScroll()));
+                const gridTarget = getGridTarget();
+                const footerTarget = getMaxScroll();
+                if (Math.abs(clampedTarget - footerTarget) < 2) {
+                    activeSection = 'footer';
+                } else if (Math.abs(clampedTarget - gridTarget) < 2) {
+                    activeSection = 'grid';
+                } else {
+                    activeSection = 'hero';
+                }
+
+                if (Math.abs(window.scrollY - clampedTarget) < 1) return;
+
                 cancelAnimationFrame(sectionAnimationFrame);
                 isSectionAnimating = true;
 
                 const start = window.scrollY;
-                const distance = target - start;
+                const distance = clampedTarget - start;
                 const startTime = performance.now();
                 const duration = 600;
 
@@ -1306,10 +1364,8 @@
                 sectionAnimationFrame = requestAnimationFrame(animateScroll);
             };
 
-            // Keep each section still until the scroll intent crosses the jump threshold.
-            // The hero and the whole grid section are treated as the two "snap"
-            // targets, so the threshold works no matter where in the grid the user
-            // is coming back from (e.g. after scrolling down to the impressum).
+            // Wheel navigation between the three resting points: hero, grid,
+            // and footer. Coming back up from the footer lands on the grid first.
             window.addEventListener('wheel', (event) => {
                 if (!gridSection || Math.abs(event.deltaY) < 1) return;
 
@@ -1318,17 +1374,22 @@
                     return;
                 }
 
-                const gridOffset = getGridOffset();
-                const gridBottom = getGridBottom();
-                const boundary = getGridBoundary();
-                const atHero = window.scrollY < boundary;
-                // Grid = from the boundary down to the bottom of the grid section.
-                // The footer below the grid is deliberately left free to scroll.
-                const atGrid = window.scrollY >= boundary && window.scrollY < gridBottom - 10;
-                const movingTowardGrid = event.deltaY > 0 && atHero;
-                const movingTowardHero = event.deltaY < 0 && atGrid;
+                const current = window.scrollY;
+                const gridTarget = getGridTarget();
+                const atHero = current < gridTarget - GRID_SNAP_TOLERANCE;
+                const atGrid = Math.abs(current - gridTarget) <= GRID_SNAP_TOLERANCE;
+                const belowGrid = current > gridTarget + GRID_SNAP_TOLERANCE;
 
-                if (!movingTowardGrid && !movingTowardHero) {
+                let target = null;
+                if (event.deltaY > 0 && atHero) {
+                    target = gridTarget;
+                } else if (event.deltaY < 0 && atGrid) {
+                    target = 0;
+                } else if (event.deltaY < 0 && belowGrid) {
+                    target = gridTarget;
+                }
+
+                if (target === null) {
                     wheelDistance = 0;
                     return;
                 }
@@ -1337,28 +1398,57 @@
                 wheelDistance += event.deltaY;
 
                 if (Math.abs(wheelDistance) >= SECTION_JUMP_DISTANCE) {
-                    moveToSection(movingTowardGrid ? gridOffset : 0);
+                    moveToSection(target);
                     wheelDistance = 0;
                 }
             }, { passive: false });
 
-            // Safety net: if the user stops scrolling while sitting on the hero/grid
-            // threshold (for example after a momentum flick), snap to the nearest
-            // section so the boundary is never left in a dead spot.
-            let boundarySnapTimer = null;
+            // Safety net for touch scrolling, scrollbar dragging, keyboard
+            // paging and momentum flicks: once scrolling stops, always settle
+            // on the hero, the centred grid, or the footer — never halfway.
+            let sectionSnapTimer = null;
+            let isResizing = false;
             window.addEventListener('scroll', () => {
-                if (isSectionAnimating || !gridSection) return;
-                clearTimeout(boundarySnapTimer);
-                boundarySnapTimer = setTimeout(() => {
-                    if (isSectionAnimating || !gridSection) return;
-                    const boundary = getGridBoundary();
+                if (isSectionAnimating || isResizing || !gridSection) return;
+                clearTimeout(sectionSnapTimer);
+                sectionSnapTimer = setTimeout(() => {
+                    if (isSectionAnimating || isResizing || !gridSection) return;
+
                     const current = window.scrollY;
-                    if (Math.abs(current - boundary) > 40) return;
-                    const target = current < boundary ? 0 : getGridOffset();
-                    // Already resting on a section boundary – nothing to do.
-                    if (Math.abs(current - target) < 5) return;
-                    moveToSection(target);
-                }, 120);
+                    const gridTarget = getGridTarget();
+                    const footerTarget = getMaxScroll();
+
+                    if (current <= gridTarget + GRID_SNAP_TOLERANCE) {
+                        const nearest = current < gridTarget / 2 ? 0 : gridTarget;
+                        if (Math.abs(current - nearest) < 2) return;
+                        moveToSection(nearest);
+                        return;
+                    }
+
+                    const midpoint = (gridTarget + footerTarget) / 2;
+                    const nearest = current < midpoint ? gridTarget : footerTarget;
+                    if (Math.abs(current - nearest) < 2) return;
+                    moveToSection(nearest);
+                }, 140);
+            });
+
+            // Keep the current section aligned after a window resize (or the
+            // mobile browser bar expanding/collapsing changes the viewport).
+            // Resizing can clamp the scroll position, so this runs before the
+            // scroll safety net above and then re-centres the active section.
+            let resizeSnapTimer = null;
+            window.addEventListener('resize', () => {
+                isResizing = true;
+                clearTimeout(resizeSnapTimer);
+                resizeSnapTimer = setTimeout(() => {
+                    isResizing = false;
+                    if (isSectionAnimating) return;
+                    if (activeSection === 'grid') {
+                        moveToSection(getGridTarget());
+                    } else if (activeSection === 'footer') {
+                        moveToSection(getMaxScroll());
+                    }
+                }, 100);
             });
 
             window.addEventListener('scroll', () => {
