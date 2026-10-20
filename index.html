@@ -275,6 +275,15 @@
             justify-content: center;
             border-radius: var(--grid-radius);
             overflow: hidden;
+            /* Each rectangle is a query container so the label text and icon
+               can react to the rectangle's own width and height. */
+            container-type: size;
+            /* Label text follows both dimensions: width (6cqw) so wide
+               rectangles get larger text, height (16cqh) so short rectangles
+               never get text that is too tall for them. */
+            --grid-label-size: clamp(0.5rem, min(6cqw, 16cqh), 1.1rem);
+            /* Space the label needs at the bottom: offset + line + small gap. */
+            --grid-label-space: calc(0.6rem + 1.2 * var(--grid-label-size) + 0.35rem);
             transition:
                 left var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
                 top var(--grid-move-time) cubic-bezier(0.65, 0, 0.35, 1),
@@ -293,11 +302,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: filter 0.5s ease, transform 0.27s cubic-bezier(0.65, 0, 0.35, 1);
+            transition:
+                filter 0.5s ease,
+                transform 0.27s cubic-bezier(0.65, 0, 0.35, 1),
+                inset 0.27s cubic-bezier(0.65, 0, 0.35, 1);
             transform-origin: center;
         }
 
+        /* On hover the label appears along the bottom edge: shrink the icon
+           into the space above it so the two can never overlap. */
         .grid-rect:hover .grid-rect-icon {
+            inset: 6% 6% max(6%, var(--grid-label-space)) 6%;
             transform: scale(0.75);
         }
 
@@ -321,10 +336,18 @@
             left: 0;
             right: 0;
             bottom: 0.6rem;
+            padding: 0 0.25rem;
             text-align: center;
-            font-size: 0.85rem;
+            /* Fluid text defined on .grid-rect: scales with the rectangle and
+               never grows too tall for short rectangles. */
+            font-size: var(--grid-label-size);
+            line-height: 1.2;
             font-weight: 600;
             letter-spacing: 0.02em;
+            /* Keep the label on one line so the reserved icon space holds. */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             opacity: 0;
             transform: translateY(120%);
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -1242,10 +1265,19 @@
             let wheelDistance = 0;
             let sectionAnimationFrame;
             let isSectionAnimating = false;
+            // How much wheel travel is required before a section jump is triggered.
+            const SECTION_JUMP_DISTANCE = 300;
             const getGridOffset = () => {
                 if (!gridSection) return 0;
                 return gridSection.getBoundingClientRect().top + window.scrollY;
             };
+            const getGridBottom = () => {
+                if (!gridSection) return 0;
+                return gridSection.getBoundingClientRect().bottom + window.scrollY;
+            };
+            // The single threshold line that separates the hero (header) section
+            // from the grid/rectangles section.
+            const getGridBoundary = () => getGridOffset() - 10;
 
             const moveToSection = (target) => {
                 cancelAnimationFrame(sectionAnimationFrame);
@@ -1275,6 +1307,9 @@
             };
 
             // Keep each section still until the scroll intent crosses the jump threshold.
+            // The hero and the whole grid section are treated as the two "snap"
+            // targets, so the threshold works no matter where in the grid the user
+            // is coming back from (e.g. after scrolling down to the impressum).
             window.addEventListener('wheel', (event) => {
                 if (!gridSection || Math.abs(event.deltaY) < 1) return;
 
@@ -1284,8 +1319,12 @@
                 }
 
                 const gridOffset = getGridOffset();
-                const atHero = window.scrollY < gridOffset - 10;
-                    const atGrid = window.scrollY >= gridOffset - 10 && window.scrollY <= gridOffset + 120;
+                const gridBottom = getGridBottom();
+                const boundary = getGridBoundary();
+                const atHero = window.scrollY < boundary;
+                // Grid = from the boundary down to the bottom of the grid section.
+                // The footer below the grid is deliberately left free to scroll.
+                const atGrid = window.scrollY >= boundary && window.scrollY < gridBottom - 10;
                 const movingTowardGrid = event.deltaY > 0 && atHero;
                 const movingTowardHero = event.deltaY < 0 && atGrid;
 
@@ -1297,11 +1336,30 @@
                 event.preventDefault();
                 wheelDistance += event.deltaY;
 
-                if (Math.abs(wheelDistance) >= 300) {
+                if (Math.abs(wheelDistance) >= SECTION_JUMP_DISTANCE) {
                     moveToSection(movingTowardGrid ? gridOffset : 0);
                     wheelDistance = 0;
                 }
             }, { passive: false });
+
+            // Safety net: if the user stops scrolling while sitting on the hero/grid
+            // threshold (for example after a momentum flick), snap to the nearest
+            // section so the boundary is never left in a dead spot.
+            let boundarySnapTimer = null;
+            window.addEventListener('scroll', () => {
+                if (isSectionAnimating || !gridSection) return;
+                clearTimeout(boundarySnapTimer);
+                boundarySnapTimer = setTimeout(() => {
+                    if (isSectionAnimating || !gridSection) return;
+                    const boundary = getGridBoundary();
+                    const current = window.scrollY;
+                    if (Math.abs(current - boundary) > 40) return;
+                    const target = current < boundary ? 0 : getGridOffset();
+                    // Already resting on a section boundary – nothing to do.
+                    if (Math.abs(current - target) < 5) return;
+                    moveToSection(target);
+                }, 120);
+            });
 
             window.addEventListener('scroll', () => {
                 const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
