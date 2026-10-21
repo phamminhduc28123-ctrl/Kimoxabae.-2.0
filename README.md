@@ -42,9 +42,18 @@ Lets Fucking Go!!!!!
 - Photography Page:
   + ✅Layout
   + ❌Hero?
-- ❌ CGI Reel reediting/reupload ❗❗❗:
+- ❌ CGI Reel reediting/reupload ❗❗❗: old reel( https://vimeo.com/manage/videos/1104557560 ), noddle ( https://vimeo.com/1236302050?fl=ip&fe=ec )
   + Keep/Find: Buscemi, Moiras.
   + Scharfe Ramen
   + Mehr Motion Design Houdini
 - ✅ Linked minhducpham.de / kimoxabae.de
 - ✅Grid Section in index.html fix
+- Animation Vids:
+  + ❌ Eiskuhlauf: https://vimeo.com/1238006958?fl=tl&fe=ec
+  + ✅ Magic: https://vimeo.com/1099044860?fl=tl&fe=ecGDTQ
+  + ✅ Excalibur: https://vimeo.com/1099081815?fl=tl&fe=ec
+  + ❌ Background: https://vimeo.com/1104428417?fl=tl&fe=ec
+  + ✅ Nham: https://vimeo.com/1099038796?fl=tl&fe=ec
+  + ✅ GDTQ: https://vimeo.com/1103869128?fl=tl&fe=ec
+  + ✅ Dog & Cat: https://vimeo.com/1099093216?fl=tl&fe=ec
+  + ✅ Geist: https://vimeo.com/1099034448?fl=tl&fe=ec
