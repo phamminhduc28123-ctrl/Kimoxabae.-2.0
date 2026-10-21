@@ -42,6 +42,9 @@ Lets Fucking Go!!!!!
 - Photography Page:
   + ✅Layout
   + ❌Hero?
-- ❌ CGI Reel reediting/reupload ❗❗❗
+- ❌ CGI Reel reediting/reupload ❗❗❗:
+  + Keep/Find: Buscemi, Moiras.
+  + Scharfe Ramen
+  + Mehr Motion Design Houdini
 - ✅ Linked minhducpham.de / kimoxabae.de
 - ✅Grid Section in index.html fix
