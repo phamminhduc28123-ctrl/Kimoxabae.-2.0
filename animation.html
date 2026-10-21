@@ -1,66 +1,1949 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<link rel="icon" type="image/svg+xml" href="Kimoxabae%20Favicon.svg">
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Animation</title>
+    <link rel="icon" type="image/svg+xml" href="Kimoxabae%20Favicon.svg">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#050505">
+    <title>Animation</title>
+    <meta name="description" content="A self-taught animation workprint by Minh Duc Pham. Eight projects, 21,350 frames, shown in the order they were made.">
 
-	<script src="https://cdn.tailwindcss.com"></script>
-	<style id="shared-styles"></style>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Animation — A Workprint | Minh Duc Pham">
+    <meta property="og:description" content="Eight projects. 21,350 frames. Fourteen minutes. No film school.">
+    <meta property="og:image" content="images/animation/gdtq-1280.jpg">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style id="shared-styles"></style>
+
+    <style>
+        /* --- FONTS (also supplied by the shared index styles) --- */
+        @font-face {
+            font-family: 'Geom Variable';
+            src: url('fonts/Geom-VariableFont_wght.woff2') format('woff2'),
+                 url('fonts/Geom-VariableFont_wght.woff') format('woff'),
+                 url('fonts/Geom-VariableFont_wght.ttf') format('truetype');
+            font-weight: 100 900;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Lexend Variable';
+            src: url('fonts/Lexend-VariableFont_wght.ttf') format('truetype');
+            font-weight: 100 900;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        :root {
+            --ink: #050505;
+            --paper: #f4f0e9;
+            --muted: #8d8d87;
+            --line: rgba(244, 240, 233, .16);
+            --line-soft: rgba(244, 240, 233, .08);
+            --pad: clamp(1.25rem, 4vw, 4rem);
+            --max: 1440px;
+        }
+
+        * { box-sizing: border-box; }
+
+        html {
+            background: var(--ink);
+            scroll-behavior: auto;
+        }
+
+        body.animation-page {
+            margin: 0;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'Geom Variable', sans-serif;
+            overflow-x: clip;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body.animation-page ::selection {
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        body.animation-page a { color: inherit; }
+
+        /* Keep the header visible on the long programme, and blend it into the page. */
+        #shared-header #smartHeader {
+            background-color: var(--ink) !important;
+            border-bottom: 1px solid var(--line-soft);
+        }
+        #smartHeader.header-hidden { top: 0 !important; }
+
+        .container {
+            width: 100%;
+            max-width: var(--max);
+            margin-inline: auto;
+            padding-inline: var(--pad);
+        }
+
+        .eyebrow {
+            font-size: .58rem;
+            line-height: 1.5;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ---------------- HERO ---------------- */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            overflow: hidden;
+            padding-top: 4rem;
+            isolation: isolate;
+        }
+
+        .hero-media {
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            background: #000;
+        }
+
+        .hero-frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            filter: grayscale(1) contrast(1.06) brightness(.56);
+            transform: scale(1.06);
+            transition: opacity 1.8s ease, transform 7s linear;
+        }
+
+        .hero-frame.is-active {
+            opacity: .72;
+            transform: scale(1);
+        }
+
+        .hero-shade {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background:
+                linear-gradient(180deg, rgba(5, 5, 5, .72) 0%, rgba(5, 5, 5, .06) 32%, rgba(5, 5, 5, .32) 62%, var(--ink) 100%);
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: var(--max);
+            margin-inline: auto;
+            padding: 1.5rem var(--pad) clamp(2rem, 5vh, 4rem);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 4rem;
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .hero-title {
+            margin: 0 0 1.5rem;
+            font-family: 'Lexend Variable', sans-serif;
+            font-size: clamp(2.6rem, 12.4vw, 11.5rem);
+            line-height: .82;
+            letter-spacing: .005em;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .hero-sub {
+            max-width: 44rem;
+            margin: 0;
+            font-size: clamp(1.15rem, 2.1vw, 1.85rem);
+            line-height: 1.35;
+            font-weight: 300;
+            color: rgba(244, 240, 233, .92);
+        }
+
+        .hero-sub strong { font-weight: 500; color: var(--paper); }
+
+        .hero-sub span {
+            display: block;
+            margin-top: .55rem;
+            font-size: .62em;
+            letter-spacing: .02em;
+            color: var(--muted);
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .75rem 2rem;
+            margin-top: 1.75rem;
+        }
+
+        .hero-scroll {
+            display: inline-flex;
+            align-items: center;
+            gap: .75rem;
+            font-size: .58rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color .3s ease;
+        }
+
+        .hero-scroll::before {
+            content: '';
+            display: block;
+            width: 2.5rem;
+            height: 1px;
+            background: var(--line);
+        }
+
+        .hero-scroll:hover { color: var(--paper); }
+
+        /* ---------------- MANIFESTO ---------------- */
+        .manifesto {
+            padding: clamp(5rem, 12vh, 9rem) 0;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .manifesto-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr);
+            gap: clamp(2rem, 6vw, 6rem);
+            align-items: start;
+        }
+
+        .manifesto-text {
+            max-width: 22ch;
+            margin: 0;
+            font-size: clamp(2.1rem, 4.6vw, 4.6rem);
+            line-height: 1.02;
+            letter-spacing: -.03em;
+            font-weight: 300;
+        }
+
+        .manifesto-text .quiet { color: var(--muted); }
+
+        .manifesto-body {
+            max-width: 36rem;
+            margin: 2rem 0 0 auto;
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.75;
+        }
+
+        /* ---------------- STICKY FILM INDEX ---------------- */
+        .film-strip {
+            position: sticky;
+            top: 4rem;
+            z-index: 40;
+            background: rgba(5, 5, 5, .92);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .film-strip-inner {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            width: 100%;
+            max-width: var(--max);
+            margin-inline: auto;
+            padding: .55rem var(--pad);
+        }
+
+        .strip-label,
+        .strip-total {
+            flex: none;
+            font-size: .55rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .strip-items {
+            display: flex;
+            flex: 1;
+            gap: .3rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .strip-items::-webkit-scrollbar { display: none; }
+
+        .strip-item {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            flex: none;
+            padding: .28rem .45rem;
+            border: 1px solid transparent;
+            color: var(--muted);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color .3s ease, border-color .3s ease, background .3s ease;
+        }
+
+        .strip-item img {
+            display: block;
+            width: 2.8rem;
+            height: 1.6rem;
+            object-fit: cover;
+            filter: grayscale(1);
+            opacity: .45;
+            transition: filter .4s ease, opacity .4s ease;
+        }
+
+        .strip-item .num {
+            font-size: .52rem;
+            letter-spacing: .12em;
+        }
+
+        .strip-item .name {
+            font-size: .58rem;
+            letter-spacing: .13em;
+            text-transform: uppercase;
+        }
+
+        .strip-item:hover,
+        .strip-item.is-active {
+            color: var(--paper);
+            border-color: var(--line);
+            background: rgba(244, 240, 233, .04);
+        }
+
+        .strip-item:hover img,
+        .strip-item.is-active img {
+            filter: grayscale(0);
+            opacity: 1;
+        }
+
+        .strip-progress {
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 100%;
+            height: 1px;
+            background: var(--paper);
+            transform: scaleX(0);
+            transform-origin: left center;
+            will-change: transform;
+        }
+
+        /* ---------------- FILMS ---------------- */
+        .films { padding-bottom: 2rem; }
+
+        .film {
+            padding: clamp(4.5rem, 10vh, 8rem) 0;
+            border-bottom: 1px solid var(--line-soft);
+            scroll-margin-top: 8.5rem;
+        }
+
+        .film-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+            column-gap: clamp(2rem, 5vw, 6rem);
+            row-gap: 2rem;
+            align-items: start;
+        }
+
+        .film:nth-child(even) .film-grid {
+            grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+        }
+
+        .film-header {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .film-body {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .film-grid > .poster {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+            align-self: center;
+        }
+
+        .film:nth-child(even):not(.film--feature) .film-header,
+        .film:nth-child(even):not(.film--feature) .film-body {
+            grid-column: 2;
+        }
+
+        .film:nth-child(even) .film-grid > .poster {
+            grid-column: 1;
+        }
+
+        .film-kicker {
+            display: flex;
+            align-items: baseline;
+            gap: .5rem;
+            margin-bottom: 1rem;
+        }
+
+        .film-index {
+            font-family: 'Lexend Variable', sans-serif;
+            font-size: clamp(2.6rem, 4vw, 4rem);
+            line-height: .8;
+            letter-spacing: -.04em;
+            color: rgba(244, 240, 233, .22);
+        }
+
+        .film-of {
+            font-size: .55rem;
+            letter-spacing: .2em;
+            color: var(--muted);
+        }
+
+        .film-title {
+            margin: 0 0 1rem;
+            font-family: 'Lexend Variable', sans-serif;
+            font-size: clamp(2.2rem, 3.9vw, 3.9rem);
+            line-height: .94;
+            letter-spacing: -.01em;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .film-meta {
+            margin: 0;
+            font-size: .58rem;
+            line-height: 1.9;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .film-premise {
+            max-width: 29rem;
+            margin: 1.4rem 0 0;
+            font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+            line-height: 1.5;
+            font-weight: 300;
+            color: rgba(244, 240, 233, .9);
+        }
+
+        .poster {
+            position: relative;
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            padding: 0;
+            border: 1px solid var(--line);
+            background: #000;
+            overflow: hidden;
+            cursor: pointer;
+            color: var(--paper);
+            text-align: left;
+            text-decoration: none;
+        }
+
+        .poster-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.04) brightness(.9);
+            transform: scale(1.01);
+            transition: filter .7s ease, transform .9s cubic-bezier(.2, .7, .2, 1);
+            will-change: transform;
+        }
+
+        .poster--bright .poster-img {
+            filter: grayscale(1) contrast(1.02) brightness(.78);
+        }
+
+        .poster:hover .poster-img,
+        .poster:focus-visible .poster-img {
+            filter: grayscale(0) contrast(1.04) brightness(1);
+        }
+
+        .poster::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: linear-gradient(180deg, transparent 52%, rgba(5, 5, 5, .68) 100%);
+            pointer-events: none;
+        }
+
+        .poster-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 3;
+            width: clamp(3.4rem, 6vw, 5rem);
+            height: clamp(3.4rem, 6vw, 5rem);
+            transform: translate(-50%, -50%);
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(244, 240, 233, .55);
+            border-radius: 50%;
+            background: rgba(5, 5, 5, .28);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            transition: background .35s ease, color .35s ease, transform .35s ease;
+        }
+
+        .poster:hover .poster-play,
+        .poster:focus-visible .poster-play {
+            background: var(--paper);
+            color: var(--ink);
+            transform: translate(-50%, -50%) scale(1.06);
+        }
+
+        .poster-play svg {
+            display: block;
+            width: 1.05rem;
+            height: 1.05rem;
+            margin-left: .15rem;
+        }
+
+        .poster-time,
+        .poster-hint {
+            position: absolute;
+            bottom: .9rem;
+            z-index: 3;
+            font-size: .53rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: rgba(244, 240, 233, .82);
+        }
+
+        .poster-time { left: 1rem; }
+        .poster-hint { right: 1rem; }
+
+        .film-notes {
+            margin: 0;
+            border-top: 1px solid var(--line-soft);
+        }
+
+        .film-notes > div {
+            display: grid;
+            grid-template-columns: 5.5rem minmax(0, 1fr);
+            gap: 1rem;
+            padding: .85rem 0;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .film-notes dt {
+            padding-top: .13rem;
+            font-size: .52rem;
+            line-height: 1.5;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .film-notes dd {
+            margin: 0;
+            font-size: .9rem;
+            line-height: 1.6;
+            color: rgba(244, 240, 233, .78);
+        }
+
+        .film-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .9rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .film-link {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding-bottom: .3rem;
+            border-bottom: 1px solid var(--line);
+            font-size: .58rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: gap .3s ease, border-color .3s ease;
+        }
+
+        .film-link:hover {
+            gap: .8rem;
+            border-color: var(--paper);
+        }
+
+        .film-also {
+            font-size: .55rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: color .3s ease, border-color .3s ease;
+        }
+
+        .film-also:hover {
+            color: var(--paper);
+            border-color: var(--line);
+        }
+
+        /* ---------------- FULL-BLEED FEATURE ---------------- */
+        .film--feature .finale-body {
+            padding-bottom: 0;
+        }
+
+        .finale-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+            gap: 2rem;
+            align-items: end;
+            margin-bottom: 2rem;
+        }
+
+        .finale-head .film-title {
+            max-width: 14ch;
+            margin-bottom: 1rem;
+            font-size: clamp(2.4rem, 5vw, 5.2rem);
+        }
+
+        .finale-copy { max-width: 32rem; padding-bottom: .35rem; }
+        .finale-copy .film-premise { margin-top: 0; }
+
+        .finale-poster {
+            border-right: 0;
+            border-left: 0;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            aspect-ratio: 16 / 9;
+            max-height: 84vh;
+        }
+
+        .finale-body {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+            gap: 2rem;
+            padding-top: 2rem;
+            padding-bottom: clamp(4rem, 8vh, 6rem);
+        }
+
+        .finale-body .film-notes { border-top: 0; }
+
+        .finale-body .film-notes > div {
+            border-top: 1px solid var(--line-soft);
+            border-bottom: 0;
+        }
+
+        .finale-body .film-actions { margin-top: 0; }
+
+        /* ---------------- CLOSING ---------------- */
+        .closing {
+            padding: clamp(5rem, 12vh, 9rem) 0;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .closing-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+            gap: 2rem;
+            align-items: end;
+        }
+
+        .closing h2 {
+            margin: .75rem 0 0;
+            font-family: 'Lexend Variable', sans-serif;
+            font-size: clamp(2.6rem, 6vw, 6rem);
+            line-height: .96;
+            letter-spacing: -.015em;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .closing h2 a {
+            text-decoration: none;
+            border-bottom: 1px solid var(--line);
+            transition: border-color .3s ease;
+        }
+
+        .closing h2 a:hover { border-color: var(--paper); }
+
+        .closing-copy {
+            max-width: 28rem;
+            margin: 0;
+            color: var(--muted);
+            font-size: .95rem;
+            line-height: 1.75;
+        }
+
+        .back-to-top {
+            display: inline-block;
+            margin-top: 1.25rem;
+            font-size: .55rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--paper);
+            text-decoration: none;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: .25rem;
+        }
+
+        /* ---------------- FOOTER ---------------- */
+        .site-footer {
+            padding: 3.5rem 0 2rem;
+            color: var(--muted);
+            font-size: .65rem;
+            line-height: 1.8;
+        }
+
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .footer-mark {
+            font-family: 'Lexend Variable', sans-serif;
+            font-size: .9rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--paper);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 1.75rem 0;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .footer-grid a {
+            color: var(--paper);
+            text-decoration: none;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .footer-note {
+            max-width: 40rem;
+            margin: 0;
+            color: #6f6f6b;
+            font-size: .6rem;
+            line-height: 1.8;
+        }
+
+        /* ---------------- PLAYER DIALOG ---------------- */
+        .player-dialog {
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            max-height: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .player-dialog::backdrop {
+            background: rgba(0, 0, 0, .92);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .player-shell {
+            width: min(1200px, 100%);
+            height: 100%;
+            margin-inline: auto;
+            padding: 2rem var(--pad);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1.2rem;
+        }
+
+        .player-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            width: min(100%, calc(72svh * 16 / 9));
+            margin-inline: auto;
+        }
+
+        .player-close {
+            padding: .45rem 0;
+            border: 0;
+            border-bottom: 1px solid var(--line);
+            background: none;
+            color: var(--paper);
+            font-family: inherit;
+            font-size: .57rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: border-color .3s ease;
+        }
+
+        .player-close:hover { border-color: var(--paper); }
+
+        .player-frame {
+            position: relative;
+            width: min(100%, calc(72svh * 16 / 9));
+            aspect-ratio: 16 / 9;
+            margin-inline: auto;
+            background: #000;
+            border: 1px solid var(--line-soft);
+        }
+
+        .player-frame iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .player-frame.is-loading::after {
+            content: 'Loading film';
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            font-size: .55rem;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: #000;
+        }
+
+        .player-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 2rem;
+            width: min(100%, calc(72svh * 16 / 9));
+            margin-inline: auto;
+        }
+
+        .player-info h3 {
+            margin: .3rem 0;
+            font-family: 'Lexend Variable', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .player-info p {
+            margin: 0;
+            font-size: .55rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .player-nav { display: flex; gap: .4rem; flex: none; }
+
+        .player-nav button {
+            padding: .5rem .7rem;
+            border: 1px solid var(--line);
+            background: none;
+            color: var(--paper);
+            font-family: inherit;
+            font-size: .54rem;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background .25s ease, color .25s ease, opacity .25s ease;
+        }
+
+        .player-nav button:hover:not(:disabled) {
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        .player-nav button:disabled { opacity: .25; cursor: default; }
+
+        .player-note {
+            width: min(100%, calc(72svh * 16 / 9));
+            margin-inline: auto;
+            margin-bottom: 0;
+            color: #6f6f6b;
+            font-size: .53rem;
+            line-height: 1.6;
+            letter-spacing: .06em;
+        }
+
+        body.modal-open { overflow: hidden; }
+
+        /* ---------------- FOCUS ---------------- */
+        body.animation-page a:focus-visible,
+        body.animation-page button:focus-visible,
+        body.animation-page summary:focus-visible {
+            outline: 1px solid var(--paper);
+            outline-offset: 4px;
+        }
+
+        /* ---------------- RESPONSIVE ---------------- */
+        @media (max-width: 900px) {
+            .manifesto-grid,
+            .finale-head,
+            .finale-body,
+            .closing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .manifesto-body { margin-left: 0; }
+
+            .film-grid,
+            .film:nth-child(even) .film-grid {
+                grid-template-columns: 1fr;
+                row-gap: 2.25rem;
+            }
+
+            .film-header,
+            .film:nth-child(even) .film-header {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .film-grid > .poster,
+            .film:nth-child(even) .film-grid > .poster {
+                grid-column: 1;
+                grid-row: 2;
+                align-self: stretch;
+            }
+
+            .film-body,
+            .film:nth-child(even) .film-body {
+                grid-column: 1;
+                grid-row: 3;
+            }
+
+            .film-title,
+            .finale-head .film-title {
+                font-size: clamp(2.2rem, 8vw, 3.6rem);
+            }
+
+            .finale-head { margin-bottom: 1.75rem; }
+            .finale-copy { max-width: none; }
+            .finale-poster { max-height: none; }
+            .finale-body { padding-top: 1.75rem; }
+
+            .closing-copy { max-width: none; }
+
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .hero-inner { padding-top: 1.25rem; gap: 2.5rem; }
+            .hero-top .eyebrow:last-child { display: none; }
+            .hero-title { margin-bottom: 1.1rem; }
+            .hero-meta { gap: .6rem 1.25rem; }
+            .hero-scroll { display: none; }
+
+            .strip-label,
+            .strip-total,
+            .strip-item .name {
+                display: none;
+            }
+
+            .film-strip-inner { gap: .25rem; }
+            .strip-item { gap: .25rem; padding: .2rem .2rem; border-width: 1px; }
+            .strip-item img { width: 1.8rem; height: 1.08rem; }
+            .strip-item .num { font-size: .42rem; }
+
+            .film { scroll-margin-top: 8rem; }
+            .film-kicker { margin-bottom: .75rem; }
+            .film-notes > div { grid-template-columns: 4.5rem minmax(0, 1fr); gap: .75rem; }
+            .poster-hint { display: none; }
+
+            .footer-top { flex-direction: column; gap: .5rem; }
+            .footer-grid { grid-template-columns: 1fr; gap: .75rem; }
+
+            .player-shell { padding: 1.25rem var(--pad); gap: .9rem; }
+            .player-head { width: 100%; }
+            .player-frame { width: 100%; }
+            .player-foot {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .player-note { width: 100%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-frame { transition: none; }
+            .poster-img { transition: filter .3s ease; }
+            * { scroll-behavior: auto !important; }
+        }
+    </style>
 </head>
 
-<body class="min-h-screen">
-	<div id="shared-header"></div>
+<body class="animation-page">
+    <div id="shared-header"></div>
 
-	<main class="pt-16">
-		<!-- Animation page content -->
-	</main>
+    <main>
+        <!--
+            CONTENT STATUS — layout approved, copy provisional.
+            The eight-film order is confirmed oldest → newest.
+            Replace every block marked data-draft="copy": the project premises
+            and the FIRST TIME / LESSON notes.
+        -->
+        <!-- HERO -->
+        <section class="hero" id="top" aria-labelledby="hero-title">
+            <div class="hero-media" aria-hidden="true">
+                <img class="hero-frame is-active" src="images/animation/geist-1280.jpg" alt="" decoding="async">
+                <img class="hero-frame" src="images/animation/gdtq-1920.jpg" alt="" decoding="async">
+                <img class="hero-frame" src="images/animation/nham-1280.jpg" alt="" decoding="async">
+                <img class="hero-frame" src="images/animation/magic-1280.jpg" alt="" decoding="async">
+                <img class="hero-frame" src="images/animation/dogcat-1280.jpg" alt="" decoding="async">
+                <img class="hero-frame" src="images/animation/excalibur-1280.jpg" alt="" decoding="async">
+            </div>
+            <div class="hero-shade"></div>
 
-	<script>
-		fetch('./index.html')
-			.then(response => {
-				if (!response.ok) {
-					throw new Error('Could not load index.html');
-				}
+            <div class="hero-inner">
+                <div class="hero-top">
+                    <p class="eyebrow">A self-taught animation practice</p>
+                    <p class="eyebrow">Workprint / 01—08</p>
+                </div>
 
-				return response.text();
-			})
-			.then(html => {
-				const sourceDocument =
-					new DOMParser().parseFromString(html, 'text/html');
+                <div>
+                    <h1 class="hero-title" id="hero-title">Animation</h1>
+                    <p class="hero-sub">
+                        <strong>21,350 frames.</strong> Fourteen minutes. No film school.
+                        <span>A workprint, shown in the order it was made.</span>
+                    </p>
+                    <div class="hero-meta">
+                        <span class="eyebrow">Eight projects</span>
+                        <span class="eyebrow">24—25 fps</span>
+                        <span class="eyebrow">14:31 total</span>
+                        <a class="hero-scroll" href="#manifesto">Scroll to screen</a>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-				const sourceStyle =
-					sourceDocument.querySelector('style');
+        <!-- MANIFESTO -->
+        <section class="manifesto" id="manifesto">
+            <div class="container manifesto-grid">
+                <p class="eyebrow">The workprint</p>
+                <div>
+                    <p class="manifesto-text">
+                        I didn't go to film school.<br>
+                        <span class="quiet">I made eight projects instead.</span>
+                    </p>
+                    <p class="manifesto-body">
+                        No traditional training, no shortcuts — just eight projects, shown in the order
+                        I made them. The old ones stay in. That's the point.
+                    </p>
+                </div>
+            </div>
+        </section>
 
-				if (sourceStyle) {
-					document.getElementById('shared-styles').textContent =
-						sourceStyle.textContent;
-				}
+        <!-- STICKY FILM INDEX -->
+        <nav class="film-strip" aria-label="Film index">
+            <div class="film-strip-inner">
+                <span class="strip-label">01 — 08</span>
+                <div class="strip-items">
+                    <a class="strip-item is-active" href="#film-dogcat" data-film="dogcat">
+                        <img src="images/animation/dogcat-640.jpg" alt="" loading="lazy">
+                        <span class="num">01</span><span class="name">Dog &amp; Cat</span>
+                    </a>
+                    <a class="strip-item" href="#film-nham" data-film="nham">
+                        <img src="images/animation/nham-640.jpg" alt="" loading="lazy">
+                        <span class="num">02</span><span class="name">Nhẩm</span>
+                    </a>
+                    <a class="strip-item" href="#film-gdtq" data-film="gdtq">
+                        <img src="images/animation/gdtq-640.jpg" alt="" loading="lazy">
+                        <span class="num">03</span><span class="name">GDTQ</span>
+                    </a>
+                    <a class="strip-item" href="#film-excalibur" data-film="excalibur">
+                        <img src="images/animation/excalibur-640.jpg" alt="" loading="lazy">
+                        <span class="num">04</span><span class="name">Excalibur</span>
+                    </a>
+                    <a class="strip-item" href="#film-magic" data-film="magic">
+                        <img src="images/animation/magic-640.jpg" alt="" loading="lazy">
+                        <span class="num">05</span><span class="name">Magic</span>
+                    </a>
+                    <a class="strip-item" href="#film-geist" data-film="geist">
+                        <img src="images/animation/geist-640.jpg" alt="" loading="lazy">
+                        <span class="num">06</span><span class="name">Geist</span>
+                    </a>
+                    <a class="strip-item" href="#film-background" data-film="background">
+                        <img src="images/animation/background-640.jpg" alt="" loading="lazy">
+                        <span class="num">07</span><span class="name">Website BG</span>
+                    </a>
+                    <a class="strip-item" href="#film-eiskuhlauf" data-film="eiskuhlauf">
+                        <img src="images/animation/eiskuhlauf-640.jpg" alt="" loading="lazy">
+                        <span class="num">08</span><span class="name">Eiskuhlauf</span>
+                    </a>
+                </div>
+                <span class="strip-total">14:31</span>
+            </div>
+            <span class="strip-progress" id="strip-progress" aria-hidden="true"></span>
+        </nav>
 
-				const sourceHeader =
-					sourceDocument.querySelector('#smartHeader');
+        <!-- FILMS -->
+        <div class="films">
+            <!-- 01 -->
+            <article class="film" id="film-dogcat" data-film="dogcat">
+                <div class="container film-grid">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">01</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Dog &amp; Cat</h2>
+                        <p class="film-meta">Intro &middot; 0:26 &middot; 624 frames &middot; 24 fps</p>
+                        <p class="film-premise" data-draft="copy">A short intro for a story about a dog, a cat, and a very specific street.</p>
+                    </header>
 
-				if (sourceHeader) {
-					document
-						.getElementById('shared-header')
-						.appendChild(document.importNode(sourceHeader, true));
-				}
+                    <a class="poster" href="https://vimeo.com/1099093216" data-play="dogcat" target="_blank" rel="noopener" aria-label="Play Dog and Cat, 26 seconds">
+                        <img class="poster-img" src="images/animation/dogcat-1280.jpg" alt="" loading="lazy" decoding="async">
+                        <span class="poster-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                        </span>
+                        <span class="poster-time">0:26</span>
+                        <span class="poster-hint">Open film</span>
+                    </a>
 
-				const sourceScripts =
-					sourceDocument.querySelectorAll('script:not([src])');
+                    <div class="film-body">
+                        <dl class="film-notes" data-draft="copy">
+                            <div>
+                                <dt>First time</dt>
+                                <dd>Building a whole world instead of a single character.</dd>
+                            </div>
+                            <div>
+                                <dt>Lesson</dt>
+                                <dd>Backgrounds are characters with a longer pause.</dd>
+                            </div>
+                        </dl>
+                        <div class="film-actions">
+                            <a class="film-link" href="https://vimeo.com/1099093216" data-play="dogcat" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                            <a class="film-also" href="illustration.html">See the illustration work →</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
 
-				sourceScripts.forEach(sourceScript => {
-					const script = document.createElement('script');
-					script.textContent = sourceScript.textContent;
-					document.body.appendChild(script);
-				});
+            <!-- 02 -->
+            <article class="film" id="film-nham" data-film="nham">
+                <div class="container film-grid">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">02</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Nhẩm</h2>
+                        <p class="film-meta">Music video &middot; 2:45 &middot; 4,125 frames &middot; 25 fps</p>
+                        <p class="film-premise" data-draft="copy">A black-and-white music video for Nhẩm's “Béo”.</p>
+                    </header>
 
-				document.dispatchEvent(new Event('DOMContentLoaded'));
-			})
-			.catch(error => {
-				console.error('Animation page error:', error);
-			});
-	</script>
+                    <a class="poster" href="https://vimeo.com/1099038796" data-play="nham" target="_blank" rel="noopener" aria-label="Play Nhẩm, 2 minutes 45 seconds">
+                        <img class="poster-img" src="images/animation/nham-1280.jpg" alt="" loading="lazy" decoding="async">
+                        <span class="poster-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                        </span>
+                        <span class="poster-time">2:45</span>
+                        <span class="poster-hint">Open film</span>
+                    </a>
+
+                    <div class="film-body">
+                        <dl class="film-notes" data-draft="copy">
+                            <div>
+                                <dt>First time</dt>
+                                <dd>Carrying a mood for almost three minutes.</dd>
+                            </div>
+                            <div>
+                                <dt>Lesson</dt>
+                                <dd>Contrast is a rhythm, not a color.</dd>
+                            </div>
+                        </dl>
+                        <div class="film-actions">
+                            <a class="film-link" href="https://vimeo.com/1099038796" data-play="nham" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                            <a class="film-also" href="music.html">See the music work →</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 03 -->
+            <article class="film film--feature" id="film-gdtq" data-film="gdtq">
+                <div class="container finale-head">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">03</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Giai điệu tổ quốc</h2>
+                        <p class="film-meta">Music video &middot; 3:35 &middot; 5,160 frames &middot; 24 fps</p>
+                    </header>
+                    <div class="finale-copy">
+                        <p class="film-premise" data-draft="copy">A red music video for Trần Tiến's “Giai điệu tổ quốc”.</p>
+                    </div>
+                </div>
+
+                <a class="poster finale-poster" href="https://vimeo.com/1103869128" data-play="gdtq" target="_blank" rel="noopener" aria-label="Play Giai điệu tổ quốc, 3 minutes 35 seconds">
+                    <img class="poster-img" src="images/animation/gdtq-1280.jpg" srcset="images/animation/gdtq-1280.jpg 1280w, images/animation/gdtq-1920.jpg 1920w" sizes="100vw" alt="" loading="lazy" decoding="async">
+                    <span class="poster-play" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                    </span>
+                    <span class="poster-time">3:35</span>
+                    <span class="poster-hint">Open film</span>
+                </a>
+
+                <div class="container finale-body">
+                    <dl class="film-notes" data-draft="copy">
+                        <div>
+                            <dt>First time</dt>
+                            <dd>Directing a palette instead of decorating a frame.</dd>
+                        </div>
+                        <div>
+                            <dt>Lesson</dt>
+                            <dd>One color, used seriously, is louder than ten.</dd>
+                        </div>
+                    </dl>
+                    <div class="film-actions">
+                        <a class="film-link" href="https://vimeo.com/1103869128" data-play="gdtq" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                        <a class="film-also" href="music.html">See the music work →</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 04 -->
+            <article class="film" id="film-excalibur" data-film="excalibur">
+                <div class="container film-grid">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">04</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Excalibur</h2>
+                        <p class="film-meta">Key animation &middot; 0:17 &middot; 408 frames &middot; 24 fps</p>
+                        <p class="film-premise" data-draft="copy">A skeleton tries to lift a sword that is far too heavy for it.</p>
+                    </header>
+
+                    <a class="poster" href="https://vimeo.com/1099081815" data-play="excalibur" target="_blank" rel="noopener" aria-label="Play Excalibur, 17 seconds">
+                        <img class="poster-img" src="images/animation/excalibur-1280.jpg" alt="" loading="lazy" decoding="async">
+                        <span class="poster-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                        </span>
+                        <span class="poster-time">0:17</span>
+                        <span class="poster-hint">Open film</span>
+                    </a>
+
+                    <div class="film-body">
+                        <dl class="film-notes" data-draft="copy">
+                            <div>
+                                <dt>First time</dt>
+                                <dd>Rigging a character instead of redrawing every frame.</dd>
+                            </div>
+                            <div>
+                                <dt>Lesson</dt>
+                                <dd>Weight isn't in the drawing. It's in the pause before the lift.</dd>
+                            </div>
+                        </dl>
+                        <div class="film-actions">
+                            <a class="film-link" href="https://vimeo.com/1099081815" data-play="excalibur" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 05 -->
+            <article class="film" id="film-magic" data-film="magic">
+                <div class="container film-grid">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">05</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Magic</h2>
+                        <p class="film-meta">Key animation &middot; 0:29 &middot; 696 frames &middot; 24 fps</p>
+                        <p class="film-premise" data-draft="copy">A dragon teaser, animated key pose by key pose.</p>
+                    </header>
+
+                    <a class="poster" href="https://vimeo.com/1099044860" data-play="magic" target="_blank" rel="noopener" aria-label="Play Magic, 29 seconds">
+                        <img class="poster-img" src="images/animation/magic-1280.jpg" alt="" loading="lazy" decoding="async">
+                        <span class="poster-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                        </span>
+                        <span class="poster-time">0:29</span>
+                        <span class="poster-hint">Open film</span>
+                    </a>
+
+                    <div class="film-body">
+                        <dl class="film-notes" data-draft="copy">
+                            <div>
+                                <dt>First time</dt>
+                                <dd>Thinking about scale and camera at the same time.</dd>
+                            </div>
+                            <div>
+                                <dt>Lesson</dt>
+                                <dd>A creature only feels big when the camera feels small.</dd>
+                            </div>
+                        </dl>
+                        <div class="film-actions">
+                            <a class="film-link" href="https://vimeo.com/1099044860" data-play="magic" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 06 -->
+            <article class="film" id="film-geist" data-film="geist">
+                <div class="container film-grid">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">06</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Geist</h2>
+                        <p class="film-meta">Animatic &middot; 1:33 &middot; 2,232 frames &middot; 24 fps</p>
+                        <p class="film-premise" data-draft="copy">An animatic cut to Overwerk's “Geist”.</p>
+                    </header>
+
+                    <a class="poster" href="https://vimeo.com/1099034448" data-play="geist" target="_blank" rel="noopener" aria-label="Play Geist, 1 minute 33 seconds">
+                        <img class="poster-img" src="images/animation/geist-1280.jpg" alt="" loading="lazy" decoding="async">
+                        <span class="poster-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                        </span>
+                        <span class="poster-time">1:33</span>
+                        <span class="poster-hint">Open film</span>
+                    </a>
+
+                    <div class="film-body">
+                        <dl class="film-notes" data-draft="copy">
+                            <div>
+                                <dt>First time</dt>
+                                <dd>Cutting to music instead of cutting to logic.</dd>
+                            </div>
+                            <div>
+                                <dt>Lesson</dt>
+                                <dd>An animatic is 80% editing.</dd>
+                            </div>
+                        </dl>
+                        <div class="film-actions">
+                            <a class="film-link" href="https://vimeo.com/1099034448" data-play="geist" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                            <a class="film-also" href="storyboard.html">See the storyboard →</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 07 -->
+            <article class="film" id="film-background" data-film="background">
+                <div class="container film-grid">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">07</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Website Background</h2>
+                        <p class="film-meta">Background loop &middot; 0:45 &middot; 1,080 frames &middot; 24 fps</p>
+                        <p class="film-premise" data-draft="copy">A looping background made for a website.</p>
+                    </header>
+
+                    <a class="poster poster--bright" href="https://vimeo.com/1104428417" data-play="background" target="_blank" rel="noopener" aria-label="Play Website Background Gif, 45 seconds">
+                        <img class="poster-img" src="images/animation/background-1280.jpg" alt="" loading="lazy" decoding="async">
+                        <span class="poster-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                        </span>
+                        <span class="poster-time">0:45</span>
+                        <span class="poster-hint">Open film</span>
+                    </a>
+
+                    <div class="film-body">
+                        <dl class="film-notes" data-draft="copy">
+                            <div>
+                                <dt>First time</dt>
+                                <dd>Making a loop that has no beginning or end.</dd>
+                            </div>
+                            <div>
+                                <dt>Lesson</dt>
+                                <dd>A good loop hides the seam.</dd>
+                            </div>
+                        </dl>
+                        <div class="film-actions">
+                            <a class="film-link" href="https://vimeo.com/1104428417" data-play="background" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                            <a class="film-also" href="index.html">See the homepage →</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 08 -->
+            <article class="film" id="film-eiskuhlauf" data-film="eiskuhlauf">
+                <div class="container film-grid">
+                    <header class="film-header">
+                        <div class="film-kicker">
+                            <span class="film-index">08</span>
+                            <span class="film-of">/ 08</span>
+                        </div>
+                        <h2 class="film-title">Eiskuhlauf</h2>
+                        <p class="film-meta">Short &middot; 4:41 &middot; 7,025 frames &middot; 25 fps</p>
+                        <p class="film-premise" data-draft="copy">A short film set on ice.</p>
+                    </header>
+
+                    <a class="poster poster--bright" href="https://vimeo.com/1238006958" data-play="eiskuhlauf" target="_blank" rel="noopener" aria-label="Play Eiskuhlauf, 4 minutes 41 seconds">
+                        <img class="poster-img" src="images/animation/eiskuhlauf-1280.jpg" alt="" loading="lazy" decoding="async">
+                        <span class="poster-play" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+                        </span>
+                        <span class="poster-time">4:41</span>
+                        <span class="poster-hint">Open film</span>
+                    </a>
+
+                    <div class="film-body">
+                        <dl class="film-notes" data-draft="copy">
+                            <div>
+                                <dt>First time</dt>
+                                <dd>Holding a story for almost five minutes.</dd>
+                            </div>
+                            <div>
+                                <dt>Lesson</dt>
+                                <dd>Silence can carry a scene.</dd>
+                            </div>
+                        </dl>
+                        <div class="film-actions">
+                            <a class="film-link" href="https://vimeo.com/1238006958" data-play="eiskuhlauf" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- CLOSING -->
+        <section class="closing">
+            <div class="container closing-grid">
+                <div>
+                    <p class="eyebrow">Still learning</p>
+                    <h2>Next: <a href="3d.html">3D / CGI</a></h2>
+                </div>
+                <div>
+                    <p class="closing-copy">
+                        The next ones will be better. For now, this is the honest record —
+                        made between other jobs, without a syllabus, one frame at a time.
+                    </p>
+                    <a class="back-to-top" href="#top">Back to the beginning ↑</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-top">
+                <span class="footer-mark">Minh Đức Phạm</span>
+                <span class="eyebrow">Animation / Workprint</span>
+            </div>
+            <div class="footer-grid">
+                <div>Nuremberg, Germany</div>
+                <div><a href="mailto:kimoxabae@web.de">kimoxabae@web.de</a></div>
+                <div>© 2026 — all work by the artist</div>
+            </div>
+            <p class="footer-note">
+                This is a personal portfolio website. All artwork and content are created by the artist
+                and may not be used without permission. Film playback is hosted by Vimeo.
+            </p>
+        </div>
+    </footer>
+
+    <!-- PLAYER -->
+    <dialog class="player-dialog" id="player-dialog" aria-labelledby="player-title">
+        <div class="player-shell">
+            <div class="player-head">
+                <span class="eyebrow" id="player-kicker">01 / 08 — Workprint</span>
+                <button class="player-close" id="player-close" type="button">Close ×</button>
+            </div>
+
+            <div class="player-frame is-loading" id="player-frame">
+                <div id="player-embed"></div>
+            </div>
+
+            <div class="player-foot">
+                <div class="player-info">
+                    <p class="eyebrow">Now screening</p>
+                    <h3 id="player-title">Excalibur</h3>
+                    <p id="player-meta">Key animation · 0:17 · 408 frames · 24 fps</p>
+                </div>
+                <div class="player-nav">
+                    <button type="button" id="player-prev">← Previous</button>
+                    <button type="button" id="player-next">Next →</button>
+                </div>
+            </div>
+
+            <p class="player-note">Playback is hosted by Vimeo. Press Esc to close and return to the workprint.</p>
+        </div>
+    </dialog>
+
+    <!-- Video structured data -->
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Animation — A Workprint",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Dog & Cat",
+                "description": "A short intro for a story about a dog, a cat, and a very specific street.",
+                "thumbnailUrl": "images/animation/dogcat-1280.jpg",
+                "duration": "PT26S",
+                "embedUrl": "https://player.vimeo.com/video/1099093216?h=59ab709888"
+            }
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Nhẩm",
+                "description": "A black-and-white music video for Nhẩm's Béo.",
+                "thumbnailUrl": "images/animation/nham-1280.jpg",
+                "duration": "PT2M45S",
+                "embedUrl": "https://player.vimeo.com/video/1099038796?h=d4bb0a0910"
+            }
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Giai điệu tổ quốc",
+                "description": "A red music video for Trần Tiến's Giai điệu tổ quốc.",
+                "thumbnailUrl": "images/animation/gdtq-1280.jpg",
+                "duration": "PT3M35S",
+                "embedUrl": "https://player.vimeo.com/video/1103869128?h=0b7064d7cc"
+            }
+        },
+        {
+            "@type": "ListItem",
+            "position": 4,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Excalibur",
+                "description": "A skeleton tries to lift a sword that is far too heavy for it.",
+                "thumbnailUrl": "images/animation/excalibur-1280.jpg",
+                "duration": "PT17S",
+                "embedUrl": "https://player.vimeo.com/video/1099081815?h=72643e1dcb"
+            }
+        },
+        {
+            "@type": "ListItem",
+            "position": 5,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Magic",
+                "description": "A dragon teaser, animated key pose by key pose.",
+                "thumbnailUrl": "images/animation/magic-1280.jpg",
+                "duration": "PT29S",
+                "embedUrl": "https://player.vimeo.com/video/1099044860?h=07f4a8e2ce"
+            }
+        },
+        {
+            "@type": "ListItem",
+            "position": 6,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Geist",
+                "description": "An animatic cut to Overwerk's Geist.",
+                "thumbnailUrl": "images/animation/geist-1280.jpg",
+                "duration": "PT1M33S",
+                "embedUrl": "https://player.vimeo.com/video/1099034448?h=7aa8c2e32d"
+            }
+        },
+        {
+            "@type": "ListItem",
+            "position": 7,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Website Background",
+                "description": "A looping background made for a website.",
+                "thumbnailUrl": "images/animation/background-1280.jpg",
+                "duration": "PT45S",
+                "embedUrl": "https://player.vimeo.com/video/1104428417?h=ab397bbd05"
+            }
+        },
+        {
+            "@type": "ListItem",
+            "position": 8,
+            "item": {
+                "@type": "VideoObject",
+                "name": "Eiskuhlauf",
+                "description": "A short film set on ice.",
+                "thumbnailUrl": "images/animation/eiskuhlauf-1280.jpg",
+                "duration": "PT4M41S",
+                "embedUrl": "https://player.vimeo.com/video/1238006958?h=5b8fd390b6"
+            }
+        }
+    ]
+}
+    </script>
+
+    <script>
+        // Load the shared header, styles, and page scripts from the homepage.
+        fetch('./index.html')
+            .then(response => {
+                if (!response.ok) throw new Error('Could not load index.html');
+                return response.text();
+            })
+            .then(html => {
+                const sourceDocument = new DOMParser().parseFromString(html, 'text/html');
+
+                const sourceStyle = sourceDocument.querySelector('style');
+                if (sourceStyle) {
+                    document.getElementById('shared-styles').textContent = sourceStyle.textContent;
+                }
+
+                const sourceHeader = sourceDocument.querySelector('#smartHeader');
+                if (sourceHeader) {
+                    document.getElementById('shared-header').appendChild(
+                        document.importNode(sourceHeader, true)
+                    );
+                }
+
+                const sourceScripts = sourceDocument.querySelectorAll('script:not([src])');
+                sourceScripts.forEach(sourceScript => {
+                    const script = document.createElement('script');
+                    script.textContent = sourceScript.textContent;
+                    document.body.appendChild(script);
+                });
+
+                document.dispatchEvent(new Event('DOMContentLoaded'));
+            })
+            .catch(error => {
+                console.error('Animation page error:', error);
+            });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // The shared-header loader dispatches a synthetic DOMContentLoaded
+            // event as well as the browser's own one. Initialise only once.
+            if (window.__animationPageReady) return;
+            window.__animationPageReady = true;
+
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            const FILMS = [
+                {
+                    id: 'dogcat',
+                    title: 'Dog & Cat',
+                    meta: 'Intro · 0:26 · 624 frames · 24 fps',
+                    vimeo: '1099093216',
+                    hash: '59ab709888'
+                },
+                {
+                    id: 'nham',
+                    title: 'Nhẩm',
+                    meta: 'Music video · 2:45 · 4,125 frames · 25 fps',
+                    vimeo: '1099038796',
+                    hash: 'd4bb0a0910'
+                },
+                {
+                    id: 'gdtq',
+                    title: 'Giai điệu tổ quốc',
+                    meta: 'Music video · 3:35 · 5,160 frames · 24 fps',
+                    vimeo: '1103869128',
+                    hash: '0b7064d7cc'
+                },
+                {
+                    id: 'excalibur',
+                    title: 'Excalibur',
+                    meta: 'Key animation · 0:17 · 408 frames · 24 fps',
+                    vimeo: '1099081815',
+                    hash: '72643e1dcb'
+                },
+                {
+                    id: 'magic',
+                    title: 'Magic',
+                    meta: 'Key animation · 0:29 · 696 frames · 24 fps',
+                    vimeo: '1099044860',
+                    hash: '07f4a8e2ce'
+                },
+                {
+                    id: 'geist',
+                    title: 'Geist',
+                    meta: 'Animatic · 1:33 · 2,232 frames · 24 fps',
+                    vimeo: '1099034448',
+                    hash: '7aa8c2e32d'
+                },
+                {
+                    id: 'background',
+                    title: 'Website Background',
+                    meta: 'Background loop · 0:45 · 1,080 frames · 24 fps',
+                    vimeo: '1104428417',
+                    hash: 'ab397bbd05'
+                },
+                {
+                    id: 'eiskuhlauf',
+                    title: 'Eiskuhlauf',
+                    meta: 'Short · 4:41 · 7,025 frames · 25 fps',
+                    vimeo: '1238006958',
+                    hash: '5b8fd390b6'
+                }
+            ];
+
+            // Keep the player caption in sync with the visible section copy,
+            // so there is only one place to edit the titles and credits.
+            FILMS.forEach(film => {
+                const section = document.querySelector(`.film[data-film="${film.id}"]`);
+                if (!section) return;
+                const title = section.querySelector('.film-title');
+                const meta = section.querySelector('.film-meta');
+                if (title) film.title = title.textContent.trim();
+                if (meta) film.meta = meta.textContent.replace(/\s+/g, ' ').trim();
+            });
+
+            /* --- HERO CROSSFADE --- */
+            const hero = document.querySelector('.hero');
+            const heroFrames = Array.from(document.querySelectorAll('.hero-frame'));
+            let heroIndex = 0;
+            let heroTimer = null;
+
+            const showHeroFrame = index => {
+                heroFrames.forEach((frame, frameIndex) => {
+                    frame.classList.toggle('is-active', frameIndex === index);
+                });
+            };
+
+            const startHero = () => {
+                if (reducedMotion || heroFrames.length < 2) return;
+                window.clearInterval(heroTimer);
+                heroTimer = window.setInterval(() => {
+                    heroIndex = (heroIndex + 1) % heroFrames.length;
+                    showHeroFrame(heroIndex);
+                }, 3400);
+            };
+
+            const stopHero = () => window.clearInterval(heroTimer);
+
+            if (hero) {
+                startHero();
+                hero.addEventListener('pointerenter', stopHero);
+                hero.addEventListener('pointerleave', startHero);
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) stopHero();
+                    else startHero();
+                });
+            }
+
+            /* --- STICKY INDEX: ACTIVE FILM + PROGRESS --- */
+            const stripItems = Array.from(document.querySelectorAll('.strip-item'));
+            const stripItemsContainer = document.querySelector('.strip-items');
+            const sections = Array.from(document.querySelectorAll('.film'));
+            const stripProgress = document.getElementById('strip-progress');
+
+            const setActiveFilm = id => {
+                stripItems.forEach(item => {
+                    item.classList.toggle('is-active', item.dataset.film === id);
+                });
+
+                const activeItem = stripItems.find(item => item.dataset.film === id);
+                if (activeItem && stripItemsContainer) {
+                    const containerRect = stripItemsContainer.getBoundingClientRect();
+                    const itemRect = activeItem.getBoundingClientRect();
+                    const itemLeft = itemRect.left - containerRect.left + stripItemsContainer.scrollLeft;
+                    const target = itemLeft - (containerRect.width - itemRect.width) / 2;
+                    stripItemsContainer.scrollTo({
+                        left: Math.max(0, target),
+                        behavior: reducedMotion ? 'auto' : 'smooth'
+                    });
+                }
+            };
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setActiveFilm(entry.target.dataset.film);
+                        }
+                    });
+                }, { rootMargin: '-38% 0px -54% 0px', threshold: 0 });
+
+                sections.forEach(section => observer.observe(section));
+            }
+
+            stripItems.forEach(item => {
+                item.addEventListener('click', event => {
+                    const target = document.getElementById(`film-${item.dataset.film}`);
+                    if (!target) return;
+                    event.preventDefault();
+                    target.scrollIntoView({
+                        behavior: reducedMotion ? 'auto' : 'smooth',
+                        block: 'start'
+                    });
+                    setActiveFilm(item.dataset.film);
+                });
+            });
+
+            let progressFrame = null;
+
+            const updateProgress = () => {
+                if (!stripProgress || !sections.length) return;
+                const first = sections[0];
+                const last = sections[sections.length - 1];
+                const firstTop = first.getBoundingClientRect().top + window.scrollY;
+                const lastBottom = last.getBoundingClientRect().bottom + window.scrollY;
+                const span = Math.max(1, lastBottom - firstTop);
+                const midpoint = window.scrollY + window.innerHeight * .5;
+                const progress = Math.min(1, Math.max(0, (midpoint - firstTop) / span));
+                stripProgress.style.transform = `scaleX(${progress})`;
+            };
+
+            const requestProgress = () => {
+                if (progressFrame !== null) return;
+                progressFrame = window.requestAnimationFrame(() => {
+                    updateProgress();
+                    progressFrame = null;
+                });
+            };
+
+            window.addEventListener('scroll', requestProgress, { passive: true });
+            window.addEventListener('resize', requestProgress);
+            updateProgress();
+
+            /* --- POSTER PARALLAX (subtle, no fake frames) --- */
+            if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                document.querySelectorAll('.poster').forEach(poster => {
+                    const image = poster.querySelector('.poster-img');
+                    if (!image) return;
+
+                    poster.addEventListener('pointermove', event => {
+                        const rect = poster.getBoundingClientRect();
+                        const x = (event.clientX - rect.left) / rect.width - .5;
+                        const y = (event.clientY - rect.top) / rect.height - .5;
+                        image.style.transform = `scale(1.045) translate(${x * -7}px, ${y * -7}px)`;
+                    });
+
+                    poster.addEventListener('pointerleave', () => {
+                        image.style.transform = '';
+                    });
+                });
+            }
+
+            /* --- PLAYER --- */
+            const dialog = document.getElementById('player-dialog');
+            const playerEmbed = document.getElementById('player-embed');
+            const playerFrame = document.getElementById('player-frame');
+            const playerKicker = document.getElementById('player-kicker');
+            const playerTitle = document.getElementById('player-title');
+            const playerMeta = document.getElementById('player-meta');
+            const playerPrev = document.getElementById('player-prev');
+            const playerNext = document.getElementById('player-next');
+            const playerClose = document.getElementById('player-close');
+
+            let currentFilm = 0;
+            let lastTrigger = null;
+
+            const embedUrl = film => {
+                const params = new URLSearchParams({
+                    h: film.hash,
+                    autoplay: '1',
+                    title: '0',
+                    byline: '0',
+                    portrait: '0',
+                    dnt: '1',
+                    pip: '0',
+                    playsinline: '1',
+                    color: 'f4f0e9'
+                });
+                return `https://player.vimeo.com/video/${film.vimeo}?${params.toString()}`;
+            };
+
+            const updatePlayer = index => {
+                currentFilm = (index + FILMS.length) % FILMS.length;
+                const film = FILMS[currentFilm];
+
+                playerKicker.textContent = `${String(currentFilm + 1).padStart(2, '0')} / 08 — Workprint`;
+                playerTitle.textContent = film.title;
+                playerMeta.textContent = film.meta;
+                playerFrame.classList.add('is-loading');
+                playerEmbed.innerHTML = '';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = embedUrl(film);
+                iframe.title = `${film.title} — animation by Minh Duc Pham`;
+                iframe.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write';
+                iframe.addEventListener('load', () => playerFrame.classList.remove('is-loading'));
+                playerEmbed.appendChild(iframe);
+
+                playerPrev.disabled = currentFilm === 0;
+                playerNext.disabled = currentFilm === FILMS.length - 1;
+
+                document.querySelectorAll('.strip-item').forEach(item => {
+                    item.classList.toggle('is-active', item.dataset.film === film.id);
+                });
+            };
+
+            const openPlayer = (id, trigger) => {
+                const index = FILMS.findIndex(film => film.id === id);
+                if (index === -1) return;
+
+                lastTrigger = trigger || null;
+                updatePlayer(index);
+
+                if (typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                } else {
+                    dialog.setAttribute('open', '');
+                }
+
+                document.body.classList.add('modal-open');
+            };
+
+            const closePlayer = () => {
+                if (typeof dialog.close === 'function') dialog.close();
+                else dialog.removeAttribute('open');
+            };
+
+            document.querySelectorAll('[data-play]').forEach(trigger => {
+                trigger.addEventListener('click', event => {
+                    event.preventDefault();
+                    openPlayer(trigger.dataset.play, trigger);
+                });
+            });
+
+            playerClose.addEventListener('click', closePlayer);
+            playerPrev.addEventListener('click', () => updatePlayer(currentFilm - 1));
+            playerNext.addEventListener('click', () => updatePlayer(currentFilm + 1));
+
+            dialog.addEventListener('close', () => {
+                playerEmbed.innerHTML = '';
+                document.body.classList.remove('modal-open');
+                if (lastTrigger && typeof lastTrigger.focus === 'function') {
+                    lastTrigger.focus({ preventScroll: true });
+                }
+            });
+
+            dialog.addEventListener('cancel', event => {
+                event.preventDefault();
+                closePlayer();
+            });
+        });
+    </script>
 </body>
 </html>
