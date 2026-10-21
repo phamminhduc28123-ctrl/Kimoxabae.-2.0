@@ -383,8 +383,8 @@
             align-self: center;
         }
 
-        .film:nth-child(even):not(.film--feature) .film-header,
-        .film:nth-child(even):not(.film--feature) .film-body {
+        .film:nth-child(even) .film-header,
+        .film:nth-child(even) .film-body {
             grid-column: 2;
         }
 
@@ -439,6 +439,10 @@
             line-height: 1.5;
             font-weight: 300;
             color: rgba(244, 240, 233, .9);
+        }
+
+        .film-body .film-premise {
+            margin-top: 0;
         }
 
         .poster {
@@ -532,35 +536,6 @@
         .poster-time { left: 1rem; }
         .poster-hint { right: 1rem; }
 
-        .film-notes {
-            margin: 0;
-            border-top: 1px solid var(--line-soft);
-        }
-
-        .film-notes > div {
-            display: grid;
-            grid-template-columns: 5.5rem minmax(0, 1fr);
-            gap: 1rem;
-            padding: .85rem 0;
-            border-bottom: 1px solid var(--line-soft);
-        }
-
-        .film-notes dt {
-            padding-top: .13rem;
-            font-size: .52rem;
-            line-height: 1.5;
-            letter-spacing: .18em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .film-notes dd {
-            margin: 0;
-            font-size: .9rem;
-            line-height: 1.6;
-            color: rgba(244, 240, 233, .78);
-        }
-
         .film-actions {
             display: flex;
             flex-wrap: wrap;
@@ -635,17 +610,10 @@
 
         .finale-body {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+            grid-template-columns: 1fr;
             gap: 2rem;
             padding-top: 2rem;
             padding-bottom: clamp(4rem, 8vh, 6rem);
-        }
-
-        .finale-body .film-notes { border-top: 0; }
-
-        .finale-body .film-notes > div {
-            border-top: 1px solid var(--line-soft);
-            border-bottom: 0;
         }
 
         .finale-body .film-actions { margin-top: 0; }
@@ -973,7 +941,6 @@
 
             .film { scroll-margin-top: 8rem; }
             .film-kicker { margin-bottom: .75rem; }
-            .film-notes > div { grid-template-columns: 4.5rem minmax(0, 1fr); gap: .75rem; }
             .poster-hint { display: none; }
 
             .footer-top { flex-direction: column; gap: .5rem; }
@@ -1006,8 +973,7 @@
         <!--
             CONTENT STATUS — layout approved, copy provisional.
             The eight-film order is confirmed oldest → newest.
-            Replace every block marked data-draft="copy": the project premises
-            and the FIRST TIME / LESSON notes.
+            Replace every block marked data-draft="copy": the project descriptions.
         -->
         <!-- HERO -->
         <section class="hero" id="top" aria-labelledby="hero-title">
@@ -1115,7 +1081,6 @@
                         </div>
                         <h2 class="film-title">Dog &amp; Cat</h2>
                         <p class="film-meta">Intro &middot; 0:26 &middot; 624 frames &middot; 24 fps</p>
-                        <p class="film-premise" data-draft="copy">A short intro for a story about a dog, a cat, and a very specific street.</p>
                     </header>
 
                     <a class="poster" href="https://vimeo.com/1099093216" data-play="dogcat" target="_blank" rel="noopener" aria-label="Play Dog and Cat, 26 seconds">
@@ -1128,16 +1093,7 @@
                     </a>
 
                     <div class="film-body">
-                        <dl class="film-notes" data-draft="copy">
-                            <div>
-                                <dt>First time</dt>
-                                <dd>Building a whole world instead of a single character.</dd>
-                            </div>
-                            <div>
-                                <dt>Lesson</dt>
-                                <dd>Backgrounds are characters with a longer pause.</dd>
-                            </div>
-                        </dl>
+                        <p class="film-premise" data-draft="copy">A short intro for a story about a dog, a cat, and a very specific street.</p>
                         <div class="film-actions">
                             <a class="film-link" href="https://vimeo.com/1099093216" data-play="dogcat" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                             <a class="film-also" href="illustration.html">See the illustration work →</a>
@@ -1156,7 +1112,6 @@
                         </div>
                         <h2 class="film-title">Nhẩm</h2>
                         <p class="film-meta">Music video &middot; 2:45 &middot; 4,125 frames &middot; 25 fps</p>
-                        <p class="film-premise" data-draft="copy">A black-and-white music video for Nhẩm's “Béo”.</p>
                     </header>
 
                     <a class="poster" href="https://vimeo.com/1099038796" data-play="nham" target="_blank" rel="noopener" aria-label="Play Nhẩm, 2 minutes 45 seconds">
@@ -1169,16 +1124,7 @@
                     </a>
 
                     <div class="film-body">
-                        <dl class="film-notes" data-draft="copy">
-                            <div>
-                                <dt>First time</dt>
-                                <dd>Carrying a mood for almost three minutes.</dd>
-                            </div>
-                            <div>
-                                <dt>Lesson</dt>
-                                <dd>Contrast is a rhythm, not a color.</dd>
-                            </div>
-                        </dl>
+                        <p class="film-premise" data-draft="copy">A black-and-white music video for Nhẩm's “Béo”.</p>
                         <div class="film-actions">
                             <a class="film-link" href="https://vimeo.com/1099038796" data-play="nham" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                             <a class="film-also" href="music.html">See the music work →</a>
@@ -1213,16 +1159,6 @@
                 </a>
 
                 <div class="container finale-body">
-                    <dl class="film-notes" data-draft="copy">
-                        <div>
-                            <dt>First time</dt>
-                            <dd>Directing a palette instead of decorating a frame.</dd>
-                        </div>
-                        <div>
-                            <dt>Lesson</dt>
-                            <dd>One color, used seriously, is louder than ten.</dd>
-                        </div>
-                    </dl>
                     <div class="film-actions">
                         <a class="film-link" href="https://vimeo.com/1103869128" data-play="gdtq" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                         <a class="film-also" href="music.html">See the music work →</a>
@@ -1240,7 +1176,6 @@
                         </div>
                         <h2 class="film-title">Excalibur</h2>
                         <p class="film-meta">Key animation &middot; 0:17 &middot; 408 frames &middot; 24 fps</p>
-                        <p class="film-premise" data-draft="copy">A skeleton tries to lift a sword that is far too heavy for it.</p>
                     </header>
 
                     <a class="poster" href="https://vimeo.com/1099081815" data-play="excalibur" target="_blank" rel="noopener" aria-label="Play Excalibur, 17 seconds">
@@ -1253,16 +1188,7 @@
                     </a>
 
                     <div class="film-body">
-                        <dl class="film-notes" data-draft="copy">
-                            <div>
-                                <dt>First time</dt>
-                                <dd>Rigging a character instead of redrawing every frame.</dd>
-                            </div>
-                            <div>
-                                <dt>Lesson</dt>
-                                <dd>Weight isn't in the drawing. It's in the pause before the lift.</dd>
-                            </div>
-                        </dl>
+                        <p class="film-premise" data-draft="copy">A skeleton tries to lift a sword that is far too heavy for it.</p>
                         <div class="film-actions">
                             <a class="film-link" href="https://vimeo.com/1099081815" data-play="excalibur" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                         </div>
@@ -1280,7 +1206,6 @@
                         </div>
                         <h2 class="film-title">Magic</h2>
                         <p class="film-meta">Key animation &middot; 0:29 &middot; 696 frames &middot; 24 fps</p>
-                        <p class="film-premise" data-draft="copy">A dragon teaser, animated key pose by key pose.</p>
                     </header>
 
                     <a class="poster" href="https://vimeo.com/1099044860" data-play="magic" target="_blank" rel="noopener" aria-label="Play Magic, 29 seconds">
@@ -1293,16 +1218,7 @@
                     </a>
 
                     <div class="film-body">
-                        <dl class="film-notes" data-draft="copy">
-                            <div>
-                                <dt>First time</dt>
-                                <dd>Thinking about scale and camera at the same time.</dd>
-                            </div>
-                            <div>
-                                <dt>Lesson</dt>
-                                <dd>A creature only feels big when the camera feels small.</dd>
-                            </div>
-                        </dl>
+                        <p class="film-premise" data-draft="copy">A dragon teaser, animated key pose by key pose.</p>
                         <div class="film-actions">
                             <a class="film-link" href="https://vimeo.com/1099044860" data-play="magic" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                         </div>
@@ -1320,7 +1236,6 @@
                         </div>
                         <h2 class="film-title">Geist</h2>
                         <p class="film-meta">Animatic &middot; 1:33 &middot; 2,232 frames &middot; 24 fps</p>
-                        <p class="film-premise" data-draft="copy">An animatic cut to Overwerk's “Geist”.</p>
                     </header>
 
                     <a class="poster" href="https://vimeo.com/1099034448" data-play="geist" target="_blank" rel="noopener" aria-label="Play Geist, 1 minute 33 seconds">
@@ -1333,16 +1248,7 @@
                     </a>
 
                     <div class="film-body">
-                        <dl class="film-notes" data-draft="copy">
-                            <div>
-                                <dt>First time</dt>
-                                <dd>Cutting to music instead of cutting to logic.</dd>
-                            </div>
-                            <div>
-                                <dt>Lesson</dt>
-                                <dd>An animatic is 80% editing.</dd>
-                            </div>
-                        </dl>
+                        <p class="film-premise" data-draft="copy">An animatic cut to Overwerk's “Geist”.</p>
                         <div class="film-actions">
                             <a class="film-link" href="https://vimeo.com/1099034448" data-play="geist" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                             <a class="film-also" href="storyboard.html">See the storyboard →</a>
@@ -1361,7 +1267,6 @@
                         </div>
                         <h2 class="film-title">Website Background</h2>
                         <p class="film-meta">Background loop &middot; 0:45 &middot; 1,080 frames &middot; 24 fps</p>
-                        <p class="film-premise" data-draft="copy">A looping background made for a website.</p>
                     </header>
 
                     <a class="poster poster--bright" href="https://vimeo.com/1104428417" data-play="background" target="_blank" rel="noopener" aria-label="Play Website Background Gif, 45 seconds">
@@ -1374,16 +1279,7 @@
                     </a>
 
                     <div class="film-body">
-                        <dl class="film-notes" data-draft="copy">
-                            <div>
-                                <dt>First time</dt>
-                                <dd>Making a loop that has no beginning or end.</dd>
-                            </div>
-                            <div>
-                                <dt>Lesson</dt>
-                                <dd>A good loop hides the seam.</dd>
-                            </div>
-                        </dl>
+                        <p class="film-premise" data-draft="copy">A looping background made for a website.</p>
                         <div class="film-actions">
                             <a class="film-link" href="https://vimeo.com/1104428417" data-play="background" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                             <a class="film-also" href="index.html">See the homepage →</a>
@@ -1402,7 +1298,6 @@
                         </div>
                         <h2 class="film-title">Eiskuhlauf</h2>
                         <p class="film-meta">Short &middot; 4:41 &middot; 7,025 frames &middot; 25 fps</p>
-                        <p class="film-premise" data-draft="copy">A short film set on ice.</p>
                     </header>
 
                     <a class="poster poster--bright" href="https://vimeo.com/1238006958" data-play="eiskuhlauf" target="_blank" rel="noopener" aria-label="Play Eiskuhlauf, 4 minutes 41 seconds">
@@ -1415,16 +1310,7 @@
                     </a>
 
                     <div class="film-body">
-                        <dl class="film-notes" data-draft="copy">
-                            <div>
-                                <dt>First time</dt>
-                                <dd>Holding a story for almost five minutes.</dd>
-                            </div>
-                            <div>
-                                <dt>Lesson</dt>
-                                <dd>Silence can carry a scene.</dd>
-                            </div>
-                        </dl>
+                        <p class="film-premise" data-draft="copy">A short film set on ice.</p>
                         <div class="film-actions">
                             <a class="film-link" href="https://vimeo.com/1238006958" data-play="eiskuhlauf" target="_blank" rel="noopener">Watch the film <span aria-hidden="true">↗</span></a>
                         </div>
