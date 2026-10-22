@@ -47,6 +47,7 @@
 			content: '';
 			position: absolute;
 			inset: 0;
+			z-index: 2;
 			background: rgba(255, 255, 255, 0.28);
 			pointer-events: none;
 		}
@@ -59,6 +60,11 @@
 			object-fit: cover;
 			border: 0;
 			pointer-events: none;
+			z-index: 0;
+		}
+
+		.storyboard-hero-sequence.is-active {
+			z-index: 1;
 		}
 
 		.storyboard-hero-progress {
@@ -75,7 +81,6 @@
 			width: 0;
 			height: 100%;
 			background: #000;
-			transition: width 125ms linear;
 		}
 
 		#intro-section .hero-content {
@@ -116,7 +121,8 @@
 		<div class="cover-stage intro-stage">
 			<section id="intro-section" class="parallax-cover" style="z-index: 1;">
 				<div class="storyboard-hero-video" aria-hidden="true">
-					<img id="storyboard-hero-sequence" class="storyboard-hero-sequence" src="Storyboard Hero Images/Storyboard hero images_00000.jpg" alt="">
+					<img id="storyboard-hero-sequence" class="storyboard-hero-sequence is-active" src="Storyboard Hero Images/Storyboard hero images_00000.jpg" alt="">
+					<img id="storyboard-hero-sequence-buffer" class="storyboard-hero-sequence" alt="">
 				</div>
 				<div id="storyboard-hero-progress" class="storyboard-hero-progress" role="progressbar" aria-label="Hero image sequence progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
 					<div id="storyboard-hero-progress-fill" class="storyboard-hero-progress-fill"></div>
@@ -152,30 +158,251 @@
 		const introEl = document.getElementById('storyboard-intro');
 		const introText = "I have worked on the storyboard of all the film projects I have taken part in.\n\nWhat I enjoy the most about it is how much I have to work with cameraman or the camera directly.\n\nAnd I doesn't hurt that I can abuse my sketching skill.";
 		const heroSequenceEl = document.getElementById('storyboard-hero-sequence');
+		const heroSequenceBufferEl = document.getElementById('storyboard-hero-sequence-buffer');
 		const heroProgressEl = document.getElementById('storyboard-hero-progress');
 		const heroProgressFillEl = document.getElementById('storyboard-hero-progress-fill');
 		const heroFrameCount = 559;
 		const heroFrameRate = 8;
 		const heroSequencePath = 'Storyboard Hero Images/Storyboard hero images_';
+		const heroPrefetchAhead = 8;
+		const heroCacheLimit = 20;
+		const heroMaxLagFrames = 24;
+		const heroLayers = [heroSequenceEl, heroSequenceBufferEl];
+
 		let heroSequenceStart;
-		let heroSequenceFrame = -1;
+		let heroDisplayedFrame = 0;
+		let heroDesiredFrame = 0;
+		let heroFirstFrameReady = false;
+		let heroActiveLayer = 0;
+		let heroSwapId = 0;
+		let heroSwapPending = false;
+		const heroFrameCache = new Map();
+
+		function heroFrameUrl(index) {
+			return `${heroSequencePath}${String(index).padStart(5, '0')}.jpg`;
+		}
+
+		function seedHeroFirstFrame() {
+			if (heroFirstFrameReady) {
+				return true;
+			}
+
+			if (heroSequenceEl.complete && heroSequenceEl.naturalWidth > 0) {
+				heroFirstFrameReady = true;
+				heroFrameCache.set(0, { img: heroSequenceEl, ready: true });
+			}
+
+			return heroFirstFrameReady;
+		}
+
+		function getHeroFrame(index) {
+			let entry = heroFrameCache.get(index);
+
+			if (!entry) {
+				const img = new Image();
+				img.className = 'storyboard-hero-sequence';
+				img.alt = '';
+				img.decoding = 'async';
+
+				entry = { img, ready: false };
+
+				img.onload = () => {
+					// Wait until the frame is fully decoded so a swap can never
+					// show a blank/paint-less image (which looks like flicker).
+					if (typeof img.decode === 'function') {
+						img.decode().then(() => {
+							entry.ready = true;
+						}, () => {
+							entry.ready = true;
+						});
+					} else {
+						entry.ready = true;
+					}
+				};
+				img.onerror = () => {
+					entry.failed = true;
+				};
+				img.src = heroFrameUrl(index);
+
+				heroFrameCache.set(index, entry);
+			}
+
+			return entry;
+		}
+
+		function isHeroFrameReady(index) {
+			const entry = heroFrameCache.get(index);
+			return Boolean(entry && entry.ready);
+		}
+
+		function prefetchHeroFrames(startFrame) {
+			for (let offset = 0; offset <= heroPrefetchAhead; offset++) {
+				getHeroFrame((startFrame + offset) % heroFrameCount);
+			}
+
+			trimHeroFrameCache();
+		}
+
+		function isHeroFrameInPlaybackWindow(index) {
+			if (index === heroDisplayedFrame) {
+				return true;
+			}
+
+			const distanceAhead = (index - heroDesiredFrame + heroFrameCount) % heroFrameCount;
+			return distanceAhead <= heroPrefetchAhead;
+		}
+
+		function trimHeroFrameCache() {
+			if (heroFrameCache.size <= heroCacheLimit) {
+				return;
+			}
+
+			for (const [index, entry] of heroFrameCache) {
+				if (heroFrameCache.size <= heroCacheLimit) {
+					break;
+				}
+
+				if (heroLayers.includes(entry.img) || isHeroFrameInPlaybackWindow(index)) {
+					continue;
+				}
+
+				entry.img.onload = null;
+				entry.img.onerror = null;
+				entry.img.removeAttribute('src');
+				heroFrameCache.delete(index);
+			}
+		}
+
+		function publishHeroProgress(index) {
+			// The bar reflects the frame that is actually visible, never the clock.
+			const progress = heroFrameCount > 1 ? (index / (heroFrameCount - 1)) * 100 : 100;
+			heroProgressFillEl.style.width = `${progress}%`;
+			heroProgressEl.setAttribute('aria-valuenow', String(Math.round(progress)));
+		}
+
+		function showHeroFrame(index) {
+			const entry = heroFrameCache.get(index);
+
+			if (!entry || !entry.ready || heroSwapPending) {
+				return false;
+			}
+
+			const swapId = ++heroSwapId;
+			const nextLayerIndex = 1 - heroActiveLayer;
+			const nextLayer = heroLayers[nextLayerIndex];
+			const url = heroFrameUrl(index);
+
+			let settled = false;
+
+			const commit = () => {
+				if (settled) {
+					return;
+				}
+
+				settled = true;
+				heroSwapPending = false;
+
+				if (swapId !== heroSwapId) {
+					return;
+				}
+
+				nextLayer.classList.add('is-active');
+				heroLayers[heroActiveLayer].classList.remove('is-active');
+
+				// The initial frame entry points at a live layer rather than a
+				// preloader, so drop it once we move past frame 0. Future prefetch
+				// passes will load frame 0 like any other frame (needed when the
+				// sequence loops).
+				if (heroDisplayedFrame === 0 && index !== 0) {
+					const seededEntry = heroFrameCache.get(0);
+
+					if (seededEntry && seededEntry.img === heroSequenceEl) {
+						heroFrameCache.delete(0);
+					}
+				}
+
+				heroActiveLayer = nextLayerIndex;
+				heroDisplayedFrame = index;
+
+				publishHeroProgress(index);
+			};
+
+			const abandon = () => {
+				if (settled) {
+					return;
+				}
+
+				settled = true;
+				heroSwapPending = false;
+			};
+
+			heroSwapPending = true;
+			nextLayer.src = url;
+
+			// Decode into the hidden layer first, then reveal it in a single
+			// step. The old frame stays visible the whole time, so there is no
+			// blank frame and no flicker.
+			if (typeof nextLayer.decode === 'function') {
+				nextLayer.decode().then(commit, abandon);
+			} else if (nextLayer.complete) {
+				commit();
+			} else {
+				nextLayer.onload = commit;
+				nextLayer.onerror = abandon;
+			}
+
+			return true;
+		}
+
+		function advanceHeroFrame() {
+			let frameToShow = -1;
+
+			if (isHeroFrameReady(heroDesiredFrame)) {
+				frameToShow = heroDesiredFrame;
+			} else {
+				// Step through already-loaded frames instead of jumping ahead of the image.
+				for (let index = heroDesiredFrame - 1; index > heroDisplayedFrame; index--) {
+					if (isHeroFrameReady(index)) {
+						frameToShow = index;
+						break;
+					}
+				}
+
+				// If loading fell far behind the clock, catch up to the nearest loaded frame.
+				const lag = (heroDesiredFrame - heroDisplayedFrame + heroFrameCount) % heroFrameCount;
+
+				if (frameToShow === -1 && lag > heroMaxLagFrames) {
+					for (let offset = 0; offset <= heroPrefetchAhead; offset++) {
+						const index = (heroDesiredFrame + offset) % heroFrameCount;
+
+						if (isHeroFrameReady(index)) {
+							frameToShow = index;
+							break;
+						}
+					}
+				}
+			}
+
+			if (frameToShow !== -1) {
+				showHeroFrame(frameToShow);
+			}
+		}
 
 		function updateHeroSequence(timestamp) {
+			if (!seedHeroFirstFrame()) {
+				requestAnimationFrame(updateHeroSequence);
+				return;
+			}
+
 			if (heroSequenceStart === undefined) {
 				heroSequenceStart = timestamp;
 			}
 
 			const elapsedFrames = Math.floor((timestamp - heroSequenceStart) * heroFrameRate / 1000);
-			const nextFrame = elapsedFrames % heroFrameCount;
+			heroDesiredFrame = elapsedFrames % heroFrameCount;
 
-			if (nextFrame !== heroSequenceFrame) {
-				heroSequenceFrame = nextFrame;
-				const frameNumber = String(nextFrame).padStart(5, '0');
-				const progress = (nextFrame / (heroFrameCount - 1)) * 100;
-				heroSequenceEl.src = `${heroSequencePath}${frameNumber}.jpg`;
-				heroProgressFillEl.style.width = `${progress}%`;
-				heroProgressEl.setAttribute('aria-valuenow', String(Math.round(progress)));
-			}
+			prefetchHeroFrames(heroDesiredFrame);
+			advanceHeroFrame();
 
 			requestAnimationFrame(updateHeroSequence);
 		}
